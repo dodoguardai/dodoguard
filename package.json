@@ -272,7 +272,7 @@
     "@inquirer/core": "^10.3.0",
     "@inquirer/editor": "^4.2.21",
     "@inquirer/input": "^4.2.5",
-    "@inquirer/select": "^4.4.0",
+    "@inquirer/select": "^5.2.2",
     "@modelcontextprotocol/sdk": "^1.20.0",
     "@openai/agents": "^0.1.11",
     "@types/ws": "^8.18.1",
