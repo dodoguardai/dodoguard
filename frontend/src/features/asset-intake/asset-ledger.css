@@ -1,0 +1,15 @@
+.asset-ledger-card-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
+  max-height: min(720px, 72vh);
+  overflow: auto;
+  padding: 4px 2px 8px;
+}
+
+@media (max-width: 720px) {
+  .asset-ledger-card-grid {
+    grid-template-columns: 1fr;
+    max-height: none;
+  }
+}

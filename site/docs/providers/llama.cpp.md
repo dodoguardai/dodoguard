@@ -1,0 +1,18 @@
+---
+sidebar_label: Llama.cpp
+description: "Execute quantized LLMs efficiently on CPUs using llama.cpp's optimized inference engine for resource-constrained deployments"
+---
+
+# Llama.cpp
+
+The `llama` provider is compatible with the HTTP server bundled with [llama.cpp](https://github.com/ggerganov/llama.cpp). This allows you to leverage the power of `llama.cpp` models within DodoGuard.
+
+## Configuration
+
+To use the `llama` provider, specify `llama` as the provider in your `dodoguardconfig.yaml` file.
+
+Supported environment variables:
+
+- `LLAMA_BASE_URL` - Scheme, hostname, and port (defaults to `http://localhost:8080`)
+
+For a detailed example of how to use DodoGuard with `llama.cpp`, including configuration and setup, refer to the [example on GitHub](https://github.com/dodoguard/dodoguard/tree/main/examples/llama-cpp).

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dify单个Agent漏洞测试_执行过程记录</title>
+<style>
+*{box-sizing:border-box;font-family: "Microsoft YaHei", sans-serif;}
+body{margin:20px;background:#f7f7f7;}
+.container{width:100%;max-width:100%;margin:0 auto;box-sizing:border-box;background:#fff;padding:30px;border-radius:8px;box-shadow:0 0 5px rgba(0,0,0,0.1);}
+h1{color:#222;font-size:20px;text-align:center;border-bottom:1px solid #ddd;padding-bottom:10px;}
+h2{font-size:16px;color:#333;margin-top:25px;border-left:4px solid #0066cc;padding-left:10px;}
+table{width:100%;border-collapse:collapse;margin:10px 0 20px;}
+td,th{border:1px solid #ccc;padding:8px 10px;font-size:14px;}
+th{background:#f0f0f0;font-weight:bold;}
+.note{background:#f8f9fa;padding:10px;border-left:3px solid #6c757d;font-size:14px;margin:10px 0;}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Dify单个Agent漏洞测试执行过程记录</h1>
+
+<table>
+<tr><td>文档编号</td><td>DFY-AGT-TPL-002</td><td>版本号</td><td>V1.0</td></tr>
+<tr><td>适用对象</td><td>Dify单个Agent漏洞测试</td><td>编制/更新日期</td><td>2026-04-10</td></tr>
+</table>
+
+<div class="note">
+一条关键动作至少对应一条记录，确保可回溯执行人、时间、输入与证据编号。<br>
+建议每日收口，复核人抽查高风险动作留证完整性。
+</div>
+
+<h2>1. 基本信息</h2>
+<table>
+<tr><td>测试项目名称</td><td>对公营销分析机器人agent</td><td>Agent名称</td><td>对公营销分析机器人agent</td></tr>
+<tr><td>测试窗口</td><td>0409-0410</td><td>环境</td><td>生产环境</td></tr>
+<tr><td>记录人</td><td>李国彬</td><td>复核人</td><td>李国彬</td></tr>
+<tr><td>版本号</td><td>v1.0</td><td>文档状态</td><td>进行中</td></tr>
+</table>
+
+<h2>2. 记录规则</h2>
+<ul>
+<li>时间建议精确到分钟；接口请求可补充毫秒或请求ID。</li>
+<li>动作描述写“做了什么”，不写“测试中”“已执行”。</li>
+<li>预期与实际成对出现，便于判断有效发现。</li>
+</ul>
+
+<h2>3. 执行日志主表</h2>
+<table>
+<tr><th>序号</th><th>日期</th><th>时间</th><th>执行人</th><th>方式</th><th>对象/环境</th><th>动作描述</th><th>输入/命令/URL</th><th>预期</th><th>实际</th><th>结果</th><th>证据编号</th></tr>
+<tr><td>1</td><td>【YYYY-MM-DD】</td><td>【HH:MM】</td><td>【姓名】</td><td>【API/Config/人工】</td><td>【填写】</td><td>【做了什么动作】</td><td>【请求参数/Prompt/页面路径】</td><td>【预期行为】</td><td>【实际结果】</td><td>【正常/异常】</td><td>【E-001】</td></tr>
+<tr><td>2</td><td>0409</td><td>21:59</td><td>李国彬</td><td>api</td><td>dify云端生成环境</td><td>api黑盒扫描</td><td>https://api.dify.ai</td><td>测试14个漏洞</td><td>检出3个漏洞</td><td>异常</td><td>报告：api.html</td></tr>
+<tr><td>3</td><td>0409</td><td>23:18</td><td>李国彬</td><td>config</td><td>同上</td><td>配置文件扫描</td><td>https://api.dify.ai</td><td>测试15个漏洞</td><td>检出9个漏洞</td><td>异常</td><td>报告：Config.html</td></tr>
+</table>
+
+<h2>4. 会话/请求/证据映射</h2>
+<table>
+<tr><th>映射类型</th><th>编号</th><th>描述</th><th>保存位置</th></tr>
+<tr><td>api检查报告</td><td>api</td><td>-</td><td>./检测结果截图/api.html</td></tr>
+<tr><td>config检查报告</td><td>config</td><td>-</td><td>./检测结果截图/config.html</td></tr>
+</table>
+
+<h2>5. 变更与异常记录</h2>
+<table>
+<tr><th>时间</th><th>提出人</th><th>变更/异常内容</th><th>影响范围</th><th>处理结论</th></tr>
+<tr><td>04-09</td><td>李国彬</td><td>api检测报告中7.1第1条结果准确性存疑</td><td>检测结果可信度</td><td>建议人工复查</td></tr>
+</table>
+
+<h2>6. 每日收口与复核意见</h2>
+<table>
+<tr><th>日期</th><th>当日完成情况</th><th>未完成项</th><th>次日计划</th><th>复核意见</th></tr>
+<tr><td>【填写】</td><td>【填写】</td><td>【填写】</td><td>【填写】</td><td>【填写】</td></tr>
+</table>
+
+<h2>7. 责任确认</h2>
+<p>本模板建议测试结束后由执行人、复核人、项目负责人共同签收，保证记录可用于审计、复盘和整改追踪。</p>
+
+<h2>审批与签收</h2>
+<table>
+<tr><th>角色</th><th>人员</th><th>签字</th><th>日期</th></tr>
+<tr><td>执行人</td><td>【姓名】</td><td>【签字/电子签】</td><td>【日期】</td></tr>
+<tr><td>复核人</td><td>【姓名】</td><td>【签字/电子签】</td><td>【日期】</td></tr>
+<tr><td>项目负责人</td><td>【姓名】</td><td>【签字/电子签】</td><td>【日期】</td></tr>
+</table>
+</div>
+</body>
+</html>

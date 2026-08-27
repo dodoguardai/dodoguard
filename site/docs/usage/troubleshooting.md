@@ -1,0 +1,346 @@
+---
+sidebar_position: 60
+description: Debug and resolve common dodoguard issues with solutions for memory optimization, API configuration, Node.js errors, and native builds in your LLM testing pipeline
+---
+
+# Troubleshooting
+
+## Log Files and Debugging
+
+Before troubleshooting specific issues, you can access detailed logs to help diagnose problems:
+
+- **View logs directly**: Log files are stored in your config directory at `~/.dodoguard/logs` by default
+- **Export logs for sharing**: Use `dodoguard export logs` to create a compressed archive of your log files for debugging or support
+
+## Out of memory error
+
+If you have a large number of tests or your tests have large outputs, you may encounter an out of memory error. There are several ways to handle this:
+
+### Basic setup
+
+Follow **all** of these steps:
+
+1. Do not use the `--no-write` flag. We need to write to disk to avoid memory issues.
+2. Use the `--no-table` flag.
+3. **Use JSONL format**: `--output results.jsonl`
+
+:::tip
+JSONL format processes results in batches, avoiding memory limits that cause JSON export to fail on large datasets.
+:::
+
+### Granular memory optimization
+
+You can selectively strip out heavy data from the results using environment variables:
+
+```bash
+# Strip prompt text (useful if your prompts contain large amounts of text or images)
+export DODOGUARD_STRIP_PROMPT_TEXT=true
+
+# Strip model outputs (useful if your model generates large responses)
+export DODOGUARD_STRIP_RESPONSE_OUTPUT=true
+
+# Strip test variables (useful if your test cases contain large datasets)
+export DODOGUARD_STRIP_TEST_VARS=true
+
+# Strip grading results (useful if you're using model-graded assertions)
+export DODOGUARD_STRIP_GRADING_RESULT=true
+
+# Strip metadata (useful if you're storing large amounts of custom metadata)
+export DODOGUARD_STRIP_METADATA=true
+```
+
+You can use any combination of these variables to optimize memory usage while preserving the data you need.
+
+### Increase Node.js memory limit
+
+If you're still encountering memory issues after trying the above options, you can increase the amount of memory available to dodoguard by setting the `NODE_OPTIONS` environment variable:
+
+```bash
+# 8192 MB is 8 GB. Set this to an appropriate value for your machine.
+NODE_OPTIONS="--max-old-space-size=8192" npx dodoguard eval
+```
+
+## Object template handling
+
+When working with complex data structures in templates, you might encounter issues with how objects are displayed or accessed in your prompts and grading rubrics.
+
+### `[object Object]` appears in outputs
+
+If you see `[object Object]` in your LLM outputs or grading results, this means JavaScript objects are being converted to their string representation without proper serialization. By default, dodoguard automatically stringifies objects to prevent this issue.
+
+**Example problem:**
+
+```yaml
+prompts:
+  - 'Product: {{product}}'
+tests:
+  - vars:
+      product:
+        name: 'Headphones'
+        price: 99.99
+# Results in: "Product: [object Object]" in outputs
+```
+
+**Default solution:** Objects are automatically converted to JSON strings:
+
+```text
+Product: {"name":"Headphones","price":99.99}
+```
+
+### Accessing object properties in templates
+
+If you need to access specific properties of objects in your templates (like `{{ product.name }}`), you can enable direct object access:
+
+```bash
+export DODOGUARD_DISABLE_OBJECT_STRINGIFY=true
+dodoguard eval
+```
+
+With this setting enabled, you can use object property access in templates:
+
+```yaml
+prompts:
+  - 'Product: {{ product.name }} costs ${{ product.price }}'
+# Results in: "Product: Headphones costs $99.99"
+```
+
+### When to use each approach
+
+**Use default behavior (stringified objects) when:**
+
+- You want objects as JSON strings in your prompts
+- Working with existing templates that expect JSON strings
+- You need maximum compatibility and don't want to see `[object Object]`
+
+**Use object property access (`DODOGUARD_DISABLE_OBJECT_STRINGIFY=true`) when:**
+
+- You need to access specific properties like `{{ product.name }}`
+- Building new templates designed for object navigation
+- Working with complex nested data structures
+
+## Node.js version mismatch error
+
+When running `npx dodoguard@latest`, you might encounter this error:
+
+```text
+Error: The module '/path/to/node_modules/better-sqlite3/build/Release/better_sqlite3.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 115. This version of Node.js requires
+NODE_MODULE_VERSION 127. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).
+```
+
+This happens because dodoguard uses native code modules (like better-sqlite3) that need to be compiled specifically for your Node.js version.
+
+### Solution: Remove npx cache and reinstall
+
+To fix this issue, run this single command:
+
+```bash
+rm -rf ~/.npm/_npx && npx -y dodoguard@latest
+```
+
+This removes any cached npm packages in the npx cache directory and forces a fresh download and installation of dodoguard, ensuring the native modules are compiled correctly for your current Node.js version.
+
+## Native build failures
+
+Some dependencies like [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) include native code that must compile locally. Ensure your machine has a C/C++ build toolchain:
+
+- **Ubuntu/Debian**: `sudo apt-get install build-essential`
+- **macOS**: `xcode-select --install`
+- **Windows**: [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+
+If the prebuilt binaries fail, force a local build:
+
+```bash
+npm install --build-from-source
+# or
+npm rebuild
+```
+
+## OpenAI API key is not set
+
+If you're using OpenAI, set the `OPENAI_API_KEY` environment variable or add `apiKey` to the provider config.
+
+If you're not using OpenAI but still receiving this message, you probably have some [model-graded metric](/docs/configuration/expected-outputs/model-graded/) such as `llm-rubric` or `similar` that requires you to [override the grader](/docs/configuration/expected-outputs/model-graded/#overriding-the-llm-grader).
+
+Follow the instructions to override the grader, e.g., using the `defaultTest` property:
+
+```yaml
+defaultTest:
+  options:
+    provider:
+      text:
+        id: azureopenai:chat:gpt-4o-deployment
+        config:
+          apiHost: xxx.openai.azure.com
+      embedding:
+        id: azureopenai:embeddings:text-embedding-ada-002-deployment
+        config:
+          apiHost: xxx.openai.azure.com
+```
+
+## How to triage stuck evals
+
+When running evals, you may encounter timeout errors, especially when using local providers or when running many concurrent requests. Here's how to fix them:
+
+**Common use cases:**
+
+- Ensure evaluations complete within a time limit (useful for CI/CD)
+- Handle custom providers or providers that get stuck
+- Prevent runaway costs from long-running evaluations
+
+You can control two settings: timeout for individual test cases and timeout for the entire evaluation.
+
+### Quick fixes
+
+**Set timeouts for individual requests and total evaluation time:**
+
+```bash
+export DODOGUARD_EVAL_TIMEOUT_MS=30000  # 30 seconds per request
+export DODOGUARD_MAX_EVAL_TIME_MS=300000  # 5 minutes total limit
+
+npx dodoguard eval
+```
+
+You can also set these values in your `.env` file or DodoGuard config file:
+
+```yaml title="dodoguardconfig.yaml"
+env:
+  DODOGUARD_EVAL_TIMEOUT_MS: 30000
+  DODOGUARD_MAX_EVAL_TIME_MS: 300000
+```
+
+## Debugging Python
+
+When using custom Python providers, prompts, hooks, assertions, etc., you may need to debug your Python code. Here are some tips to help you troubleshoot issues:
+
+### Viewing Python output
+
+To see the output from your Python script, including print statements, set the `LOG_LEVEL` environment variable to `debug` when running your eval:
+
+```bash
+LOG_LEVEL=debug npx dodoguard eval
+```
+
+Alternatively, you can use the `--verbose` flag:
+
+```bash
+npx dodoguard eval --verbose
+```
+
+### Using the Python debugger (pdb)
+
+DodoGuard now supports native Python debugging with pdb. To enable it:
+
+```bash
+export DODOGUARD_PYTHON_DEBUG_ENABLED=true
+```
+
+Then add breakpoints in your Python code:
+
+```python
+import pdb
+
+def call_api(prompt, options, context):
+    pdb.set_trace()  # Debugger will pause here
+    # Your code...
+```
+
+### Python Installation and Path Issues
+
+If you encounter errors like `spawn py -3 ENOENT` or `Python 3 not found`, dodoguard cannot locate your Python installation. Here's how to resolve this:
+
+#### Setting a Custom Python Path
+
+Use the `DODOGUARD_PYTHON` environment variable to specify your Python executable:
+
+```bash
+# Windows (if Python is installed at a custom location)
+export DODOGUARD_PYTHON=C:\Python\3_11\python.exe
+
+# macOS/Linux
+export DODOGUARD_PYTHON=/usr/local/bin/python3
+
+# Then run your evaluation
+npx dodoguard eval
+```
+
+#### Per-Provider Python Configuration
+
+You can also set the Python path for specific providers in your config:
+
+```yaml
+providers:
+  - id: 'file://my_provider.py'
+    config:
+      pythonExecutable: /path/to/specific/python
+```
+
+#### Windows-Specific Issues
+
+On Windows, dodoguard tries to detect Python in this order:
+
+1. `DODOGUARD_PYTHON` environment variable (if set)
+2. Provider-specific `pythonExecutable` config (if set)
+3. **Windows smart detection**: Uses `where python` command and filters out Microsoft Store stubs
+4. `python -c "import sys; print(sys.executable)"` (to get the actual Python path)
+5. Common fallback commands: `python`, `python3`, `py -3`, `py`
+
+If you don't have the Python launcher (`py.exe`) installed but have Python directly, make sure the `python` command works from your command line. If not, either:
+
+- Add your Python installation directory to your PATH
+- Set `DODOGUARD_PYTHON` to the full path of your `python.exe`
+
+**Common Windows Python locations:**
+
+- Microsoft Store: `%USERPROFILE%\AppData\Local\Microsoft\WindowsApps\python.exe`
+- Direct installer: `C:\Python3X\python.exe` (where X is the version)
+- Anaconda: `C:\Users\YourName\anaconda3\python.exe`
+
+#### Testing Your Python Configuration
+
+To verify your Python is correctly configured:
+
+```bash
+# Test that dodoguard can find your Python
+python -c "import sys; print(sys.executable)"
+
+# If this works but dodoguard still has issues, set DODOGUARD_PYTHON:
+export DODOGUARD_PYTHON=$(python -c "import sys; print(sys.executable)")
+```
+
+### Handling errors
+
+If you encounter errors in your Python script, the error message and stack trace will be displayed in the dodoguard output. Make sure to check this information for clues about what might be going wrong in your code.
+
+Remember that dodoguard runs your Python script in a separate process, so some standard debugging techniques may not work as expected. Using logging and remote debugging as described above are the most reliable ways to troubleshoot issues in your Python providers.
+
+## Debugging the Database
+
+1. Set environment variables:
+
+   ```bash
+   export DODOGUARD_ENABLE_DATABASE_LOGS=true
+   export LOG_LEVEL=debug
+   ```
+
+2. Run your command:
+
+   ```bash
+   npx dodoguard eval
+   ```
+
+3. Disable logging when done:
+
+   ```bash
+   unset DODOGUARD_ENABLE_DATABASE_LOGS
+   ```
+
+## Finding log files
+
+DodoGuard logs errors and verbose logs to `~/.dodoguard/logs` by default.
+
+Change the location by setting `DODOGUARD_LOG_DIR` to a different directory.
+
+For each run an error log and a debug log will be created.

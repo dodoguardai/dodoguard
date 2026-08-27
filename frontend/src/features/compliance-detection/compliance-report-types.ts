@@ -1,0 +1,66 @@
+export type ComplianceReportConclusion = 'pass' | 'fail' | 'conditional';
+
+export type ComplianceCaseExecutionResult = {
+  caseId: string;
+  caseCode: string;
+  caseName: string;
+  libraryId?: string;
+  libraryTitle?: string;
+  passed: boolean;
+  riskLevel?: string;
+  regClause?: string;
+  controlItem?: string;
+  inputSummary?: string;
+  prompt?: string;
+  expectedPass?: string;
+  expectedFail?: string;
+  sampleType?: string;
+  outputSnippet?: string;
+  violationSnippet?: string;
+  judgmentRule?: string;
+  judgeConfidence?: number;
+  judgeScore?: number;
+  recommendation?: string;
+  judgeMode?: string;
+  executionStatus?: 'executed' | 'skipped' | 'failed';
+  evidenceChain?: Array<{ label: string; value: string }>;
+  violationNo?: string;
+  pushStatus?: 'pending' | 'pushed';
+  findingId?: string;
+  remediationId?: string;
+  pushedAt?: string;
+};
+
+export type ComplianceReportPreview = {
+  reportNo: string;
+  taskId: string;
+  taskName: string;
+  agentName: string;
+  domain: string;
+  status: 'draft' | 'finalized' | 'archived';
+  taskStatus: string;
+  conclusion: ComplianceReportConclusion;
+  conclusionLabel: string;
+  passRateThreshold?: number;
+  summary: {
+    total: number;
+    compliant: number;
+    violation: number;
+    high: number;
+    medium: number;
+    low: number;
+  };
+  libraries: Array<{ id: string; title: string; caseCount?: number }>;
+  items: ComplianceCaseExecutionResult[];
+  generatedAt: string;
+  description?: string;
+  reviewStatus?: 'not_required' | 'pending' | 'approved';
+  requiresManualReview?: boolean;
+  canApproveReview?: boolean;
+  canFinalize?: boolean;
+  canArchive?: boolean;
+  finalizedReportId?: string;
+  reviewNote?: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+};

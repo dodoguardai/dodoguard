@@ -1,0 +1,23 @@
+# Local, self-hosted DodoGuard using the SQLite database included in the image.
+# For production, publish a versioned image and provide secrets through your
+# deployment platform rather than committing them to a Compose file.
+services:
+  dodoguard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dodoguard:local
+    ports:
+      - "3000:3000"
+    environment:
+      DODOGUARD_SELF_HOSTED: "1"
+      DB_TYPE: sqlite
+    volumes:
+      - dodoguard-data:/home/dodoguard/.dodoguard
+      - dodoguard-reports:/app/reports
+      - dodoguard-user-configs:/app/user-configs
+
+volumes:
+  dodoguard-data:
+  dodoguard-reports:
+  dodoguard-user-configs:

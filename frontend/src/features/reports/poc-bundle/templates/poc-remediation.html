@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Dify单个Agent漏洞测试_PoC结论与整改建议</title>
+<style>
+body{font-family:Microsoft YaHei, Arial; margin:20px; background:#f9f9f9;}
+.container{width:100%;max-width:100%;margin:0 auto;box-sizing:border-box;background:white;padding:25px;border-radius:8px;box-shadow:0 0 5px #ccc;}
+h1{color:#2c3e50; border-left:4px solid #e74c3c; padding-left:10px;}
+h2{color:#34495e; font-size:16px; margin-top:20px;}
+table{width:100%; border-collapse:collapse; margin:10px 0;}
+td,th{border:1px solid #ddd; padding:8px; text-align:left;}
+th{background:#ecf0f1;}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Dify单个Agent漏洞测试_PoC结论与整改建议</h1>
+<p><strong>文档编号：</strong>DFY-AGT-TPL-004</p>
+<p><strong>版本号：</strong>V1.0</p>
+<p><strong>编制日期：</strong>2026-04-10</p>
+
+<h2>一、结论总览</h2>
+<table>
+<tr><td>测试对象</td><td>对公营销分析机器人Agent</td></tr>
+<tr><td>总发现数</td><td>12</td></tr>
+<tr><td>风险分布</td><td>高3，中9，低0</td></tr>
+<tr><td>是否建议上线</td><td>有条件建议（整改+回归通过）</td></tr>
+<tr><td>最关键问题</td><td>文件类型校验缺失、配置基线不达标、提示注入可绕过</td></tr>
+</table>
+
+<h2>二、发现归类</h2>
+<table>
+<tr><th>编号</th><th>问题名称</th><th>根因</th><th>等级</th><th>优先级</th><th>责任团队</th></tr>
+<tr><td>P-001</td><td>不支持文件类型未拦截</td><td>API校验缺失</td><td>高</td><td>P0</td><td>开发</td></tr>
+<tr><td>P-002</td><td>配置项存在安全风险</td><td>安全基线缺失</td><td>高</td><td>P0</td><td>安全+平台</td></tr>
+<tr><td>P-003</td><td>提示词防护不足</td><td>系统提示词薄弱</td><td>中</td><td>P1</td><td>算法</td></tr>
+</table>
+
+<h2>三、单项整改详情</h2>
+<h3>P-001 文件类型校验缺失</h3>
+<table>
+<tr><td>问题描述</td><td>上传非法文件提示“不支持该类型”，但未严格拦截与日志审计</td></tr>
+<tr><td>根因</td><td>API未做白名单校验、异常捕获不彻底</td></tr>
+<tr><td>整改建议</td><td>增加文件类型白名单，拦截非法请求并记录日志</td></tr>
+<tr><td>临时缓解</td><td>前端拦截+接口过滤</td></tr>
+<tr><td>长期措施</td><td>纳入安全上线门禁，自动化扫描</td></tr>
+<tr><td>责任人</td><td>钱兴会</td></tr>
+<tr><td>完成时间</td><td>2026-04-13</td></tr>
+<tr><td>回归标准</td><td>非法文件上传被拒绝，无异常泄露</td></tr>
+</table>
+
+<h3>P-002 配置安全不达标</h3>
+<table>
+<tr><td>问题描述</td><td>Config扫描发现9项配置风险，含权限、插件、日志等</td></tr>
+<tr><td>整改建议</td><td>按安全基线加固配置，启用最小权限</td></tr>
+<tr><td>责任人</td><td>李国彬</td></tr>
+<tr><td>完成时间</td><td>2026-04-12</td></tr>
+</table>
+
+<h2>四、整改任务清单</h2>
+<table>
+<tr><th>任务编号</th><th>任务</th><th>责任方</th><th>优先级</th><th>状态</th></tr>
+<tr><td>R-001</td><td>修复API文件类型校验</td><td>开发</td><td>P0</td><td>待开始</td></tr>
+<tr><td>R-002</td><td>加固Config安全配置</td><td>安全</td><td>P0</td><td>待开始</td></tr>
+<tr><td>R-003</td><td>优化提示词与拒答策略</td><td>算法</td><td>P1</td><td>待开始</td></tr>
+<tr><td>R-004</td><td>安全回归测试</td><td>安全</td><td>P1</td><td>待开始</td></tr>
+</table>
+</div>
+</body>
+</html>

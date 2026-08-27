@@ -1,0 +1,170 @@
+import async from 'async';
+import chalk from 'chalk';
+import dedent from 'dedent';
+import { VERSION } from '../../constants';
+import { renderPrompt } from '../../evaluatorHelpers';
+import { getUserEmail } from '../../globalConfig/accounts';
+import logger from '../../logger';
+import { fetchWithProxy } from '../../util/fetch/index';
+import invariant from '../../util/invariant';
+import { accumulateResponseTokenUsage, createEmptyTokenUsage } from '../../util/tokenUsageUtils';
+import { getRemoteGenerationUrl, neverGenerateRemote } from '../remoteGeneration';
+import { getSessionId } from '../util';
+
+import type {
+  ApiProvider,
+  CallApiContextParams,
+  CallApiOptionsParams,
+  ProviderOptions,
+  ProviderResponse,
+} from '../../types/providers';
+
+interface BestOfNResponse {
+  modifiedPrompts: string[];
+  task: 'jailbreak:best-of-n';
+}
+
+export default class BestOfNProvider implements ApiProvider {
+  private readonly injectVar: string;
+  private readonly maxConcurrency: number;
+  private readonly nSteps?: number;
+  private readonly maxCandidatesPerStep?: number;
+
+  id() {
+    return 'dodoguard:redteam:best-of-n';
+  }
+
+  constructor(
+    options: ProviderOptions & {
+      injectVar?: string;
+      maxConcurrency?: number;
+      nSteps?: number;
+      maxCandidatesPerStep?: number;
+    } = {},
+  ) {
+    if (neverGenerateRemote()) {
+      throw new Error(`Best-of-N strategy requires remote generation to be enabled`);
+    }
+
+    invariant(typeof options.injectVar === 'string', 'Expected injectVar to be set');
+    this.injectVar = options.injectVar;
+    this.maxConcurrency = options.maxConcurrency || 3;
+    this.nSteps = options.nSteps;
+    this.maxCandidatesPerStep = options.maxCandidatesPerStep;
+  }
+
+  async callApi(
+    _prompt: string,
+    context?: CallApiContextParams,
+    options?: CallApiOptionsParams,
+  ): Promise<ProviderResponse> {
+    logger.debug('[Best-of-N] callApi context', { context });
+    invariant(context?.originalProvider, 'Expected originalProvider to be set');
+    invariant(context?.vars, 'Expected vars to be set');
+
+    const targetProvider: ApiProvider = context.originalProvider;
+    const targetTokenUsage = createEmptyTokenUsage();
+    const sessionIds: string[] = [];
+    try {
+      // Get candidate prompts from the server
+      const response = await fetchWithProxy(getRemoteGenerationUrl(), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          task: 'jailbreak:best-of-n',
+          prompt: context.vars[this.injectVar],
+          nSteps: this.nSteps,
+          maxCandidatesPerStep: this.maxCandidatesPerStep,
+          version: VERSION,
+          email: getUserEmail(),
+        }),
+      });
+
+      const data = (await response.json()) as BestOfNResponse;
+      invariant(Array.isArray(data.modifiedPrompts), 'Expected modifiedPrompts array in response');
+
+      logger.debug(
+        dedent`
+          ${chalk.bold.green('Best-of-N candidates:')}
+          ${chalk.cyan(JSON.stringify(data.modifiedPrompts, null, 2))}
+        `,
+      );
+
+      // Try candidates concurrently until one succeeds
+      let successfulResponse: ProviderResponse | null = null;
+      let lastResponse: ProviderResponse | null = null;
+      let currentStep = 0;
+
+      await async.eachLimit(data.modifiedPrompts, this.maxConcurrency, async (candidatePrompt) => {
+        if (successfulResponse) {
+          return;
+        }
+
+        const targetVars = {
+          ...context.vars,
+          [this.injectVar]: candidatePrompt,
+        };
+
+        const renderedPrompt = await renderPrompt(
+          context.prompt,
+          targetVars,
+          context.filters,
+          targetProvider,
+        );
+
+        try {
+          const response = await targetProvider.callApi(renderedPrompt, context, options);
+          const sessionId = getSessionId(response, context);
+          if (sessionId) {
+            sessionIds.push(sessionId);
+          }
+          lastResponse = response;
+          accumulateResponseTokenUsage(targetTokenUsage, response);
+          currentStep++;
+          if (!response.error) {
+            successfulResponse = response;
+            successfulResponse.metadata = {
+              ...successfulResponse.metadata,
+              redteamFinalPrompt: candidatePrompt,
+              step: currentStep,
+            };
+            return false; // Stop processing more candidates
+          }
+        } catch (err) {
+          logger.debug(`[Best-of-N] Candidate failed: ${err}`);
+          currentStep++;
+        }
+      });
+
+      if (successfulResponse) {
+        (successfulResponse as ProviderResponse).tokenUsage = targetTokenUsage;
+        return successfulResponse;
+      }
+      if (lastResponse) {
+        (lastResponse as ProviderResponse).tokenUsage = targetTokenUsage;
+        (lastResponse as ProviderResponse).metadata = {
+          ...((lastResponse as ProviderResponse).metadata ?? {}),
+          sessionIds,
+        };
+      }
+      return (
+        lastResponse || {
+          error: 'All candidates failed',
+          metadata: {
+            sessionIds,
+          },
+        }
+      );
+    } catch (err) {
+      logger.error(`[Best-of-N] Error: ${err}`);
+      return {
+        error: String(err),
+        metadata: {
+          sessionIds,
+        },
+      };
+    }
+  }
+}

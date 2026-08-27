@@ -1,0 +1,59 @@
+# yaml-language-server: $schema=https://dodoguard.dev/config-schema.json
+description: Basic assertion types and test case fundamentals
+
+prompts:
+  - file://prompts.txt
+providers:
+  - openai:gpt-5-mini
+tests:
+  - description: Check for exact match
+    vars:
+      body: Yes
+    assert:
+      - type: equals
+        value: Yarr
+
+  - description: Another basic substring check
+    vars:
+      body: I'm hungry
+    assert:
+      - type: icontains
+        value: grub
+
+  - description: Check if output is JSON
+    vars:
+      body: Output the story of your life in JSON
+    assert:
+      - type: is-json
+
+  - description: Check for semantic similarity
+    vars:
+      body: Hello world
+    assert:
+      # Look for substring
+      - type: javascript
+        value: output.startsWith('Ahoy')
+      - type: python
+        value: max(0, len(output) - 300)
+
+      # Check for semantic similarity
+      - type: similar
+        value: Ahoy, world
+
+  - description: Use LLM to evaluate output
+    vars:
+      body: The quick brown fox jumps over the lazy dog
+    assert:
+      # Ask the LLM to check if it spoke like a pirate
+      - type: llm-rubric
+        value: Is spoken like a pirate
+
+      # $ref can be used as a shorthand to include reusable templates
+      - $ref: '#/assertionTemplates/containsPirateNoise'
+
+outputPath: file://output.csv
+
+assertionTemplates:
+  containsPirateNoise:
+    type: icontains
+    value: arrr

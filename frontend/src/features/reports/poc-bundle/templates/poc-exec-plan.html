@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dify单个Agent漏洞测试_执行策划</title>
+<style>
+*{box-sizing:border-box;font-family: "Microsoft YaHei", sans-serif;}
+body{margin:20px;background:#f7f7f7;}
+.container{width:100%;max-width:100%;margin:0 auto;box-sizing:border-box;background:#fff;padding:30px;border-radius:8px;box-shadow:0 0 5px rgba(0,0,0,0.1);}
+h1{color:#222;font-size:20px;text-align:center;border-bottom:1px solid #ddd;padding-bottom:10px;}
+h2{font-size:16px;color:#333;margin-top:25px;border-left:4px solid #0066cc;padding-left:10px;}
+table{width:100%;border-collapse:collapse;margin:10px 0 20px;}
+td,th{border:1px solid #ccc;padding:8px 10px;font-size:14px;}
+th{background:#f0f0f0;font-weight:bold;}
+.note{background:#f8f9fa;padding:10px;border-left:3px solid #6c757d;font-size:14px;margin:10px 0;}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Dify单个Agent漏洞测试执行策划</h1>
+
+<table>
+<tr><td>文档编号</td><td>DFY-AGT-TPL-001</td><td>版本号</td><td>V1.0</td></tr>
+<tr><td>适用对象</td><td>Dify单个Agent漏洞测试</td><td>编制/更新日期</td><td>2026-04-09</td></tr>
+</table>
+
+<div class="note">
+用于单个Dify Agent的一次测试立项与方案确认，适合作为启动会附件或审批件。<br>
+建议正式测试前由业务负责人、测试负责人、技术接口人共同确认。
+</div>
+
+<h2>1. 测试背景与目标</h2>
+<table>
+<tr><td>Agent名称</td><td>对公营销分析机器人</td></tr>
+<tr><td>所属应用/工作区</td><td>【填写】</td></tr>
+<tr><td>当前版本/发布日期</td><td>V1.0/2026-03-09</td></tr>
+<tr><td>主要功能</td><td>对公营销问题分类分析</td></tr>
+<tr><td>测试目标</td><td>验证是否存在：提示注入、越权调用工具、敏感数据泄露等问题</td></tr>
+</table>
+
+<h2>2. 为什么做</h2>
+<ul>
+<li>风险驱动：本Agent是否接入了知识库、插件、HTTP请求、代码执行、文件上传、外部API等高风险能力。</li>
+<li>业务驱动：该Agent是否服务真实用户、关键业务流程或敏感数据处理环节。</li>
+<li>合规驱动：是否需要满足内部审计、金融行业监管、上线前评估或供应商治理要求。</li>
+</ul>
+
+<h2>3. 范围与边界</h2>
+<table>
+<tr><th>类别</th><th>纳入范围（In Scope）</th><th>排除范围（Out of Scope）</th></tr>
+<tr><td>测试对象</td><td>单个Dify Agent「对公营销分析机器人」的完整工作流、提示词模板、知识检索链路、问题分类器、LLM应答节点、知识库权限与检索行为</td><td>其他Agent、外部生产核心系统、未授权插件、通义千问模型底层服务</td></tr>
+<tr><td>测试方式</td><td>Api扫描、Config扫描、人工测试</td><td>压力测试、性能测试、生产环境破坏性渗透、DOS类测试</td></tr>
+<tr><td>数据边界</td><td>测试环境知识库、脱敏企业样本数据、测试账号、模拟营销数据</td><td>真实客户数据、生产密钥/Token、未脱敏对公企业资料、内部敏感政策文件</td></tr>
+<tr><td>时间边界</td><td>2026-04-09 至 2026-04-19（POC验证周期）</td><td>-</td></tr>
+</table>
+
+<h2>4. 测试假设与前置条件</h2>
+<table>
+<tr><th>序号</th><th>前置条件</th><th>责任人</th><th>确认状态</th></tr>
+<tr><td>1</td><td>测试账号、访问地址与必要权限已开通</td><td>李国彬</td><td>✅</td></tr>
+<tr><td>2</td><td>测试时间窗内允许开展授权安全验证</td><td>李国彬</td><td>未确认</td></tr>
+<tr><td>3</td><td>日志、截图、导出文件可用于留证</td><td>李国彬</td><td>✅</td></tr>
+<tr><td>4</td><td>如涉及外部接口，已完成接口白名单与环境隔离</td><td>李国彬</td><td>✅</td></tr>
+</table>
+
+<h2>5. 测试方法设计</h2>
+<table>
+<tr><th>测试方式</th><th>做什么</th><th>为什么做</th><th>重点验证点</th><th>输出物</th></tr>
+<tr><td>API扫描</td><td>1）对api接口进行黑盒测试<br>2）用漏洞库YAML批量发送话术<br>3）校验鉴权、参数边界、会话对象隔离<br>4）正则+LLM裁决判定攻击</td><td>快速发现可远程利用高风险问题</td><td>鉴权绕过、IDOR、Prompt注入、工具滥用、SSRF、知识库越权、拒答失效</td><td>测试日志、扫描报告</td></tr>
+<tr><td>Config扫描</td><td>1）审计Agent配置<br>2）对比安全基线<br>3）检查默认值风险</td><td>配置风险比代码更常见</td><td>最小权限、密钥、插件、出网白名单、授权边界、日志脱敏</td><td>测试日志、扫描报告</td></tr>
+<tr><td>人工测试</td><td>1）多轮会话攻击<br>2）交叉账号验证<br>3）复现扫描问题<br>4）修复回归</td><td>确认真实可利用性</td><td>可复现路径、越权、数据提取、拒答绕过</td><td>PoC截图、会话记录、复现步骤</td></tr>
+</table>
+
+<h2>6. 成功标准与退出标准</h2>
+<table>
+<tr><th>维度</th><th>成功标准</th><th>退出标准/中止条件</th></tr>
+<tr><td>覆盖率</td><td>关键接口、配置、场景均覆盖</td><td>关键资产不可访问且无法补齐授权</td></tr>
+<tr><td>证据</td><td>每个发现均有证据</td><td>证据缺失无法证明结果</td></tr>
+<tr><td>复现性</td><td>高中危至少复现2次</td><td>问题偶发无法稳定复现</td></tr>
+<tr><td>治理性</td><td>每个问题可转为整改任务</td><td>无法归责或无执行建议</td></tr>
+</table>
+
+<h2>7. 角色分工与沟通机制</h2>
+<table>
+<tr><th>角色</th><th>姓名/团队</th><th>职责</th><th>升级触发条件</th></tr>
+<tr><td>项目负责人</td><td>李国彬</td><td>统筹、范围确认、结论签发</td><td>发现高危或需暂停测试</td></tr>
+<tr><td>测试执行人</td><td>李国彬</td><td>执行测试、留证、提交发现</td><td>不可逆影响风险</td></tr>
+<tr><td>技术接口人</td><td>钱兴会</td><td>配置、日志、环境支持</td><td>快速定位根因</td></tr>
+<tr><td>业务负责人</td><td>钱兴会</td><td>业务影响与容忍度确认</td><td>影响真实用户</td></tr>
+</table>
+
+<h2>8. 日程与里程碑</h2>
+<table>
+<tr><th>阶段</th><th>时间</th><th>主要动作</th><th>输出</th></tr>
+<tr><td>启动与确认</td><td>0409</td><td>确认范围、边界、账号、窗口</td><td>已批准执行策划</td></tr>
+<tr><td>执行阶段</td><td>0409-0410</td><td>API/Config/人工测试</td><td>过程记录与证据包</td></tr>
+<tr><td>复核阶段</td><td>0410</td><td>复现、分级、根因讨论</td><td>结论与整改建议</td></tr>
+<tr><td>汇报阶段</td><td>0411</td><td>管理层摘要、资源建议</td><td>管理层决策材料</td></tr>
+</table>
+
+<h2>审批与签收</h2>
+<table>
+<tr><th>角色</th><th>人员</th><th>签字</th><th>日期</th></tr>
+<tr><td>编制</td><td>【姓名】</td><td>【签字/电子签】</td><td>【日期】</td></tr>
+<tr><td>审核</td><td>【姓名】</td><td>【签字/电子签】</td><td>【日期】</td></tr>
+<tr><td>批准</td><td>【姓名】</td><td>【签字/电子签】</td><td>【日期】</td></tr>
+</table>
+</div>
+</body>
+</html>

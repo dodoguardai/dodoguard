@@ -1,0 +1,5 @@
+id: dify-surface
+version: "1.0.0"
+slug: dify-surface
+supportedSurfaces:
+  - dify

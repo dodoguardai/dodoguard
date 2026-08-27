@@ -1,0 +1,13 @@
+{
+  "legacyWatch": true,
+  "watch": ["backend/src", "capability-audit"],
+  "ignore": [
+    "backend/src/app/*",
+    "dist/*",
+    "node_modules/*",
+    ".git/*",
+    "site/*",
+    "frontend/*",
+    "capability-audit/tools/scan-venv/*"
+  ]
+}

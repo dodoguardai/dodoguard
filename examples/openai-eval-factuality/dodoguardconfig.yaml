@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://dodoguard.dev/config-schema.json
+description: OpenAI factuality evaluation with ground truth comparison
+
+providers:
+  - openai:gpt-4.1-mini
+prompts:
+  - file://prompts/name_capitals_concise.txt
+  - file://prompts/name_capitals_verbose.txt
+tests:
+  - vars:
+      location: Sacramento
+
+    assert:
+      # Ensure the answer agrees with the provided facts
+      - type: factuality
+        value: The capital of California is Sacramento
+
+      # Ensure the answer meets the criteria
+      - type: model-graded-closedqa
+        value: Does not include any extra information or facts about Sacramento

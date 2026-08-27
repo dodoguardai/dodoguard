@@ -1,0 +1,74 @@
+{
+  "templates": [
+    {
+      "templateKey": "CMP-TPL-001",
+      "name": "金融合规季度抽检",
+      "domain": "金融合规",
+      "scope": "适当性 + 客户信息 + 收益承诺",
+      "description": "适用于投顾/财富类 Agent · 引用金融销售适当性与客户信息保护控制库",
+      "libraryKeys": ["cmp-invest", "cmp-product", "cmp-sensitive"],
+      "sampleTypes": ["single", "multi_turn"],
+      "assessScenario": "periodic",
+      "creationMode": "manual",
+      "icon": "💰",
+      "tags": ["金融", "适当性", "必测"],
+      "ownerName": "平台预置"
+    },
+    {
+      "templateKey": "CMP-TPL-002",
+      "name": "个人信息保护法专项",
+      "domain": "个人信息",
+      "scope": "脱敏 + 删除权 + 跨用户隔离",
+      "description": "适用于客服/对外 Agent · 个保法核心控制项全覆盖",
+      "libraryKeys": ["cmp-pii-id", "cmp-pii-retention"],
+      "sampleTypes": ["single", "multi_turn", "file_input"],
+      "assessScenario": "launch",
+      "creationMode": "manual",
+      "icon": "🔒",
+      "tags": ["个保法", "涉敏", "必测"],
+      "ownerName": "平台预置"
+    },
+    {
+      "templateKey": "CMP-TPL-003",
+      "name": "政务数据边界检测",
+      "domain": "政务/国企",
+      "scope": "内网边界 + 官方口径 + 权限边界",
+      "description": "适用于政务/国企类 Agent · 数据保护与官方口径合规",
+      "libraryKeys": ["cmp-gov-data", "cmp-auth"],
+      "sampleTypes": ["single", "multi_turn", "file_output"],
+      "assessScenario": "launch",
+      "creationMode": "manual",
+      "icon": "🏛️",
+      "tags": ["政务", "边界"],
+      "ownerName": "平台预置"
+    },
+    {
+      "templateKey": "CMP-TPL-004",
+      "name": "通用合规准入基线",
+      "domain": "通用合规",
+      "scope": "敏感信息 + 授权告知 + 高风险确认",
+      "description": "上线前通用合规基线 · 可作为准入材料附件",
+      "libraryKeys": ["cmp-sensitive", "cmp-auth", "cmp-highrisk"],
+      "sampleTypes": ["single", "multi_turn"],
+      "assessScenario": "launch",
+      "creationMode": "manual",
+      "icon": "✅",
+      "tags": ["准入", "基线"],
+      "ownerName": "平台预置"
+    },
+    {
+      "templateKey": "CMP-TPL-005",
+      "name": "数据安全分类分级评估",
+      "domain": "数据安全",
+      "scope": "分类分级 + 出境评估 + 重要数据",
+      "description": "适用于处理企业/用户数据的 Agent · 数据安全法核心要求",
+      "libraryKeys": ["cmp-ds-classify", "cmp-ds-crossborder"],
+      "sampleTypes": ["single", "file_input", "file_output"],
+      "assessScenario": "change",
+      "creationMode": "manual",
+      "icon": "🧾",
+      "tags": ["数安", "分类分级"],
+      "ownerName": "平台预置"
+    }
+  ]
+}

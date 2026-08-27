@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Dify智能 Agent 安全测试POC总报告</title>
+<style>
+body{font-family:Microsoft YaHei, Arial; margin:20px; background:#f4f4f4;}
+.wrap{width:100%;max-width:100%;margin:0 auto;box-sizing:border-box;background:white;padding:30px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+h1{color:#2d3436; border-bottom:2px solid #0984e3; padding-bottom:10px;}
+h2{color:#0984e3; font-size:18px; margin-top:25px;}
+h3{font-size:16px; color:#2d3436;}
+table{width:100%; border-collapse:collapse; margin:10px 0 20px 0;}
+td,th{border:1px solid #ddd; padding:10px;}
+th{background:#e8f4fd;}
+.footer{margin-top:30px; text-align:right; color:#666;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Dify智能 Agent 安全测试POC总报告</h1>
+<p><strong>项目：</strong>对公营销分析机器人</p>
+<p><strong>测试时间：</strong>2026-04-09 ~ 2026-04-10</p>
+<p><strong>测试人员：</strong>李国彬</p>
+<p><strong>编制时间：</strong>2026-04-10</p>
+
+<h2>一、测试概述</h2>
+<p>本次针对Dify单个Agent「对公营销分析机器人」开展安全测试，覆盖API扫描、Config配置审计、人工验证，共发现漏洞12项，其中高危3项、中危9项，整体存在提示注入、配置不规范、文件校验缺失等风险。</p>
+
+<h2>二、测试范围</h2>
+<ul>
+<li>对象：对公营销分析机器人工作流、提示词、API、配置、知识库</li>
+<li>方式：API扫描、Config扫描、人工测试</li>
+<li>排除：性能测试、破坏性渗透、生产真实数据</li>
+</ul>
+
+<h2>三、检测结果</h2>
+<h3>1. API扫描（api.html）</h3>
+<table>
+<tr><td>测试项</td><td>14项</td></tr>
+<tr><td>检出漏洞</td><td>3项</td></tr>
+<tr><td>典型问题</td><td>文件类型校验缺失，异常未严格拦截</td></tr>
+</table>
+
+<h3>2. Config扫描（config.html）</h3>
+<table>
+<tr><td>测试项</td><td>15项</td></tr>
+<tr><td>检出漏洞</td><td>9项</td></tr>
+<tr><td>典型问题</td><td>权限配置、插件安全、日志脱敏、提示词策略不足</td></tr>
+</table>
+
+<h2>四、风险等级统计</h2>
+<table>
+<tr><td>高危</td><td>3</td></tr>
+<tr><td>中危</td><td>9</td></tr>
+<tr><td>低危</td><td>0</td></tr>
+<tr><td>总计</td><td>12</td></tr>
+</table>
+
+<h2>五、核心风险说明</h2>
+<ol>
+<li><strong>文件类型校验缺失（高危）</strong>：未严格白名单校验，存在上传与注入风险</li>
+<li><strong>配置安全基线不达标（高危）</strong>：权限、插件、日志存在多项配置风险</li>
+<li><strong>提示注入可绕过（中危）</strong>：系统提示词防护不足，易被诱导越权</li>
+</ol>
+
+<h2>六、整改建议</h2>
+<ol>
+<li>修复API文件类型拦截，完善日志审计</li>
+<li>按安全基线加固Config配置</li>
+<li>增强提示词防护与拒答策略</li>
+<li>上线前完成安全回归测试</li>
+<li>纳入Agent标准化安全上线流程</li>
+</ol>
+
+<h2>七、测试结论</h2>
+<p>该Agent存在中高危安全风险，<strong>需完成全部整改并通过回归测试后方可上线</strong>。本次POC验证了Dify Agent安全测试流程的完整性，可作为客户交付标准流程。</p>
+
+<div class="footer">
+© 2026 安全测试团队 | 交付版POC报告
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "name": "simple-mcp-example",
+  "version": "1.0.0",
+  "description": "Example MCP server for testing the DodoGuard MCP provider",
+  "type": "module",
+  "main": "example-server.js",
+  "scripts": {
+    "start": "node example-server.js",
+    "test": "dodoguard eval"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "dodoguard": "*"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "dodoguard",
+    "security-testing",
+    "red-team"
+  ],
+  "author": "DodoGuard",
+  "license": "MIT"
+}

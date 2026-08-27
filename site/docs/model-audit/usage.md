@@ -1,0 +1,639 @@
+---
+title: ModelAudit Advanced Usage
+sidebar_label: Advanced Usage
+sidebar_position: 120
+description: Automate LLM model scanning across cloud providers with remote storage integration, CI/CD workflows, and programmatic controls for advanced security testing
+keywords:
+  [
+    modelaudit,
+    model scanning,
+    cloud storage,
+    remote model scanning,
+    huggingface,
+    s3 model scanning,
+    gcs model scanning,
+    mlflow,
+    jfrog artifactory,
+    dvc,
+    model authentication,
+    ci cd integration,
+    github actions,
+    gitlab ci,
+    programmatic scanning,
+    sarif output,
+    sbom generation,
+    custom scanners,
+    model security automation,
+  ]
+---
+
+# Advanced Usage
+
+This page covers advanced ModelAudit features including cloud storage integration, CI/CD workflows, and programmatic usage.
+
+## Authentication and Configuration
+
+ModelAudit uses environment variables for authentication with cloud services and model registries.
+
+### Cloud & Artifact Registry Authentication
+
+Authentication for all remote services is now handled exclusively via environment variables.
+
+#### HuggingFace
+
+- `HF_TOKEN`: Your HuggingFace Hub token for accessing private models.
+
+```bash
+# Authenticate for private models
+export HF_TOKEN=your_token_here
+dodoguard scan-model hf://your-org/private-model
+```
+
+#### JFrog Artifactory
+
+- `JFROG_URL`: The base URL of your JFrog Artifactory instance.
+- `JFROG_API_TOKEN` or `JFROG_ACCESS_TOKEN`: Your API or access token.
+
+```bash
+# Authenticate using an API token
+export JFROG_URL="https://your-domain.jfrog.io"
+export JFROG_API_TOKEN="your-api-token"
+dodoguard scan-model "https://your-domain.jfrog.io/artifactory/repo/model.pkl"
+```
+
+#### MLflow Model Registry
+
+- `MLFLOW_TRACKING_URI`: The URI of your MLflow tracking server.
+- `MLFLOW_TRACKING_USERNAME` / `MLFLOW_TRACKING_PASSWORD`: Credentials for MLflow authentication.
+
+```bash
+# Authenticate with MLflow
+export MLFLOW_TRACKING_URI="https://your-mlflow-server.com"
+export MLFLOW_TRACKING_USERNAME="your-username"
+export MLFLOW_TRACKING_PASSWORD="your-password"
+dodoguard scan-model models:/model-name/version
+```
+
+#### Amazon S3
+
+- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`: Standard AWS credentials.
+
+```bash
+export AWS_ACCESS_KEY_ID="your-access-key"
+export AWS_SECRET_ACCESS_KEY="your-secret-key"
+export AWS_DEFAULT_REGION="us-east-1"
+dodoguard scan-model s3://my-bucket/model.pkl
+```
+
+#### Google Cloud Storage
+
+- `GOOGLE_APPLICATION_CREDENTIALS`: Path to your service account key file.
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account-key.json"
+dodoguard scan-model gs://my-bucket/model.pt
+```
+
+#### Cloudflare R2
+
+- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`: Your R2 credentials.
+- `AWS_ENDPOINT_URL`: The S3-compatible endpoint for your R2 account.
+
+```bash
+export AWS_ACCESS_KEY_ID="your-r2-access-key"
+export AWS_SECRET_ACCESS_KEY="your-r2-secret-key"
+export AWS_ENDPOINT_URL="https://your-account.r2.cloudflarestorage.com"
+dodoguard scan-model r2://my-bucket/model.safetensors
+```
+
+### Migration from Deprecated Flags
+
+The following CLI flags have been **removed** and replaced by environment variables. Attempting to use them will result in an error.
+
+| Removed Flag           | Replacement Environment Variable     |
+| ---------------------- | ------------------------------------ |
+| `--jfrog-api-token`    | `JFROG_API_TOKEN`                    |
+| `--jfrog-access-token` | `JFROG_ACCESS_TOKEN`                 |
+| `--registry-uri`       | `JFROG_URL` or `MLFLOW_TRACKING_URI` |
+
+**Why the change?** Using environment variables is more secure than passing secrets as CLI flags, as it prevents them from being exposed in shell history or process lists. This aligns with industry best practices for managing credentials.
+
+## Remote Model Scanning
+
+ModelAudit can scan models directly from various remote sources without manual downloading.
+
+### HuggingFace
+
+Scan public or private models from the HuggingFace Hub.
+
+```bash
+# Public model
+dodoguard scan-model https://huggingface.co/bert-base-uncased
+
+# Private model (requires HF_TOKEN to be set)
+dodoguard scan-model hf://your-org/private-model
+```
+
+### Cloud Storage (S3, GCS, R2)
+
+Scan models stored in cloud buckets. See the [Authentication](#authentication-and-configuration) section for setup.
+
+```bash
+# Scan from S3
+dodoguard scan-model s3://my-bucket/model.pkl
+
+# Scan from Google Cloud Storage
+dodoguard scan-model gs://my-bucket/model.pt
+
+# Scan from Cloudflare R2
+dodoguard scan-model r2://my-bucket/model.safetensors
+```
+
+### Model Registries (MLflow, JFrog)
+
+Scan models from MLflow or JFrog Artifactory. See the [Authentication](#authentication-and-configuration) section for setup.
+
+```bash
+# Scan from MLflow
+dodoguard scan-model models:/MyModel/Latest
+
+# Scan from JFrog Artifactory
+dodoguard scan-model "https://your-domain.jfrog.io/artifactory/models/model.pkl"
+```
+
+### DVC Integration
+
+ModelAudit automatically resolves DVC pointer files:
+
+```bash
+# Scans the actual model file referenced by the .dvc file
+dodoguard scan-model model.pkl.dvc
+```
+
+## Configuration Options
+
+ModelAudit's behavior can be customized through command-line options. While configuration files are not currently supported, you can achieve similar results using CLI flags:
+
+```bash
+# Set blacklist patterns
+dodoguard scan-model models/ \
+  --blacklist "deepseek" \
+  --blacklist "qwen" \
+  --blacklist "unsafe_model"
+
+# Set resource limits
+dodoguard scan-model models/ \
+  --max-size 1GB \
+  --timeout 600
+
+# Combine multiple options
+dodoguard scan-model models/ \
+  --blacklist "suspicious_pattern" \
+  --max-size 1GB \
+  --timeout 600 \
+  --verbose
+
+# Enable strict mode for enhanced security validation
+dodoguard scan-model model.pkl --strict
+
+# Strict mode with additional output options
+dodoguard scan-model models/ \
+  --strict \
+  --format sarif \
+  --output security-scan.sarif
+```
+
+## CI/CD Integration
+
+### GitHub Actions
+
+```yaml
+# .github/workflows/model-security.yml
+name: Model Security Scan
+
+on:
+  push:
+    paths:
+      - 'models/**'
+      - '**.pkl'
+      - '**.h5'
+      - '**.pb'
+      - '**.pt'
+      - '**.pth'
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          npm install -g dodoguard
+          pip install modelaudit[all]
+
+      - name: Scan models
+        run: dodoguard scan-model models/ --format sarif --output model-scan.sarif
+
+      - name: Upload SARIF to GitHub Advanced Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: model-scan.sarif
+          category: model-security
+
+      - name: Upload scan results as artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: model-scan-results
+          path: model-scan.sarif
+```
+
+### GitLab CI
+
+```yaml
+# .gitlab-ci.yml
+model_security_scan:
+  stage: test
+  image: python:3.10
+  script:
+    - pip install modelaudit[all]
+    - npm install -g dodoguard
+    - dodoguard scan-model models/ --format json --output scan-results.json
+    - if grep -q '"severity":"critical"' scan-results.json; then echo "Critical security issues found!"; exit 1; fi
+  artifacts:
+    paths:
+      - scan-results.json
+    when: always
+  only:
+    changes:
+      - models/**
+      - '**/*.pkl'
+      - '**/*.h5'
+      - '**/*.pb'
+      - '**/*.pt'
+      - '**/*.pth'
+```
+
+### Pre-commit Hook
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: local
+    hooks:
+      - id: modelaudit
+        name: ModelAudit
+        entry: dodoguard scan-model
+        language: system
+        files: '\.(pkl|h5|pb|pt|pth|keras|hdf5|json|yaml|yml|zip|onnx|safetensors|bin|tflite|msgpack|pmml|joblib|npy|gguf|ggml)$'
+        pass_filenames: true
+```
+
+## Programmatic Usage
+
+You can use ModelAudit programmatically in your Python code:
+
+```python
+from modelaudit.core import scan_model_directory_or_file
+
+# Scan a single model
+results = scan_model_directory_or_file("path/to/model.pkl")
+
+# Scan a HuggingFace model URL
+results = scan_model_directory_or_file("https://huggingface.co/bert-base-uncased")
+
+# Check for issues
+if results["issues"]:
+    print(f"Found {len(results['issues'])} issues:")
+    for issue in results["issues"]:
+        print(f"- {issue['severity'].upper()}: {issue['message']}")
+else:
+    print("No issues found!")
+
+# Scan with custom configuration
+config = {
+    "blacklist_patterns": ["unsafe_model", "malicious_net"],
+    "max_file_size": 1073741824,  # 1GB
+    "timeout": 600  # 10 minutes
+}
+
+results = scan_model_directory_or_file("path/to/models/", **config)
+```
+
+## JSON Output Format
+
+When using `--format json`, ModelAudit outputs structured results:
+
+```json
+{
+  "scanner_names": ["pickle"],
+  "start_time": 1750168822.481906,
+  "bytes_scanned": 74,
+  "issues": [
+    {
+      "message": "Found REDUCE opcode - potential __reduce__ method execution",
+      "severity": "warning",
+      "location": "evil.pickle (pos 71)",
+      "details": {
+        "position": 71,
+        "opcode": "REDUCE"
+      },
+      "timestamp": 1750168822.482304
+    },
+    {
+      "message": "Suspicious module reference found: posix.system",
+      "severity": "critical",
+      "location": "evil.pickle (pos 28)",
+      "details": {
+        "module": "posix",
+        "function": "system",
+        "position": 28,
+        "opcode": "STACK_GLOBAL"
+      },
+      "timestamp": 1750168822.482378,
+      "why": "The 'os' module provides direct access to operating system functions."
+    }
+  ],
+  "has_errors": false,
+  "files_scanned": 1,
+  "duration": 0.0005328655242919922,
+  "assets": [
+    {
+      "path": "evil.pickle",
+      "type": "pickle"
+    }
+  ]
+}
+```
+
+## SARIF Output Format
+
+ModelAudit supports SARIF (Static Analysis Results Interchange Format) 2.1.0 output for seamless integration with security tools and CI/CD pipelines:
+
+```bash
+# Output SARIF to stdout
+dodoguard scan-model model.pkl --format sarif
+
+# Save SARIF to file
+dodoguard scan-model model.pkl --format sarif --output results.sarif
+
+# Scan multiple models with SARIF output
+dodoguard scan-model models/ --format sarif --output scan-results.sarif
+```
+
+### SARIF Structure
+
+The SARIF output includes:
+
+- **Rules**: Unique security patterns detected (e.g., pickle issues, dangerous imports)
+- **Results**: Individual findings with severity levels, locations, and fingerprints
+- **Artifacts**: Information about scanned files including hashes
+- **Tool Information**: ModelAudit version and capabilities
+- **Invocation Details**: Command-line arguments and scan statistics
+
+Example SARIF output structure:
+
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "ModelAudit",
+          "version": "0.2.3",
+          "rules": [
+            {
+              "id": "MA-PICKLE-ISSUE",
+              "name": "Pickle Security Issue",
+              "defaultConfiguration": {
+                "level": "error",
+                "rank": 90.0
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "MA-PICKLE-ISSUE",
+          "level": "error",
+          "message": {
+            "text": "Suspicious module reference found: os.system"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "model.pkl"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Severity Mapping
+
+ModelAudit severities are mapped to SARIF levels:
+
+- `CRITICAL` → `error`
+- `WARNING` → `warning`
+- `INFO` → `note`
+- `DEBUG` → `none`
+
+### Integration with Security Tools
+
+SARIF output enables integration with:
+
+#### GitHub Advanced Security
+
+```yaml
+# .github/workflows/security.yml
+- name: Scan models
+  run: dodoguard scan-model models/ --format sarif --output model-scan.sarif
+
+- name: Upload SARIF to GitHub
+  uses: github/codeql-action/upload-sarif@v3
+  with:
+    sarif_file: model-scan.sarif
+    category: model-security
+```
+
+#### Azure DevOps
+
+```yaml
+# azure-pipelines.yml
+- script: |
+    dodoguard scan-model models/ --format sarif --output $(Build.ArtifactStagingDirectory)/model-scan.sarif
+  displayName: 'Scan models'
+
+- task: PublishSecurityAnalysisLogs@3
+  inputs:
+    ArtifactName: 'CodeAnalysisLogs'
+    ArtifactType: 'Container'
+    AllTools: false
+    ToolLogsNotFoundAction: 'Standard'
+```
+
+#### VS Code SARIF Viewer
+
+```bash
+# Generate SARIF for local viewing
+dodoguard scan-model . --format sarif --output scan.sarif
+
+# Open in VS Code with SARIF Viewer extension
+code scan.sarif
+```
+
+#### Static Analysis Platforms
+
+SARIF output is compatible with:
+
+- SonarQube/SonarCloud (via import)
+- Fortify
+- Checkmarx
+- CodeQL
+- Snyk
+- And many other SARIF-compatible tools
+
+## Software Bill of Materials (SBOM)
+
+Generate CycloneDX-compliant SBOMs with license information:
+
+```bash
+dodoguard scan-model models/ --sbom model-sbom.json
+```
+
+The SBOM includes:
+
+- Component information (files, types, sizes, checksums)
+- License metadata (detected licenses, copyright holders)
+- Risk scoring based on scan findings
+- Model/dataset classification
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Missing Dependencies**
+
+   ```
+   Error: h5py not installed, cannot scan Keras H5 files
+   ```
+
+   Solution: Install the required dependencies:
+
+   ```bash
+   pip install h5py tensorflow
+   ```
+
+2. **Timeout Errors**
+
+   ```
+   Error: Scan timeout after 300 seconds
+   ```
+
+   Solution: Increase the timeout:
+
+   ```bash
+   dodoguard scan-model model.pkl --timeout 7200  # 2 hours for very large models
+   ```
+
+3. **File Size Limits**
+
+   ```
+   Warning: File too large to scan
+   ```
+
+   Solution: Increase the maximum file size:
+
+   ```bash
+   dodoguard scan-model model.pkl --max-size 3GB
+   ```
+
+4. **Unknown Format**
+
+   ```
+   Warning: Unknown or unhandled format
+   ```
+
+   Solution: Ensure the file is in a supported format.
+
+## Extending ModelAudit
+
+### Creating Custom Scanners
+
+You can create custom scanners by extending the `BaseScanner` class:
+
+```python
+from modelaudit.scanners.base import BaseScanner, ScanResult, IssueSeverity
+
+class CustomModelScanner(BaseScanner):
+    """Scanner for custom model format"""
+    name = "custom_format"
+    description = "Scans custom model format for security issues"
+    supported_extensions = [".custom", ".mymodel"]
+
+    @classmethod
+    def can_handle(cls, path: str) -> bool:
+        """Check if this scanner can handle the given path"""
+        return path.endswith(tuple(cls.supported_extensions))
+
+    def scan(self, path: str) -> ScanResult:
+        """Scan the model file for security issues"""
+        result = self._create_result()
+
+        try:
+            # Your custom scanning logic here
+            with open(path, 'rb') as f:
+                content = f.read()
+
+            if b'malicious_pattern' in content:
+                result.add_issue(
+                    "Suspicious pattern found",
+                    severity=IssueSeverity.WARNING,
+                    location=path,
+                    details={"pattern": "malicious_pattern"}
+                )
+
+        except Exception as e:
+            result.add_issue(
+                f"Error scanning file: {str(e)}",
+                severity=IssueSeverity.CRITICAL,
+                location=path,
+                details={"exception": str(e)}
+            )
+
+        result.finish(success=True)
+        return result
+```
+
+To integrate your custom scanner, add it to the scanner registry in `modelaudit/scanners/__init__.py`:
+
+```python
+# In modelaudit/scanners/__init__.py
+from .custom_scanner import CustomModelScanner
+
+# Add to the registry
+registry.register(
+    "custom_format",
+    lambda: CustomModelScanner,
+    description="Custom model format scanner",
+    module="modelaudit.scanners.custom_scanner"
+)
+```
+
+Custom scanners require integration into the ModelAudit package structure and cannot be dynamically registered at runtime. For production use, consider contributing your scanner to the ModelAudit project.

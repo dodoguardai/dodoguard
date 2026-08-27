@@ -1,0 +1,748 @@
+---
+sidebar_position: 10
+sidebar_label: Command line
+description: Explore dodoguard CLI commands for LLM testing - run evaluations, generate datasets, scan models for vulnerabilities, and automate testing workflows via command line
+---
+
+# Command line
+
+The `dodoguard` command line utility supports the following subcommands:
+
+- `init [directory]` - Initialize a new project with dummy files.
+- `eval` - Evaluate prompts and models. This is the command you'll be using the most!
+- `view` - Start a browser UI for visualization of results.
+- `share` - Create a URL that can be shared online.
+- `auth` - Manage authentication for cloud features.
+- `cache` - Manage cache.
+  - `cache clear`
+- `config` - Edit configuration settings.
+  - `config get`
+  - `config set`
+  - `config unset`
+- `debug` - Display debug information for troubleshooting.
+- `generate` - Generate data.
+  - `generate dataset`
+  - `generate redteam`
+  - `generate assertions`
+- `list` - List various resources like evaluations, prompts, and datasets.
+  - `list evals`
+  - `list prompts`
+  - `list datasets`
+- `mcp` - Start a Model Context Protocol (MCP) server to expose dodoguard tools to AI agents and development environments.
+- `scan-model` - Scan ML models for security vulnerabilities.
+- `show <id>` - Show details of a specific resource (evaluation, prompt, dataset).
+- `delete <id>` - Delete a resource by its ID (currently, just evaluations)
+- `validate` - Validate a dodoguard configuration file.
+- `feedback <message>` - Send feedback to the DodoGuard developers.
+- `import <filepath>` - Import an eval file from JSON format.
+- `export` - Export eval records or logs.
+  - `export eval <evalId>`
+  - `export logs`
+- `redteam` - Red team LLM applications.
+  - `redteam init`
+  - `redteam setup`
+  - `redteam run`
+  - `redteam discover`
+  - `redteam generate`
+  - `redteam poison`
+  - `redteam eval`
+  - `redteam report`
+  - `redteam plugins`
+
+## Common Options
+
+Most commands support the following common options:
+
+| Option                          | Description       |
+| ------------------------------- | ----------------- |
+| `--env-file, --env-path <path>` | Path to .env file |
+| `-v, --verbose`                 | Show debug logs   |
+| `--help`                        | Display help      |
+
+## `dodoguard eval`
+
+By default the `eval` command will read the `dodoguardconfig.yaml` configuration file in your current directory. But, if you're looking to override certain parameters you can supply optional arguments:
+
+| Option                              | Description                                                                   |
+| ----------------------------------- | ----------------------------------------------------------------------------- |
+| `-a, --assertions <path>`           | Path to assertions file                                                       |
+| `-c, --config <paths...>`           | Path to configuration file(s). Automatically loads dodoguardconfig.yaml       |
+| `--delay <number>`                  | Delay between each test (in milliseconds)                                     |
+| `--description <description>`       | Description of the eval run                                                   |
+| `--filter-failing <path or id>`     | Filter tests that failed in a previous evaluation (by file path or eval ID)   |
+| `--filter-errors-only <path or id>` | Filter tests that resulted in errors in a previous evaluation                 |
+| `-n, --filter-first-n <number>`     | Only run the first N tests                                                    |
+| `--filter-sample <number>`          | Only run a random sample of N tests                                           |
+| `--filter-metadata <key=value>`     | Only run tests whose metadata matches the key=value pair                      |
+| `--filter-pattern <pattern>`        | Only run tests whose description matches the regex pattern                    |
+| `--filter-providers <providers>`    | Only run tests with these providers (regex match)                             |
+| `--filter-targets <targets>`        | Only run tests with these targets (alias for --filter-providers)              |
+| `--grader <provider>`               | Model that will grade outputs                                                 |
+| `-j, --max-concurrency <number>`    | Maximum number of concurrent API calls                                        |
+| `--model-outputs <path>`            | Path to JSON containing list of LLM output strings                            |
+| `--no-cache`                        | Do not read or write results to disk cache                                    |
+| `--no-progress-bar`                 | Do not show progress bar                                                      |
+| `--no-table`                        | Do not output table in CLI                                                    |
+| `--no-write`                        | Do not write results to dodoguard directory                                   |
+| `--resume [evalId]`                 | Resume a paused/incomplete evaluation. If `evalId` is omitted, resumes latest |
+| `--retry-errors`                    | Retry all ERROR results from the latest evaluation                            |
+| `-o, --output <paths...>`           | Path(s) to output file (csv, txt, json, jsonl, yaml, yml, html, xml)          |
+| `-p, --prompts <paths...>`          | Paths to prompt files (.txt)                                                  |
+| `--prompt-prefix <path>`            | Prefix prepended to every prompt                                              |
+| `--prompt-suffix <path>`            | Suffix appended to every prompt                                               |
+| `-r, --providers <name or path...>` | Provider names or paths to custom API caller modules                          |
+| `--remote`                          | Force remote inference wherever possible (used for red teams)                 |
+| `--repeat <number>`                 | Number of times to run each test                                              |
+| `--share`                           | Create a shareable URL                                                        |
+| `--no-share`                        | Do not create a shareable URL, this overrides the config file                 |
+| `--suggest-prompts <number>`        | Generate N new prompts and append them to the prompt list                     |
+| `--table`                           | Output table in CLI                                                           |
+| `--table-cell-max-length <number>`  | Truncate console table cells to this length                                   |
+| `-t, --tests <path>`                | Path to CSV with test cases                                                   |
+| `--var <key=value>`                 | Set a variable in key=value format                                            |
+| `-v, --vars <path>`                 | Path to CSV with test cases (alias for --tests)                               |
+| `-w, --watch`                       | Watch for changes in config and re-run                                        |
+
+The `eval` command will return exit code `100` when there is at least 1 test case failure or when the pass rate is below the threshold set by `DODOGUARD_PASS_RATE_THRESHOLD`. It will return exit code `1` for any other error. The exit code for failed tests can be overridden with environment variable `DODOGUARD_FAILED_TEST_EXIT_CODE`.
+
+### Pause and Resume
+
+```sh
+dodoguard eval --resume            # resumes the latest evaluation
+dodoguard eval --resume <evalId>   # resumes a specific evaluation
+```
+
+- On resume, dodoguard reuses the original run's effective runtime options (e.g., `--delay`, `--no-cache`, `--max-concurrency`, `--repeat`), skips completed test/prompt pairs, ignores CLI flags that change test ordering to keep indices aligned, and disables watch mode.
+
+### Retry Errors
+
+```sh
+dodoguard eval --retry-errors      # retries all ERROR results from the latest evaluation
+```
+
+- The retry errors feature automatically finds ERROR results from the latest evaluation, removes them from the database, and re-runs only those test cases. This is useful when evaluations fail due to temporary network issues, rate limits, or API errors.
+- Cannot be used together with `--resume` or `--no-write` flags.
+- Uses the original evaluation's configuration and runtime options to ensure consistency.
+
+## `dodoguard init [directory]`
+
+Initialize a new project with dummy files.
+
+| Option             | Description                    |
+| ------------------ | ------------------------------ |
+| `directory`        | Directory to create files in   |
+| `--no-interactive` | Do not run in interactive mode |
+
+## `dodoguard view`
+
+Start a browser UI for visualization of results.
+
+| Option                | Description                             |
+| --------------------- | --------------------------------------- |
+| `-p, --port <number>` | Port number for the local server        |
+| `-y, --yes`           | Skip confirmation and auto-open the URL |
+
+If you've used `DODOGUARD_CONFIG_DIR` to override the dodoguard output directory, run `dodoguard view [directory]`.
+
+## `dodoguard share [evalId]`
+
+Create a URL that can be shared online.
+
+| Option        | Description                                     |
+| ------------- | ----------------------------------------------- |
+| `--show-auth` | Include auth info in the shared URL             |
+| `-y, --yes`   | Skip confirmation before creating shareable URL |
+
+## `dodoguard cache`
+
+Manage cache.
+
+| Option  | Description     |
+| ------- | --------------- |
+| `clear` | Clear the cache |
+
+## `dodoguard feedback <message>`
+
+Send feedback to the dodoguard developers.
+
+| Option    | Description      |
+| --------- | ---------------- |
+| `message` | Feedback message |
+
+## `dodoguard list`
+
+List various resources like evaluations, prompts, and datasets.
+
+| Subcommand | Description      |
+| ---------- | ---------------- |
+| `evals`    | List evaluations |
+| `prompts`  | List prompts     |
+| `datasets` | List datasets    |
+
+| Option       | Description                                                     |
+| ------------ | --------------------------------------------------------------- |
+| `-n`         | Show the first n records, sorted by descending date of creation |
+| `--ids-only` | Show only IDs without descriptions                              |
+
+## `dodoguard mcp`
+
+Start a Model Context Protocol (MCP) server to expose dodoguard's eval and testing capabilities as tools that AI agents and development environments can use.
+
+| Option                | Description                       | Default |
+| --------------------- | --------------------------------- | ------- |
+| `-p, --port <number>` | Port number for HTTP transport    | 3100    |
+| `--transport <type>`  | Transport type: "http" or "stdio" | http    |
+
+### Transport Types
+
+- **STDIO**: Best for desktop AI tools like Cursor, Claude Desktop, and local AI agents that communicate via standard input/output
+- **HTTP**: Best for web applications, APIs, and remote integrations that need HTTP endpoints
+
+### Examples
+
+```sh
+# Start MCP server with STDIO transport (for Cursor, Claude Desktop, etc.)
+npx dodoguard@latest mcp --transport stdio
+
+# Start MCP server with HTTP transport on default port
+npx dodoguard@latest mcp --transport http
+
+# Start MCP server with HTTP transport on custom port
+npx dodoguard@latest mcp --transport http --port 8080
+```
+
+### Available Tools
+
+The MCP server provides 9 tools for AI agents:
+
+**Core Evaluation Tools:**
+
+- **`list_evaluations`** - Browse your evaluation runs with optional dataset filtering
+- **`get_evaluation_details`** - Get comprehensive results, metrics, and test cases for a specific evaluation
+- **`run_evaluation`** - Execute evaluations with custom parameters, test case filtering, and concurrency control
+- **`share_evaluation`** - Generate publicly shareable URLs for evaluation results
+
+**Redteam Security Tools:**
+
+- **`redteam_run`** - Execute comprehensive security testing against AI applications with dynamic attack probes
+- **`redteam_generate`** - Generate adversarial test cases for redteam security testing with configurable plugins and strategies
+
+**Configuration & Testing:**
+
+- **`validate_dodoguard_config`** - Validate configuration files using the same logic as the CLI
+- **`test_provider`** - Test AI provider connectivity, credentials, and response quality
+- **`run_assertion`** - Test individual assertion rules against outputs for debugging
+
+For detailed setup instructions and integration examples, see the [MCP Server documentation](/docs/integrations/mcp-server).
+
+## `dodoguard show <id>`
+
+Show details of a specific resource.
+
+| Option         | Description                           |
+| -------------- | ------------------------------------- |
+| `eval <id>`    | Show details of a specific evaluation |
+| `prompt <id>`  | Show details of a specific prompt     |
+| `dataset <id>` | Show details of a specific dataset    |
+
+## `dodoguard delete <id>`
+
+Deletes a specific resource.
+
+| Option      | Description                |
+| ----------- | -------------------------- |
+| `eval <id>` | Delete an evaluation by id |
+
+## `dodoguard import <filepath>`
+
+Import an eval file from JSON format.
+
+## `dodoguard export`
+
+Export eval records or logs.
+
+### `dodoguard export eval <evalId>`
+
+Export an eval record to JSON format. To export the most recent, use evalId `latest`.
+
+| Option                    | Description                                 |
+| ------------------------- | ------------------------------------------- |
+| `-o, --output <filepath>` | File to write. Writes to stdout by default. |
+
+### `dodoguard export logs`
+
+Collect and zip log files for debugging purposes.
+
+| Option                    | Description                                          |
+| ------------------------- | ---------------------------------------------------- |
+| `-n, --count <number>`    | Number of recent log files to include (default: all) |
+| `-o, --output <filepath>` | Output path for the compressed log file              |
+
+This command creates a compressed tar.gz archive containing your dodoguard log files, making it easy to share them for debugging purposes. If no output path is specified, it will generate a timestamped filename automatically.
+
+## `dodoguard validate`
+
+Validate a dodoguard configuration file to ensure it follows the correct schema and structure.
+
+| Option                    | Description                                                             |
+| ------------------------- | ----------------------------------------------------------------------- |
+| `-c, --config <paths...>` | Path to configuration file(s). Automatically loads dodoguardconfig.yaml |
+
+This command validates both the configuration file and the test suite to ensure they conform to the expected schema. It will report any validation errors with detailed messages to help you fix configuration issues.
+
+Examples:
+
+```sh
+# Validate the default dodoguardconfig.yaml
+dodoguard validate
+
+# Validate a specific configuration file
+dodoguard validate -c my-config.yaml
+
+# Validate multiple configuration files
+dodoguard validate -c config1.yaml config2.yaml
+```
+
+The command will exit with code `1` if validation fails, making it useful for CI/CD pipelines to catch configuration errors early.
+
+## `dodoguard scan-model`
+
+Scan ML models for security vulnerabilities. Provide one or more paths to model files or directories.
+
+| Option                      | Description                                                | Default |
+| --------------------------- | ---------------------------------------------------------- | ------- |
+| `-b, --blacklist <pattern>` | Additional blacklist patterns to check against model names |         |
+| `-f, --format <format>`     | Output format (`text` or `json`)                           | `text`  |
+| `-o, --output <path>`       | Output file path (prints to stdout if not specified)       |         |
+| `-t, --timeout <seconds>`   | Scan timeout in seconds                                    | `300`   |
+| `--max-file-size <bytes>`   | Maximum file size to scan in bytes                         |         |
+
+## `dodoguard auth`
+
+Manage authentication for cloud features.
+
+### `dodoguard auth login`
+
+Login to the dodoguard cloud.
+
+| Option                | Description                                                                |
+| --------------------- | -------------------------------------------------------------------------- |
+| `-o, --org <orgId>`   | The organization ID to login to                                            |
+| `-h, --host <host>`   | The host of the dodoguard instance (API URL if different from the app URL) |
+| `-k, --api-key <key>` | Login using an API key                                                     |
+
+After login, if you have multiple teams, you can switch between them using the `teams` subcommand.
+
+### `dodoguard auth logout`
+
+Logout from the dodoguard cloud.
+
+### `dodoguard auth whoami`
+
+Display current authentication status including user, organization, and active team.
+
+**Output includes:**
+
+- User email
+- Organization name
+- Current team (if logged in to a multi-team organization)
+- App URL
+
+Example:
+
+```sh
+dodoguard auth whoami
+```
+
+Output:
+
+```
+Currently logged in as:
+User: user@company.com
+Organization: Acme Corp
+Current Team: Engineering Team
+App URL: https://www.dodoguard.app
+```
+
+### `dodoguard auth teams`
+
+Manage team switching for organizations with multiple teams.
+
+#### `dodoguard auth teams list`
+
+List all teams you have access to in the current organization.
+
+#### `dodoguard auth teams current`
+
+Show the currently active team.
+
+#### `dodoguard auth teams set <teamIdentifier>`
+
+Switch to a specific team. The team identifier can be:
+
+- Team name (e.g., "Engineering")
+- Team slug (e.g., "engineering")
+- Team ID (e.g., "team_12345")
+
+Examples:
+
+```sh
+# Switch to team by name
+dodoguard auth teams set "Engineering Team"
+
+# Switch to team by slug
+dodoguard auth teams set engineering
+
+# Switch to team by ID
+dodoguard auth teams set team_12345
+```
+
+Your team selection is remembered across CLI sessions and applies to all dodoguard operations including evaluations and red team testing.
+
+#### Team Selection Across Organizations
+
+If you have access to multiple organizations, team selections are **isolated per organization**. This means:
+
+- Each organization remembers its own team selection
+- Switching between organizations preserves your team choice in each org
+- When you log into an organization, your previously selected team is automatically restored
+
+Example workflow:
+
+```sh
+# Login to Organization A
+dodoguard auth login --api-key <org-a-key>
+dodoguard auth teams set "Engineering"     # Set team in Org A
+
+# Login to Organization B
+dodoguard auth login --api-key <org-b-key>
+dodoguard auth teams set "Marketing"       # Set team in Org B
+
+# Login back to Organization A
+dodoguard auth login --api-key <org-a-key>
+dodoguard auth teams current              # Shows "Engineering" (preserved!)
+```
+
+Your team selection persists across login sessions within the same organization.
+
+## `dodoguard config`
+
+Edit configuration settings.
+
+### `dodoguard config get email`
+
+Get the user's email address.
+
+### `dodoguard config set email <email>`
+
+Set the user's email address.
+
+### `dodoguard config unset email`
+
+Unset the user's email address.
+
+| Option        | Description                      |
+| ------------- | -------------------------------- |
+| `-f, --force` | Force unset without confirmation |
+
+## `dodoguard debug`
+
+Display debug information for troubleshooting.
+
+| Option                | Description                                                  |
+| --------------------- | ------------------------------------------------------------ |
+| `-c, --config [path]` | Path to configuration file. Defaults to dodoguardconfig.yaml |
+
+## `dodoguard generate dataset`
+
+BETA: Generate synthetic test cases based on existing prompts and variables.
+
+| Option                              | Description                                                | Default              |
+| ----------------------------------- | ---------------------------------------------------------- | -------------------- |
+| `-c, --config <path>`               | Path to the configuration file                             | dodoguardconfig.yaml |
+| `-w, --write`                       | Write the generated test cases directly to the config file | false                |
+| `-i, --instructions <text>`         | Custom instructions for test case generation               |                      |
+| `-o, --output <path>`               | Path to write the generated test cases                     | stdout               |
+| `--numPersonas <number>`            | Number of personas to generate                             | 5                    |
+| `--numTestCasesPerPersona <number>` | Number of test cases per persona                           | 3                    |
+| `--provider <provider>`             | Provider to use for generating test cases                  | default grader       |
+| `--no-cache`                        | Do not read or write results to disk cache                 | false                |
+
+For example, this command will modify your default config file (usually `dodoguardconfig.yaml`) with new test cases:
+
+```sh
+dodoguard generate dataset -w
+```
+
+This command will generate test cases for a specific config and write them to a file, while following special instructions:
+
+```sh
+dodoguard generate dataset -c my_config.yaml -o new_tests.yaml -i 'All test cases for {{location}} must be European cities'
+```
+
+## `dodoguard generate assertions`
+
+Generate additional objective/subjective assertions based on existing prompts and assertions.
+
+- This command can be used to generate initial set of assertions, if none exist.
+- Will only add non-overlapping, independent assertions
+- Generates both python and natural language assertions.
+
+When brainstorming assertions:
+
+- Generates python code for any objective assertions
+- Uses a specified natural language assertion type (pi, llm-rubric, or g-eval) for any subjective assertion.
+
+| Option                      | Description                                                     | Default              |
+| --------------------------- | --------------------------------------------------------------- | -------------------- |
+| `-t, --type <type>`         | The assertion type to use for generated subjective assertions.  | pi                   |
+| `-c, --config <path>`       | Path to the configuration file that contains at least 1 prompt. | dodoguardconfig.yaml |
+| `-w, --write`               | Write the generated assertions directly to the config file      | false                |
+| `-i, --instructions <text>` | Custom instructions for assertion generation                    |                      |
+| `-o, --output <path>`       | Path to write the generated assertions                          | stdout               |
+| `--numAssertions <number>`  | Number of assertions to generate                                | 5                    |
+| `--provider <provider>`     | Provider to use for generating assertions                       | default grader       |
+| `--no-cache`                | Do not read or write results to disk cache                      | false                |
+
+For example, this command will modify your default config file (usually `dodoguardconfig.yaml`) with new test cases:
+
+```sh
+dodoguard generate assertions -w
+```
+
+This command will generate `pi` and `python` assertions for a specific config and write them to a file, while following special instructions:
+
+```sh
+dodoguard generate assertions -c my_config.yaml -o new_tests.yaml -i 'I need assertions about pronunciation'
+```
+
+## `dodoguard generate redteam`
+
+Alias for [`dodoguard redteam generate`](#dodoguard-redteam-generate).
+
+## `dodoguard redteam init`
+
+Initialize a red teaming project.
+
+| Option        | Description                            | Default |
+| ------------- | -------------------------------------- | ------- |
+| `[directory]` | Directory to initialize the project in | .       |
+| `--no-gui`    | Do not open the browser UI             |         |
+
+Example:
+
+```sh
+dodoguard redteam init my_project
+```
+
+:::danger
+Adversarial testing produces offensive, toxic, and harmful test inputs, and may cause your system to produce harmful outputs.
+:::
+
+For more detail, see [red team configuration](/docs/red-team/configuration/).
+
+## `dodoguard redteam setup`
+
+Start browser UI and open to red team setup.
+
+| Option                | Description                              | Default |
+| --------------------- | ---------------------------------------- | ------- |
+| `[configDirectory]`   | Directory containing configuration files |         |
+| `-p, --port <number>` | Port number for the local server         | 15500   |
+
+## `dodoguard redteam run`
+
+Run the complete red teaming process (init, generate, and evaluate).
+
+| Option                                             | Description                                       | Default              |
+| -------------------------------------------------- | ------------------------------------------------- | -------------------- |
+| `-c, --config [path]`                              | Path to configuration file                        | dodoguardconfig.yaml |
+| `-o, --output [path]`                              | Path to output file for generated tests           | redteam.yaml         |
+| `--no-cache`                                       | Do not read or write results to disk cache        | false                |
+| `-j, --max-concurrency <number>`                   | Maximum number of concurrent API calls            |                      |
+| `--delay <number>`                                 | Delay in milliseconds between API calls           |                      |
+| `--remote`                                         | Force remote inference wherever possible          | false                |
+| `--force`                                          | Force generation even if no changes are detected  | false                |
+| `--no-progress-bar`                                | Do not show progress bar                          |
+| `--filter-providers, --filter-targets <providers>` | Only run tests with these providers (regex match) |
+| `-t, --target <id>`                                | Cloud provider target ID to run the scan on       |
+
+## `dodoguard redteam discover`
+
+Runs the [Target Discovery Agent](/docs/red-team/discovery) against your application.
+
+:::info
+
+Only a configuration file or target can be specified
+
+:::
+
+| Option                | Description                                          | Default |
+| --------------------- | ---------------------------------------------------- | ------- |
+| `-c, --config <path>` | Path to `dodoguardconfig.yaml` configuration file.   |         |
+| `-t, --target <id>`   | UUID of a target defined in DodoGuard Cloud to scan. |         |
+
+## `dodoguard redteam generate`
+
+Generate adversarial test cases to challenge your prompts and models.
+
+| Option                           | Description                                                          | Default              |
+| -------------------------------- | -------------------------------------------------------------------- | -------------------- |
+| `-c, --config <path>`            | Path to configuration file                                           | dodoguardconfig.yaml |
+| `-o, --output <path>`            | Path to write the generated test cases                               | redteam.yaml         |
+| `-w, --write`                    | Write the generated test cases directly to the config file           | false                |
+| `--purpose <purpose>`            | High-level description of the system's purpose                       | Inferred from config |
+| `--provider <provider>`          | Provider to use for generating adversarial tests                     |                      |
+| `--injectVar <varname>`          | Override the `{{variable}}` that represents user input in the prompt | `prompt`             |
+| `--plugins <plugins>`            | Comma-separated list of plugins to use                               | default              |
+| `--strategies <strategies>`      | Comma-separated list of strategies to use                            | default              |
+| `-n, --num-tests <number>`       | Number of test cases to generate per plugin                          |                      |
+| `--language <language>`          | Specify the language for generated tests                             | English              |
+| `--no-cache`                     | Do not read or write results to disk cache                           | false                |
+| `-j, --max-concurrency <number>` | Maximum number of concurrent API calls                               |                      |
+| `--delay <number>`               | Delay in milliseconds between plugin API calls                       |                      |
+| `--remote`                       | Force remote inference wherever possible                             | false                |
+| `--force`                        | Force generation even if no changes are detected                     | false                |
+| `--burp-escape-json`             | Escape special characters in .burp output for JSON payloads          | false                |
+
+For example, let's suppose we have the following `dodoguardconfig.yaml`:
+
+```yaml
+prompts:
+  - 'Act as a trip planner and help the user plan their trip'
+
+providers:
+  - openai:gpt-4.1-mini
+  - openai:gpt-4.1
+```
+
+This command will generate adversarial test cases and write them to `redteam.yaml`.
+
+```sh
+dodoguard redteam generate
+```
+
+This command overrides the system purpose and the variable to inject adversarial user input:
+
+```sh
+dodoguard redteam generate --purpose 'Travel agent that helps users plan trips' --injectVar 'message'
+```
+
+## `dodoguard redteam poison`
+
+Generate poisoned documents for RAG testing.
+
+| Option                    | Description                                       | Default                |
+| ------------------------- | ------------------------------------------------- | ---------------------- |
+| `documents`               | Documents, directories, or text content to poison |                        |
+| `-g, --goal <goal>`       | Goal/intended result of the poisoning             |                        |
+| `-o, --output <path>`     | Output YAML file path                             | `poisoned-config.yaml` |
+| `-d, --output-dir <path>` | Directory to write individual poisoned documents  | `poisoned-documents`   |
+
+## `dodoguard redteam eval`
+
+Works the same as [`dodoguard eval`](#dodoguard-eval), but defaults to loading `redteam.yaml`.
+
+## `dodoguard redteam report`
+
+Start a browser UI and open the red teaming report.
+
+| Option                | Description                                        | Default |
+| --------------------- | -------------------------------------------------- | ------- |
+| `[directory]`         | Directory containing the red teaming configuration | .       |
+| `-p, --port <number>` | Port number for the server                         | 15500   |
+
+Example:
+
+```sh
+dodoguard redteam report -p 8080
+```
+
+## `dodoguard redteam plugins`
+
+List all available red team plugins.
+
+| Option       | Description                               |
+| ------------ | ----------------------------------------- |
+| `--ids-only` | Show only plugin IDs without descriptions |
+| `--default`  | Show only the default plugins             |
+
+## Specifying Command Line Options in Config
+
+Many command line options can be specified directly in your `dodoguardconfig.yaml` file using the `commandLineOptions` section. This is convenient for options you frequently use or want to set as defaults for your project.
+
+Example:
+
+```yaml title="dodoguardconfig.yaml"
+prompts:
+  - Write a funny tweet about {{topic}}
+providers:
+  - openai:o3-mini
+tests:
+  - file://test_cases.csv
+
+# Command line options as defaults
+commandLineOptions:
+  maxConcurrency: 5
+  verbose: true
+  table: true
+  share: false
+  cache: true
+  tableCellMaxLength: 500
+```
+
+With this configuration, you can simply run `dodoguard eval` without specifying these options on the command line. You can still override any of these settings by providing the corresponding flag when running the command.
+
+## ASCII-only outputs
+
+To disable terminal colors for printed outputs, set `FORCE_COLOR=0` (this is supported by the [chalk](https://github.com/chalk/chalk) library).
+
+For the `eval` command, you may also want to disable the progress bar and table as well, because they use special characters:
+
+```sh
+FORCE_COLOR=0 dodoguard eval --no-progress-bar --no-table
+```
+
+# Environment variables
+
+These general-purpose environment variables are supported:
+
+| Name                                          | Description                                                                                                                                                                                                                                                                       | Default                       |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `FORCE_COLOR`                                 | Set to 0 to disable terminal colors for printed outputs                                                                                                                                                                                                                           |                               |
+| `DODOGUARD_ASSERTIONS_MAX_CONCURRENCY`        | How many assertions to run at a time                                                                                                                                                                                                                                              | 3                             |
+| `DODOGUARD_CACHE_ENABLED`                     | Enable LLM request/response caching                                                                                                                                                                                                                                               | `false`                       |
+| `DODOGUARD_CONFIG_DIR`                        | Directory that stores eval history                                                                                                                                                                                                                                                | `~/.dodoguard`                |
+| `DODOGUARD_DISABLE_AJV_STRICT_MODE`           | If set, disables AJV strict mode for JSON schema validation                                                                                                                                                                                                                       |                               |
+| `DODOGUARD_DISABLE_CONVERSATION_VAR`          | Prevents the `_conversation` variable from being set                                                                                                                                                                                                                              |                               |
+| `DODOGUARD_DISABLE_ERROR_LOG`                 | Prevents error logs from being written to a file                                                                                                                                                                                                                                  |                               |
+| `DODOGUARD_DISABLE_DEBUG_LOG`                 | Prevents debug logs from being written to a file                                                                                                                                                                                                                                  |                               |
+| `DODOGUARD_DISABLE_JSON_AUTOESCAPE`           | If set, disables smart variable substitution within JSON prompts                                                                                                                                                                                                                  |                               |
+| `DODOGUARD_DISABLE_OBJECT_STRINGIFY`          | Disable object stringification in templates. When false (default), objects are stringified to prevent `[object Object]` issues. When true, allows direct property access (e.g., `{{output.property}}`).                                                                           | `false`                       |
+| `DODOGUARD_DISABLE_REF_PARSER`                | Prevents JSON schema dereferencing                                                                                                                                                                                                                                                |                               |
+| `DODOGUARD_DISABLE_REMOTE_GENERATION`         | Disables ALL remote generation (including SimulatedUser and red team features). When set to `1`, `true`, or `yes`, all operations run locally. This is a superset of `DODOGUARD_DISABLE_REDTEAM_REMOTE_GENERATION`. Example: `DODOGUARD_DISABLE_REMOTE_GENERATION=true`           | `false`                       |
+| `DODOGUARD_DISABLE_REDTEAM_REMOTE_GENERATION` | Disables remote generation for red team features only (harmful content, red team strategies, red team simulated users). Does NOT affect regular SimulatedUser usage. Subset of `DODOGUARD_DISABLE_REMOTE_GENERATION`. Example: `DODOGUARD_DISABLE_REDTEAM_REMOTE_GENERATION=true` | `false`                       |
+| `DODOGUARD_DISABLE_TEMPLATE_ENV_VARS`         | Disables OS environment variables in templates. When true, only config `env:` variables are available in templates.                                                                                                                                                               | `false` (true in self-hosted) |
+| `DODOGUARD_DISABLE_TEMPLATING`                | Disables Nunjucks template processing                                                                                                                                                                                                                                             | `false`                       |
+| `DODOGUARD_DISABLE_VAR_EXPANSION`             | Prevents Array-type vars from being expanded into multiple test cases                                                                                                                                                                                                             |                               |
+| `DODOGUARD_FAILED_TEST_EXIT_CODE`             | Override the exit code when there is at least 1 test case failure or when the pass rate is below DODOGUARD_PASS_RATE_THRESHOLD                                                                                                                                                    | 100                           |
+| `DODOGUARD_LOG_DIR`                           | Directory to write error logs                                                                                                                                                                                                                                                     | `.`                           |
+| `DODOGUARD_PASS_RATE_THRESHOLD`               | Set a minimum pass rate threshold (as a percentage). If not set, defaults to 100% (no failures allowed)                                                                                                                                                                           | 100                           |
+| `DODOGUARD_REQUIRE_JSON_PROMPTS`              | By default the chat completion provider will wrap non-JSON messages in a single user message. Setting this envar to true disables that behavior.                                                                                                                                  |                               |
+| `DODOGUARD_SHARE_CHUNK_SIZE`                  | Number of results to send in each chunk. This is used to estimate the size of the results and to determine the number of chunks to send.                                                                                                                                          |                               |
+| `DODOGUARD_EVAL_TIMEOUT_MS`                   | Timeout in milliseconds for each individual test case/provider API call. When reached, that specific test is marked as an error.                                                                                                                                                  |                               |
+| `DODOGUARD_MAX_EVAL_TIME_MS`                  | Maximum total runtime in milliseconds for the entire evaluation process. When reached, all remaining tests are marked as errors and the eval ends.                                                                                                                                |                               |
+| `DODOGUARD_STRIP_GRADING_RESULT`              | Strip grading results from results to reduce memory usage                                                                                                                                                                                                                         | false                         |
+| `DODOGUARD_STRIP_METADATA`                    | Strip metadata from results to reduce memory usage                                                                                                                                                                                                                                | false                         |
+| `DODOGUARD_STRIP_PROMPT_TEXT`                 | Strip prompt text from results to reduce memory usage                                                                                                                                                                                                                             | false                         |
+| `DODOGUARD_STRIP_RESPONSE_OUTPUT`             | Strip model response outputs from results to reduce memory usage                                                                                                                                                                                                                  | false                         |
+| `DODOGUARD_STRIP_TEST_VARS`                   | Strip test variables from results to reduce memory usage                                                                                                                                                                                                                          | false                         |
+| `DODOGUARD_SELF_HOSTED`                       | Enables self-hosted mode. When true, disables OS environment variables in templates (only config `env:` values available), disables telemetry, and modifies other behaviors for controlled environments                                                                           | `false`                       |
+
+:::tip
+dodoguard will load environment variables from the `.env` in your current working directory.
+:::
+
+:::tip
+For detailed information on using timeout features, including configuration examples and troubleshooting tips, see [Timeout errors in the troubleshooting guide](/docs/usage/troubleshooting#how-to-triage-stuck-evals).
+:::

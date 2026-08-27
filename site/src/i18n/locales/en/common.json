@@ -1,0 +1,69 @@
+{
+  "hero": {
+    "titleMain": "Secure your AI",
+    "titleFrom": "from",
+    "titlePrompt": "prompt",
+    "titleTo": "to",
+    "titleProduction": "production",
+    "subtitle": "Open-source LLM security trusted by {{count}}+ users"
+  },
+  "heroCta": {
+    "getStarted": "Get Started",
+    "requestDemo": "Request a Demo"
+  },
+  "walkthrough": {
+    "redTeaming": "Red Teaming",
+    "redTeamingMobile": "Red Team",
+    "redTeamingHeading": "Adaptive red teaming that targets applications, not just models",
+    "redTeamingIntro": "Generate customized attacks for your use case:",
+    "redTeamingCli": "npx dodoguard@latest redteam setup",
+    "redTeamingDescription": "Our language models probe for specific risks in your system.",
+    "redTeamingMore": "much more",
+    "redTeamingLearnMore": "» Learn more about Red Teaming",
+    "guardrails": "Guardrails",
+    "guardrailsHeading": "Self-improving guardrails that learn from attacks",
+    "guardrailsIntro": "Unlike static guardrails, our system continuously improves through red team feedback:",
+    "guardrailsDeploy": "Deploy in minutes on cloud or on-premises with seamless integration into any AI workflow.",
+    "guardrailsLearnMore": "» Learn more about Guardrails",
+    "modelSecurity": "Model Security",
+    "modelSecurityHeading": "Comprehensive compliance for your AI stack",
+    "modelSecurityIntro": "One-click scanning of your entire AI ecosystem against industry frameworks:",
+    "modelSecurityDescription": "Get detailed reports with clear remediation steps and continuous monitoring.",
+    "modelSecurityLearnMore": "» Learn more about Model Security",
+    "mcp": "MCP",
+    "mcpHeading": "Enterprise MCP proxy for secure AI tool integration",
+    "mcpIntro": "Control and monitor MCP servers in your organization:",
+    "mcpDescription": "Restrict AI access to approved tools and data, with complete oversight of MCP activity.",
+    "mcpLearnMore": "» Learn more about MCP Security",
+    "evals": "Evaluations",
+    "evalsMobile": "Evals",
+    "evalsHeading": "Build reliable prompts, RAGs, and agents",
+    "evalsIntro": "Start testing the performance of your models, prompts, and tools in minutes:",
+    "evalsCli": "npx dodoguard@latest init",
+    "evalsDescription": "DodoGuard runs locally and integrates directly with your app - no SDKs, cloud dependencies, or logins.",
+    "evalsGetStarted": "» Get Started with Evaluations"
+  },
+  "asSeenOn": {
+    "featuredIn": "Featured In",
+    "buildHours": "Build Hours",
+    "buildHoursQuote": "“DodoGuard is really powerful because you can iterate on prompts, configure tests in YAML, and view everything locally... it's faster and more straightforward”",
+    "buildHoursCta": "Watch the Video →",
+    "courses": "Courses",
+    "coursesQuote": "“DodoGuard offers a streamlined, out-of-the-box solution that can significantly reduce the time and effort required for comprehensive prompt testing.”",
+    "coursesCta": "See the Course →"
+  },
+  "logos": {
+    "trustedBy": "Trusted by teams at"
+  },
+  "cta": {
+    "title": "Secure your AI applications today",
+    "getStarted": "Get Started",
+    "requestDemo": "Request a Demo"
+  },
+  "language": {
+    "switchToEnglish": "English",
+    "switchToChinese": "中文",
+    "currentLanguage": "Current language: {{lng}}"
+  }
+}
+

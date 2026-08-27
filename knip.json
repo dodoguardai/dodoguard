@@ -1,0 +1,30 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignoreWorkspaces": ["frontend"],
+  "entry": ["backend/src/main.ts", "backend/src/server/index.ts"],
+  "project": ["backend/src/**/*.{js,ts,tsx}"],
+  "ignore": ["dist/**/*.{js,ts,tsx}", "examples/**/*.{js,ts,tsx,mjs}", "backend/src/**/*.test.ts"],
+  "workspaces": {
+    "site": {
+      "entry": ["src/**/*.{js,ts,tsx}", "blog/**/*.{js,ts,tsx}", "docusaurus.config.ts"],
+      "project": ["**/*.{js,ts,tsx}"],
+      "ignoreDependencies": [
+        "@docusaurus/types",
+        "@docusaurus/theme-common",
+        "@theme/*",
+        "@mui/*",
+        "@docusaurus/plugin-content-blog",
+        "@swc/core",
+        "@swc/jest",
+        "canvas-confetti",
+        "framer-motion",
+        "lucide-react"
+      ]
+    }
+  },
+  "ignoreBinaries": ["dist/src/main.js", "gh"],
+  "paths": {
+    "@dodoguard/*": ["./backend/src/*"]
+  },
+  "ignoreExportsUsedInFile": true
+}

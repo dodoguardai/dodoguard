@@ -1,0 +1,15 @@
+---
+sidebar_label: Python Notebook
+description: Build and test LLM applications in Python using dodoguard's Jupyter/Colab integration. Run evals, compare models, and execute Python code in notebooks.
+---
+
+# Python
+
+For an example of using dodoguard in a Google Colab/Jupyter Notebook, **[see this notebook](https://colab.research.google.com/gist/typpo/734a5f53eb1922f90198538dbe17aa27/dodoguard-example-1.ipynb)**.
+
+This notebook shows how to
+
+1.  Set up & configure DodoGuard
+2.  Set up secrets (such as an OpenAI or Anthropic API key)
+3.  Run an eval of LLM models, prompts and outputs
+4.  Run another eval that includes Python code

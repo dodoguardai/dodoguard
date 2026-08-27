@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://dodoguard.dev/config-schema.json
+description: OpenAI evaluation with multiline YAML prompt formatting
+
+prompts:
+  - file://prompt.yaml
+providers:
+  - openai:chat:gpt-4.1-mini
+
+tests:
+  - vars:
+      content: hey
+  - vars:
+      content: what can you help with?
+  - vars:
+      content: tell me about hawaii

@@ -1,0 +1,1140 @@
+schema_version: 1.0.0
+name: RAG_Agent_AML_Monitor
+id: 7614008904813150260
+description: "银行开户后早期交易风险监测RAG+Agent系统"
+mode: workflow
+icon: plugin_icon/workflow.png
+nodes:
+    - id: "100001"
+      type: start
+      title: 开始
+      icon: https://lf3-static.bytednsdoc.com/obj/eden-cn/dvsmryvd_avi_dvsm/ljhwZthlaukjlkulzlp/icon/icon-Start-v2.jpg
+      description: "工作流的起始节点，用于设定启动工作流需要的信息"
+      position:
+        x: -2.006459402005538
+        y: 0
+      parameters:
+        node_outputs:
+            account_open_date:
+                type: string
+                required: true
+                value: null
+                description: 开户日期
+            current_date:
+                type: string
+                required: true
+                value: null
+                description: 当前处理日期
+            customer_id:
+                type: string
+                required: true
+                value: null
+                description: 客户唯一标识
+            customer_profile:
+                type: object
+                required: true
+                value: null
+                description: 客户画像信息
+            rule_hits:
+                type: list
+                items:
+                    type: string
+                    value: null
+                required: true
+                value: null
+                description: 规则引擎命中结果
+            transaction_list:
+                type: list
+                items:
+                    type: object
+                    value: null
+                required: true
+                value: null
+                description: 交易流水列表
+    - id: "900001"
+      type: end
+      title: 结束
+      icon: https://lf3-static.bytednsdoc.com/obj/eden-cn/dvsmryvd_avi_dvsm/ljhwZthlaukjlkulzlp/icon/icon-End-v2.jpg
+      description: "工作流的最终节点，用于返回工作流运行后的结果信息"
+      position:
+        x: 985.4113832200676
+        y: -13
+      parameters:
+        node_inputs:
+            - name: final_ticket
+              input:
+                type: object
+                value:
+                    path: ticket
+                    ref_node: "173540"
+            - name: audit_trail
+              input:
+                type: object
+                properties:
+                    evidence_chain:
+                        type: object
+                        value:
+                            path: evidence_chain
+                            ref_node: "103418"
+                    gate_result:
+                        type: object
+                        value:
+                            path: gate_result
+                            ref_node: "144066"
+                    policy_decision:
+                        type: object
+                        value:
+                            path: policy_decision
+                            ref_node: "179745"
+                    state_output:
+                        type: object
+                        value:
+                            path: state_output
+                            ref_node: "184303"
+                value: null
+            - name: session_id
+              input:
+                value:
+                    path: customer_id
+                    ref_node: "100001"
+        terminatePlan: returnVariables
+    - id: "184303"
+      type: llm
+      title: 状态构造
+      icon: https://lf3-static.bytednsdoc.com/obj/eden-cn/dvsmryvd_avi_dvsm/ljhwZthlaukjlkulzlp/icon/icon-LLM-v2.jpg
+      description: "调用大语言模型,使用变量和提示词生成回复"
+      version: "3"
+      position:
+        x: 491.70246190903106
+        y: -39
+      parameters:
+        fcParamVar:
+            knowledgeFCParam: {}
+        llmParam:
+            - name: modelType
+              input:
+                type: integer
+                value: "1768187121"
+            - name: modelName
+              input:
+                type: string
+                value: 豆包·1.8·深度思考
+            - name: generationDiversity
+              input:
+                type: string
+                value: balance
+            - name: temperature
+              input:
+                type: float
+                value: "0.5"
+            - name: topP
+              input:
+                type: float
+                value: "1"
+            - name: frequencyPenalty
+              input:
+                type: float
+                value: "0"
+            - name: maxTokens
+              input:
+                type: integer
+                value: "4096"
+            - name: spCurrentTime
+              input:
+                type: boolean
+                value: false
+            - name: spAntiLeak
+              input:
+                type: boolean
+                value: false
+            - name: responseFormat
+              input:
+                type: integer
+                value: "2"
+            - name: parameters
+              input:
+                type: object
+                properties:
+                    max_completion_tokens:
+                        type: integer
+                        value: "0"
+                value: null
+            - name: prompt
+              input:
+                type: string
+                value: |-
+                    请处理以下数据：
+
+                    客户ID: {{input.customer_id}}
+                    开户日期: {{input.account_open_date}}
+                    当前日期: {{input.current_date}}
+
+                    交易流水: {{input.transaction_list}}
+                    客户画像: {{input.customer_profile}}
+                    规则命中: {{input.rule_hits}}
+            - name: enableChatHistory
+              input:
+                type: boolean
+                value: false
+            - name: chatHistoryRound
+              input:
+                type: integer
+                value: "3"
+            - name: systemPrompt
+              input:
+                type: string
+                value: |-
+                    你是一位银行风控数据专家，负责将原始交易数据转化为结构化的"可审计状态"表示。
+
+                    【任务】
+                    将输入数据转化为四个维度的结构化状态，输出纯JSON格式。
+
+                    【输入数据说明】
+                    - transaction_list: 交易流水列表，包含金额、时间、渠道、对手等信息
+                    - customer_profile: 客户画像，包含KYC信息、风险等级等
+                    - rule_hits: 已命中的规则列表
+                    - account_open_date: 开户日期
+                    - current_date: 当前日期
+
+                    【输出格式要求】
+                    必须输出纯JSON，不要任何markdown标记或解释文字：
+
+                    {
+                      "x_seq": {
+                        "window_days": 7,
+                        "transaction_count": 数值,
+                        "total_amount_bucket": "金额分桶",
+                        "channel_distribution": {"网银": 占比, "手机银行": 占比, ...},
+                        "counterparty_concentration": "集中度指标",
+                        "refund_ratio": 回流比例,
+                        "night_transaction_ratio": 夜间交易占比,
+                        "avg_amount": 平均金额,
+                        "max_amount": 最大金额
+                      },
+                      "x_cust": {
+                        "industry": "行业",
+                        "region": "地域",
+                        "kyc_completeness": "KYC完整度评分",
+                        "historical_alerts": 历史告警次数,
+                        "risk_level": "风险等级",
+                        "account_type": "账户类型"
+                      },
+                      "x_graph": {
+                        "two_hop_counterparties": 二跳对手数量,
+                        "cluster_coefficient": "团簇系数分桶",
+                        "fund_loop_indicator": true/false,
+                        "abnormal_subgraph_rules": ["命中的图规则1", "命中的图规则2"]
+                      },
+                      "x_know": {
+                        "rule_hits": ["规则1", "规则2"],
+                        "red_flag_tags": ["红旗标签1", "红旗标签2"],
+                        "alert_reason": "告警原因摘要"
+                      }
+                    }
+
+                    【约束】
+                    1. 所有数值字段必须真实计算，不能虚构
+                    2. 时间窗口以开户后早期阶段为准（0-90天）
+                    3. 输出必须是合法JSON格式
+            - name: stableSystemPrompt
+              input:
+                type: string
+                value: ""
+            - name: canContinue
+              input:
+                type: boolean
+                value: false
+            - name: loopPromptVersion
+              input:
+                type: string
+                value: ""
+            - name: loopPromptName
+              input:
+                type: string
+                value: ""
+            - name: loopPromptId
+              input:
+                type: string
+                value: ""
+        node_inputs:
+            - name: customer_id
+              input:
+                value:
+                    path: customer_id
+                    ref_node: "100001"
+            - name: account_open_date
+              input:
+                value:
+                    path: account_open_date
+                    ref_node: "100001"
+            - name: current_date
+              input:
+                value:
+                    path: current_date
+                    ref_node: "100001"
+            - name: transaction_list
+              input:
+                value:
+                    path: transaction_list
+                    ref_node: "100001"
+            - name: customer_profile
+              input:
+                value:
+                    path: customer_profile
+                    ref_node: "100001"
+            - name: rule_hits
+              input:
+                value:
+                    path: rule_hits
+                    ref_node: "100001"
+        node_outputs:
+            reasoning_content:
+                type: string
+                value: null
+            state_output:
+                type: object
+                value: null
+        settingOnError:
+            processType: 1
+            retryTimes: 0
+            timeoutMs: 180000
+    - id: "104908"
+      type: llm
+      title: 查询分解
+      icon: https://lf3-static.bytednsdoc.com/obj/eden-cn/dvsmryvd_avi_dvsm/ljhwZthlaukjlkulzlp/icon/icon-LLM-v2.jpg
+      description: "调用大语言模型,使用变量和提示词生成回复"
+      version: "3"
+      position:
+        x: 491.70246190903106
+        y: 194.12536960960483
+      parameters:
+        fcParamVar:
+            knowledgeFCParam: {}
+        llmParam:
+            - name: modelType
+              input:
+                type: integer
+                value: "1768187121"
+            - name: modelName
+              input:
+                type: string
+                value: 豆包·1.8·深度思考
+            - name: generationDiversity
+              input:
+                type: string
+                value: balance
+            - name: temperature
+              input:
+                type: float
+                value: "0.5"
+            - name: topP
+              input:
+                type: float
+                value: "1"
+            - name: frequencyPenalty
+              input:
+                type: float
+                value: "0"
+            - name: maxTokens
+              input:
+                type: integer
+                value: "4096"
+            - name: spCurrentTime
+              input:
+                type: boolean
+                value: false
+            - name: spAntiLeak
+              input:
+                type: boolean
+                value: false
+            - name: responseFormat
+              input:
+                type: integer
+                value: "2"
+            - name: parameters
+              input:
+                type: object
+                properties:
+                    max_completion_tokens:
+                        type: integer
+                        value: "0"
+                value: null
+            - name: prompt
+              input:
+                type: string
+                value: |-
+                    当前状态摘要：
+                    - 客户风险等级: {{状态构造.output.x_cust.risk_level}}
+                    - 告警原因: {{状态构造.output.x_know.alert_reason}}
+                    - 命中规则: {{状态构造.output.x_know.rule_hits}}
+                    - 红旗标签: {{状态构造.output.x_know.red_flag_tags}}
+                    - 图特征异常: {{状态构造.output.x_graph.abnormal_subgraph_rules}}
+
+                    请生成检索查询。
+            - name: enableChatHistory
+              input:
+                type: boolean
+                value: false
+            - name: chatHistoryRound
+              input:
+                type: integer
+                value: "3"
+            - name: systemPrompt
+              input:
+                type: string
+                value: |-
+                    你是一位风控检索专家。基于客户状态，生成用于RAG检索的查询语句。
+
+                    【任务】
+                    生成3-5个检索查询，用于在知识库中查找相关证据。
+
+                    【输出格式】
+                    每行一个查询语句，不要编号，不要解释：
+
+                    查询语句1
+                    查询语句2
+                    查询语句3
+            - name: stableSystemPrompt
+              input:
+                type: string
+                value: ""
+            - name: canContinue
+              input:
+                type: boolean
+                value: false
+            - name: loopPromptVersion
+              input:
+                type: string
+                value: ""
+            - name: loopPromptName
+              input:
+                type: string
+                value: ""
+            - name: loopPromptId
+              input:
+                type: string
+                value: ""
+        node_inputs:
+            - name: state_output
+              input:
+                value:
+                    path: state_output
+                    ref_node: "184303"
+        node_outputs:
+            queries:
+                type: string
+                value: null
+            reasoning_content:
+                type: string
+                value: null
+        settingOnError:
+            processType: 1
+            retryTimes: 0
+            timeoutMs: 180000
+    - id: "105193"
+      type: knowledge
+      title: 静态知识检索
+      icon: https://lf3-static.bytednsdoc.com/obj/eden-cn/dvsmryvd_avi_dvsm/ljhwZthlaukjlkulzlp/icon/icon-KnowledgeQuery-v2.jpg
+      description: "在选定的知识中,根据输入变量召回最匹配的信息,并以列表形式返回"
+      position:
+        x: 491.70246190903106
+        y: 427.25073921920966
+      parameters:
+        datasetParam:
+            - name: datasetList
+              input:
+                type: list
+                items:
+                    type: string
+                    value: null
+                value:
+                    - "7613279915518427162"
+            - name: topK
+              input:
+                type: integer
+                value: "5"
+            - name: useRerank
+              input:
+                type: boolean
+                value: true
+            - name: useRewrite
+              input:
+                type: boolean
+                value: true
+            - name: isPersonalOnly
+              input:
+                type: boolean
+                value: true
+            - name: datasetType
+              input:
+                type: integer
+                value: "0"
+            - name: VolcanoInfoList
+              input:
+                type: list
+                items:
+                    type: object
+                    value: null
+                value: []
+            - name: minScore
+              input:
+                type: float
+                value: "0.7"
+            - name: strategy
+              input:
+                type: integer
+                value: "1"
+        node_inputs:
+            - name: Query
+              input:
+                value:
+                    path: queries
+                    ref_node: "104908"
+            - name: enableChatHistory
+              input:
+                type: boolean
+                value: false
+            - name: chatHistoryRound
+              input:
+                type: float
+                value: 3
+        node_outputs:
+            outputList:
+                type: list
+                items:
+                    type: object
+                    properties:
+                        documentId:
+                            type: string
+                            value: null
+                        output:
+                            type: string
+                            value: null
+                    value: null
+                value: null
+    - id: "179745"
+      type: llm
+      title: 策略决策
+      icon: https://lf3-static.bytednsdoc.com/obj/eden-cn/dvsmryvd_avi_dvsm/ljhwZthlaukjlkulzlp/icon/icon-LLM-v2.jpg
+      description: "调用大语言模型,使用变量和提示词生成回复"
+      version: "3"
+      position:
+        x: 491.70246190903106
+        y: 634.3761088288145
+      parameters:
+        fcParamVar:
+            knowledgeFCParam: {}
+        llmParam:
+            - name: modelType
+              input:
+                type: integer
+                value: "1768187121"
+            - name: modelName
+              input:
+                type: string
+                value: 豆包·1.8·深度思考
+            - name: generationDiversity
+              input:
+                type: string
+                value: balance
+            - name: temperature
+              input:
+                type: float
+                value: "0.5"
+            - name: topP
+              input:
+                type: float
+                value: "1"
+            - name: frequencyPenalty
+              input:
+                type: float
+                value: "0"
+            - name: maxTokens
+              input:
+                type: integer
+                value: "4096"
+            - name: spCurrentTime
+              input:
+                type: boolean
+                value: false
+            - name: spAntiLeak
+              input:
+                type: boolean
+                value: false
+            - name: responseFormat
+              input:
+                type: integer
+                value: "2"
+            - name: parameters
+              input:
+                type: object
+                properties:
+                    max_completion_tokens:
+                        type: integer
+                        value: "0"
+                value: null
+            - name: prompt
+              input:
+                type: string
+                value: |-
+                    【客户状态】
+                    {{状态构造.output}}
+
+                    【检索到的静态知识】
+                    {{静态知识检索.output.static_evidence}}
+
+                    【检索到的相似案例】
+                    {{案例检索.output.case_evidence}}
+
+                    【监管红线参考】
+                    - 疑似洗钱行为必须升级处置
+                    - 高风险客户需增强尽调
+                    - 证据不足时优先转人工二审
+
+                    请生成处置建议。
+            - name: enableChatHistory
+              input:
+                type: boolean
+                value: false
+            - name: chatHistoryRound
+              input:
+                type: integer
+                value: "3"
+            - name: systemPrompt
+              input:
+                type: string
+                value: |-
+                    你是一位银行风控策略专家。基于客户状态、检索证据和领域知识，生成处置意图建议。
+
+                    【处置动作定义】
+                    a0 - 继续监测：不触发额外处置，仅记录证据与风险评分
+                    a1 - 触发增强尽调(EDD)：请求补充信息收集与核验
+                    a2 - 转人工二审：生成工单并下发给客户经理/AML分析师
+                    a3 - 临时管控建议：限额/延迟入账/建议冻结（需审批）
+
+                    【决策考量因素】
+                    1. 风险信号强度（红旗标签数量、规则命中严重程度）
+                    2. 证据完整度（是否有足够信息支撑判断）
+                    3. 客户风险等级历史
+                    4. 检索到的相似案例处置结果
+                    5. 监管条款要求
+
+                    【输出格式 - 纯JSON】
+                    {
+                      "recommended_action": "a0/a1/a2/a3",
+                      "confidence": 0.0-1.0,
+                      "risk_score": 0-100,
+                      "risk_cost_tradeoff": "风险-成本权衡说明（50字内）",
+                      "key_risk_signals": ["关键信号1", "关键信号2"],
+                      "supporting_evidence": ["证据1", "证据2"],
+                      "uncertainty_factors": ["不确定因素1"]
+                    }
+            - name: stableSystemPrompt
+              input:
+                type: string
+                value: ""
+            - name: canContinue
+              input:
+                type: boolean
+                value: false
+            - name: loopPromptVersion
+              input:
+                type: string
+                value: ""
+            - name: loopPromptName
+              input:
+                type: string
+                value: ""
+            - name: loopPromptId
+              input:
+                type: string
+                value: ""
+        node_inputs:
+            - name: input
+              input:
+                value:
+                    path: outputList
+                    ref_node: "105193"
+        node_outputs:
+            policy_decision:
+                type: object
+                value: null
+        settingOnError:
+            processType: 1
+            retryTimes: 0
+            timeoutMs: 180000
+    - id: "144066"
+      type: llm
+      title: 合规门控
+      icon: https://lf3-static.bytednsdoc.com/obj/eden-cn/dvsmryvd_avi_dvsm/ljhwZthlaukjlkulzlp/icon/icon-LLM-v2.jpg
+      description: "调用大语言模型,使用变量和提示词生成回复"
+      version: "3"
+      position:
+        x: 491.70246190903106
+        y: 901.001737326291
+      parameters:
+        fcParamVar:
+            knowledgeFCParam: {}
+        llmParam:
+            - name: modelType
+              input:
+                type: integer
+                value: "1768187121"
+            - name: modelName
+              input:
+                type: string
+                value: 豆包·1.8·深度思考
+            - name: generationDiversity
+              input:
+                type: string
+                value: balance
+            - name: temperature
+              input:
+                type: float
+                value: "0.5"
+            - name: topP
+              input:
+                type: float
+                value: "1"
+            - name: frequencyPenalty
+              input:
+                type: float
+                value: "0"
+            - name: maxTokens
+              input:
+                type: integer
+                value: "4096"
+            - name: spCurrentTime
+              input:
+                type: boolean
+                value: false
+            - name: spAntiLeak
+              input:
+                type: boolean
+                value: false
+            - name: responseFormat
+              input:
+                type: integer
+                value: "2"
+            - name: parameters
+              input:
+                type: object
+                properties:
+                    max_completion_tokens:
+                        type: integer
+                        value: "0"
+                value: null
+            - name: prompt
+              input:
+                type: string
+                value: |-
+                    【策略建议】
+                    {{策略决策.output.policy_decision}}
+
+                    【客户信息】
+                    风险等级: {{状态构造.output.x_cust.risk_level}}
+                    账户类型: {{状态构造.output.x_cust.account_type}}
+
+                    【门控规则】
+                    - a3(临时管控)必须审批
+                    - 红旗标签包含"疑似洗钱"必须转二审(a2)
+                    - 证据完整度<0.5时降级为a2或a0
+
+                    请执行门控检查。
+            - name: enableChatHistory
+              input:
+                type: boolean
+                value: false
+            - name: chatHistoryRound
+              input:
+                type: integer
+                value: "3"
+            - name: systemPrompt
+              input:
+                type: string
+                value: |-
+                    你是一位银行合规专家。对策略建议进行合规门控检查。
+
+                    【检查项】
+                    1. 规则一致性：是否违反监管红线？
+                    2. 权限校验：当前岗位是否有权执行？
+                    3. 审批链路：是否需要额外审批？
+                    4. 降级策略：如不可执行，降级为何种动作？
+
+                    【门控规则】
+                    - 冻结/止付类动作必须审批
+                    - 高风险客户（risk_level=high）触发EDD是强制的
+                    - 疑似洗钱信号必须转二审
+                    - 证据严重不足时禁止输出高风险建议
+
+                    【输出格式 - 纯JSON】
+                    {
+                      "gate_result": "通过/降级/阻断",
+                      "executable_action": "a0/a1/a2/a3",
+                      "original_action": "原始建议动作",
+                      "downgrade_reason": "降级原因（如适用）",
+                      "approval_required": true/false,
+                      "approval_chain": ["审批岗位1"],
+                      "reason_code": "门控原因码",
+                      "compliance_notes": "合规备注"
+                    }
+            - name: stableSystemPrompt
+              input:
+                type: string
+                value: ""
+            - name: canContinue
+              input:
+                type: boolean
+                value: false
+            - name: loopPromptVersion
+              input:
+                type: string
+                value: ""
+            - name: loopPromptName
+              input:
+                type: string
+                value: ""
+            - name: loopPromptId
+              input:
+                type: string
+                value: ""
+        node_inputs:
+            - name: input
+              input:
+                value:
+                    path: policy_decision
+                    ref_node: "179745"
+        node_outputs:
+            gate_result:
+                type: object
+                value: null
+        settingOnError:
+            processType: 1
+            retryTimes: 0
+            timeoutMs: 180000
+    - id: "103418"
+      type: llm
+      title: 证据链补全
+      icon: https://lf3-static.bytednsdoc.com/obj/eden-cn/dvsmryvd_avi_dvsm/ljhwZthlaukjlkulzlp/icon/icon-LLM-v2.jpg
+      description: "调用大语言模型,使用变量和提示词生成回复"
+      version: "3"
+      position:
+        x: 491.70246190903106
+        y: 1167.6273658237674
+      parameters:
+        fcParamVar:
+            knowledgeFCParam: {}
+        llmParam:
+            - name: modelType
+              input:
+                type: integer
+                value: "1768187121"
+            - name: modelName
+              input:
+                type: string
+                value: 豆包·1.8·深度思考
+            - name: generationDiversity
+              input:
+                type: string
+                value: balance
+            - name: temperature
+              input:
+                type: float
+                value: "0.5"
+            - name: topP
+              input:
+                type: float
+                value: "1"
+            - name: frequencyPenalty
+              input:
+                type: float
+                value: "0"
+            - name: maxTokens
+              input:
+                type: integer
+                value: "4096"
+            - name: spCurrentTime
+              input:
+                type: boolean
+                value: false
+            - name: spAntiLeak
+              input:
+                type: boolean
+                value: false
+            - name: responseFormat
+              input:
+                type: integer
+                value: "2"
+            - name: parameters
+              input:
+                type: object
+                properties:
+                    max_completion_tokens:
+                        type: integer
+                        value: "0"
+                value: null
+            - name: prompt
+              input:
+                type: string
+                value: |-
+                    【可执行动作】
+                    {{合规门控.output.gate_result.executable_action}}
+
+                    【状态数据】
+                    {{状态构造.output}}
+
+                    【检索证据】
+                    静态知识: {{静态知识检索.output.static_evidence}}
+                    相似案例: {{案例检索.output.case_evidence}}
+
+                    请生成完整证据链。
+            - name: enableChatHistory
+              input:
+                type: boolean
+                value: false
+            - name: chatHistoryRound
+              input:
+                type: integer
+                value: "3"
+            - name: systemPrompt
+              input:
+                type: string
+                value: |-
+                    你是一位风控证据链专家。生成完整的、可审计的证据链。
+
+                    【证据链组成要求】
+                    1. 命中规则摘要（含规则版本）
+                    2. 关键特征摘要（含计算口径）
+                    3. 相似案例引用（含doc_id:chunk_id）
+                    4. 条款/SOP引用（含doc_id:chunk_id）
+                    5. 补证清单（如证据不足）
+
+                    【引用格式要求】
+                    所有引用必须标注来源：
+                    - 案例引用格式：(case_doc_id:chunk_id)
+                    - 条款引用格式：(regulation_doc_id:chunk_id)
+                    - 特征引用格式：(feature_name:version)
+
+                    【输出格式 - 纯JSON】
+                    {
+                      "rule_evidence": {
+                        "hit_rules": [{"rule_name": "规则名", "trigger_condition": "触发条件", "rule_version": "版本"}],
+                        "rule_summary": "规则命中摘要"
+                      },
+                      "feature_evidence": {
+                        "transaction_summary": "交易特征摘要",
+                        "graph_summary": "图特征摘要",
+                        "feature_version": "特征版本号"
+                      },
+                      "knowledge_evidence": {
+                        "similar_cases": [{"ref": "doc_id:chunk_id", "summary": "案例摘要", "similarity": 0.XX}],
+                        "regulation_refs": [{"ref": "doc_id:chunk_id", "clause": "条款内容摘要"}]
+                      },
+                      "supplement_list": ["需补充材料1", "需补充材料2"],
+                      "evidence_completeness": 0.0-1.0
+                    }
+            - name: stableSystemPrompt
+              input:
+                type: string
+                value: ""
+            - name: canContinue
+              input:
+                type: boolean
+                value: false
+            - name: loopPromptVersion
+              input:
+                type: string
+                value: ""
+            - name: loopPromptName
+              input:
+                type: string
+                value: ""
+            - name: loopPromptId
+              input:
+                type: string
+                value: ""
+        node_inputs:
+            - name: input
+              input:
+                value:
+                    path: gate_result
+                    ref_node: "144066"
+        node_outputs:
+            evidence_chain:
+                type: object
+                value: null
+        settingOnError:
+            processType: 1
+            retryTimes: 0
+            timeoutMs: 180000
+    - id: "173540"
+      type: llm
+      title: 工单生成
+      icon: https://lf3-static.bytednsdoc.com/obj/eden-cn/dvsmryvd_avi_dvsm/ljhwZthlaukjlkulzlp/icon/icon-LLM-v2.jpg
+      description: "调用大语言模型,使用变量和提示词生成回复"
+      version: "3"
+      position:
+        x: 491.70246190903106
+        y: 1434.2529943212437
+      parameters:
+        fcParamVar:
+            knowledgeFCParam: {}
+        llmParam:
+            - name: modelType
+              input:
+                type: integer
+                value: "1768187121"
+            - name: modelName
+              input:
+                type: string
+                value: 豆包·1.8·深度思考
+            - name: generationDiversity
+              input:
+                type: string
+                value: balance
+            - name: temperature
+              input:
+                type: float
+                value: "0.5"
+            - name: topP
+              input:
+                type: float
+                value: "1"
+            - name: frequencyPenalty
+              input:
+                type: float
+                value: "0"
+            - name: maxTokens
+              input:
+                type: integer
+                value: "4096"
+            - name: spCurrentTime
+              input:
+                type: boolean
+                value: false
+            - name: spAntiLeak
+              input:
+                type: boolean
+                value: false
+            - name: responseFormat
+              input:
+                type: integer
+                value: "2"
+            - name: parameters
+              input:
+                type: object
+                properties:
+                    max_completion_tokens:
+                        type: integer
+                        value: "0"
+                value: null
+            - name: prompt
+              input:
+                type: string
+                value: |-
+                    【可执行动作】
+                    {{合规门控.output.gate_result.executable_action}}
+
+                    【证据链】
+                    {{证据链补全.output.evidence_chain}}
+
+                    【门控信息】
+                    门控结果: {{合规门控.output.gate_result.gate_result}}
+                    降级原因: {{合规门控.output.gate_result.downgrade_reason}}
+
+                    请生成完整工单。
+            - name: enableChatHistory
+              input:
+                type: boolean
+                value: false
+            - name: chatHistoryRound
+              input:
+                type: integer
+                value: "3"
+            - name: systemPrompt
+              input:
+                type: string
+                value: |-
+                    你是一位风控工单撰写专家。生成结构化工单与自然语言解释。
+
+                    【工单字段模板】
+                    1. 建议动作及优先级
+                    2. 命中规则及红旗标签
+                    3. 关键特征摘要（可复核）
+                    4. 相似案例引用（doc_id:chunk_id）
+                    5. 条款/SOP引用（doc_id:chunk_id）
+                    6. 不确定性提示
+                    7. 补证清单
+
+                    【生成护栏】
+                    - 所有关键论断必须挂接引用
+                    - 证据不足时必须显式说明
+                    - 禁止引入未被证据支持的新事实
+                    - 自然语言解释仅供人工阅读，不能替代结构化字段
+
+                    【输出格式】
+                    {
+                      "ticket_fields": {
+                        "recommended_action": "建议动作",
+                        "priority": "优先级",
+                        "hit_rules": ["规则1", "规则2"],
+                        "key_features": "特征摘要",
+                        "case_refs": ["doc_id:chunk_id"],
+                        "regulation_refs": ["doc_id:chunk_id"],
+                        "uncertainty_note": "不确定性说明",
+                        "supplement_list": ["补证项1"]
+                      },
+                      "natural_language_explanation": "供人工审核阅读的自然语言解释（200字内）",
+                      "tool_trajectory_summary": "工具调用轨迹摘要"
+                    }
+            - name: stableSystemPrompt
+              input:
+                type: string
+                value: ""
+            - name: canContinue
+              input:
+                type: boolean
+                value: false
+            - name: loopPromptVersion
+              input:
+                type: string
+                value: ""
+            - name: loopPromptName
+              input:
+                type: string
+                value: ""
+            - name: loopPromptId
+              input:
+                type: string
+                value: ""
+        node_inputs:
+            - name: input
+              input:
+                value:
+                    path: evidence_chain
+                    ref_node: "103418"
+        node_outputs:
+            ticket:
+                type: object
+                value: null
+        settingOnError:
+            processType: 1
+            retryTimes: 0
+            timeoutMs: 180000
+edges:
+    - source_node: "100001"
+      target_node: "184303"
+    - source_node: "173540"
+      target_node: "900001"
+    - source_node: "184303"
+      target_node: "104908"
+    - source_node: "104908"
+      target_node: "105193"
+    - source_node: "105193"
+      target_node: "179745"
+    - source_node: "179745"
+      target_node: "144066"
+    - source_node: "144066"
+      target_node: "103418"
+    - source_node: "103418"
+      target_node: "173540"

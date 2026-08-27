@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Dify单个Agent漏洞测试_PoC证据包</title>
+<style>
+body{font-family:Microsoft YaHei, Arial; margin:20px; background:#f9f9f9;}
+.container{width:100%;max-width:100%;margin:0 auto;box-sizing:border-box;background:white;padding:25px;border-radius:8px;box-shadow:0 0 5px #ccc;}
+h1{color:#2c3e50; border-left:4px solid #f39c12; padding-left:10px;}
+h2{color:#34495e; font-size:16px; margin-top:20px;}
+table{width:100%; border-collapse:collapse; margin:10px 0;}
+td,th{border:1px solid #ddd; padding:8px; text-align:left;}
+th{background:#ecf0f1;}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Dify单个Agent漏洞测试_PoC证据包</h1>
+<p><strong>文档编号：</strong>DFY-AGT-TPL-005</p>
+<p><strong>版本号：</strong>V1.0</p>
+<p><strong>编制日期：</strong>2026-04-10</p>
+
+<h2>一、发现概览</h2>
+<table>
+<tr><td>发现编号</td><td>DFY-AGT-POC-001</td></tr>
+<tr><td>风险等级</td><td>高</td></tr>
+<tr><td>漏洞名称</td><td>文件类型校验缺失与配置不达标</td></tr>
+<tr><td>发现方式</td><td>API扫描+Config扫描</td></tr>
+<tr><td>影响对象</td><td>对公营销分析机器人</td></tr>
+<tr><td>首次发现</td><td>2026-04-09 21:59</td></tr>
+<tr><td>复现状态</td><td>已复现</td></tr>
+<tr><td>复现人</td><td>李国彬</td></tr>
+</table>
+
+<h2>二、环境信息</h2>
+<table>
+<tr><td>测试环境</td><td>Dify云端生成环境</td></tr>
+<tr><td>测试地址</td><td>https://api.dify.ai</td></tr>
+<tr><td>测试账号</td><td>测试账号（已授权）</td></tr>
+<tr><td>关联组件</td><td>LLM、知识库、文件上传、API接口</td></tr>
+</table>
+
+<h2>三、复现步骤</h2>
+<table>
+<tr><th>步骤</th><th>操作</th><th>输入</th><th>期望</th><th>实际</th><th>证据</th></tr>
+<tr><td>1</td><td>API黑盒扫描</td><td>异常文件类型请求</td><td>严格拦截</td><td>提示不支持但未拦截</td><td>E-001</td></tr>
+<tr><td>2</td><td>Config配置审计</td><td>基线对比检查</td><td>符合安全规范</td><td>9项不达标</td><td>E-002</td></tr>
+</table>
+
+<h2>四、证据清单</h2>
+<table>
+<tr><th>编号</th><th>类型</th><th>说明</th><th>路径</th></tr>
+<tr><td>E-001</td><td>报告</td><td>API检测报告</td><td>api.html</td></tr>
+<tr><td>E-002</td><td>报告</td><td>Config检测报告</td><td>config.html</td></tr>
+<tr><td>L-001</td><td>日志</td><td>扫描日志</td><td>./log/</td></tr>
+</table>
+
+<h2>五、可复现性</h2>
+<table>
+<tr><td>双人复现</td><td>是</td></tr>
+<tr><td>复现次数</td><td>2次</td></tr>
+<tr><td>环境依赖</td><td>无</td></tr>
+</table>
+
+<h2>六、业务影响</h2>
+<ul>
+<li>影响对象：对公业务机器人、内部用户、客户数据</li>
+<li>触发条件：构造非法文件或恶意Prompt</li>
+<li>后果：提示注入、越权、数据泄露风险</li>
+</ul>
+</div>
+</body>
+</html>

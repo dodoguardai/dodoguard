@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Dify单个Agent漏洞测试_管理层摘要</title>
+<style>
+body{font-family:Microsoft YaHei, Arial; margin:20px; background:#f9f9f9;}
+.container{width:100%;max-width:100%;margin:0 auto;box-sizing:border-box;background:white;padding:25px;border-radius:8px;box-shadow:0 0 5px #ccc;}
+h1{color:#2c3e50; border-left:4px solid #3498db; padding-left:10px;}
+h2{color:#34495e; font-size:16px; margin-top:20px;}
+table{width:100%; border-collapse:collapse; margin:10px 0;}
+td,th{border:1px solid #ddd; padding:8px; text-align:left;}
+th{background:#ecf0f1;}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Dify单个Agent漏洞测试_管理层摘要</h1>
+<p><strong>文档编号：</strong>DFY-AGT-TPL-003</p>
+<p><strong>版本号：</strong>V1.0</p>
+<p><strong>编制日期：</strong>2026-04-10</p>
+
+<h2>一、一页结论</h2>
+<table>
+<tr><th>项目</th><th>结论</th></tr>
+<tr><td>测试对象</td><td>对公营销分析机器人Agent</td></tr>
+<tr><td>总体风险判断</td><td>需限期整改</td></tr>
+<tr><td>是否影响上线/运行</td><td>有条件影响</td></tr>
+<tr><td>是否建议投入资源</td><td>是，建议级别：中</td></tr>
+<tr><td>一句话摘要</td><td>API与配置层面共检出12项安全问题，存在提示注入、配置不规范风险，需完成整改并回归测试后上线</td></tr>
+</table>
+
+<h2>二、管理层核心问题</h2>
+<table>
+<tr><th>问题</th><th>回答</th></tr>
+<tr><td>发生了什么</td><td>对公营销分析机器人在API与配置扫描中检出12项漏洞，含文件类型校验缺失、鉴权与配置风险</td></tr>
+<tr><td>影响有多大</td><td>可能被注入恶意指令、越权获取知识库内容、非法调用工具，影响对公业务数据安全</td></tr>
+<tr><td>是否可控</td><td>当前可控，可通过配置加固、接口校验、提示词加固实现缓解</td></tr>
+<tr><td>需要投入什么</td><td>安全1人天+开发1人天，3个工作日完成整改，1个工作日回归</td></tr>
+</table>
+
+<h2>三、风险与投入建议</h2>
+<table>
+<tr><th>发现/主题</th><th>业务影响</th><th>发生概率</th><th>当前控制</th><th>建议动作</th><th>建议资源</th></tr>
+<tr><td>API文件类型校验缺失</td><td>中</td><td>高</td><td>不足</td><td>立即修复</td><td>开发0.5人天</td></tr>
+<tr><td>配置安全基线不达标</td><td>中</td><td>高</td><td>不足</td><td>限期整改</td><td>安全0.5人天</td></tr>
+<tr><td>提示词与拒答策略薄弱</td><td>中</td><td>中</td><td>不足</td><td>加固优化</td><td>算法0.5人天</td></tr>
+</table>
+
+<h2>四、建议决策</h2>
+<ul>
+<li>批准3个工作日内完成漏洞整改</li>
+<li>上线前必须完成安全回归测试</li>
+<li>将本次问题纳入Agent上线安全基线</li>
+</ul>
+
+<h2>五、里程碑</h2>
+<table>
+<tr><th>时间点</th><th>动作</th><th>交付物</th><th>责任方</th></tr>
+<tr><td>T+1</td><td>完成临时缓解</td><td>配置加固记录</td><td>技术组</td></tr>
+<tr><td>T+3</td><td>完成整改</td><td>修复清单</td><td>开发+安全</td></tr>
+<tr><td>T+4</td><td>安全回归</td><td>回归通过报告</td><td>安全</td></tr>
+</table>
+
+<h2>六、关联文档</h2>
+<table>
+<tr><th>文档名称</th><th>编号/路径</th></tr>
+<tr><td>执行策划</td><td>DFY-AGT-TPL-001</td></tr>
+<tr><td>执行过程记录</td><td>DFY-AGT-TPL-002</td></tr>
+<tr><td>PoC证据包</td><td>api.html、config.html</td></tr>
+<tr><td>整改建议</td><td>DFY-AGT-TPL-004</td></tr>
+</table>
+</div>
+</body>
+</html>

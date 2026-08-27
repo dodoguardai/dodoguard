@@ -1,0 +1,33 @@
+# DodoGuard CLI 扫描任务模板
+# 复制到仓库根目录后再填写真实目标信息，例如：
+#   cp examples/scan/task.template.yaml scan-task.yaml
+#
+# 注意：scan-task.yaml、my-scan.yaml 和 *.scan.local.yaml 已在 .gitignore 中忽略，
+# 可用于存放真实 API Key、目标地址等敏感配置。
+
+name: "Dify Agent 安全扫描"
+description: "使用 CLI 对 Dify Agent 进行动态攻击扫描"
+targetType: platform
+platformFamily: dify
+scanMode: runtime
+targetConfig:
+  apiBaseUrl: https://api.dify.ai
+  apiKey: ${DIFY_API_KEY}
+  userId: scan-cli-user
+vulnerabilities:
+  - agent-prompt-injection
+attackMode: simple
+detectionConfig:
+  useRule: true
+  useLLM: false
+  useKnowledgeBase: false
+metadata:
+  creationMode: cli
+execution:
+  maxConcurrency: 2
+output:
+  path: ./scan-results.json
+  format: json
+
+# 也可引用已有 dify-pentest 配置，而非 inline targetConfig：
+# runnerConfigPath: ../dify-pentest/config.yaml

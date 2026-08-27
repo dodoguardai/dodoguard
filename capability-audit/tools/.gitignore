@@ -1,0 +1,9 @@
+# 本地覆盖配置（可选，勿提交）
+tools.env
+
+# 解压产物（由 bundled/*.zip 自动生成；若已本地解压可忽略）
+scan-venv/
+
+# Python 缓存
+*.pyc
+__pycache__/

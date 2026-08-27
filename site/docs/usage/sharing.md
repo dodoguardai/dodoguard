@@ -1,0 +1,182 @@
+---
+sidebar_position: 40
+description: Share your dodoguard eval results with teams via cloud platform, enterprise deployment, or self-hosted infrastructure
+keywords: [eval sharing, model testing, dodoguard sharing, collaboration, team sharing]
+---
+
+# Sharing
+
+Share your eval results with others using the `share` command or the web interface.
+
+## Quick Start (Cloud)
+
+Most users will share to dodoguard.app cloud:
+
+```sh
+# Login (one-time setup)
+# First, get your API key from https://dodoguard.app/welcome
+dodoguard auth login -k YOUR_API_KEY
+
+# Run an eval and share it
+dodoguard eval
+dodoguard share
+```
+
+:::note
+
+Cloud sharing creates private links only visible to you and your organization. If you don't have an account, visit https://dodoguard.app/welcome to create one and get your API key.
+
+:::
+
+## Web Interface Sharing
+
+Share evals directly from the web interface with a single click. The **Share** button appears in the "Eval actions" dropdown menu for all evals.
+
+![Share button location in web interface](/img/docs/usage/sharing-webui.png)
+
+### Share an Eval via Web Interface
+
+1. Open your eval results in the web interface
+2. Click **"Eval actions"** in the top toolbar
+3. Select **"Share"** from the dropdown menu
+4. Follow the prompts to generate your shareable URL
+
+:::tip
+
+The share button is visible by default for all evals. If sharing isn't configured, you'll see helpful setup instructions instead of errors.
+
+:::
+
+### Sharing Behavior by Setup Type
+
+- **Cloud users**: Generates private sharing URLs automatically
+- **Enterprise users**: Creates team-accessible links with role-based permissions
+- **Self-hosted users**: Uses your configured sharing endpoints
+- **Unconfigured setups**: Displays clear setup instructions with next steps
+
+## Sharing Specific Evals
+
+```sh
+# List available evals
+dodoguard list
+
+# Share by ID
+dodoguard share my-eval-id
+```
+
+## Enterprise Sharing
+
+If you have a DodoGuard Enterprise account:
+
+```sh
+# Login to your enterprise instance
+# Get your API key from the "CLI Login Information" section in your profile
+dodoguard auth login --host https://your-company.dodoguard.app -k YOUR_API_KEY
+
+# Share your eval
+dodoguard share
+```
+
+Enterprise sharing includes additional features:
+
+- Team-based access controls
+- Role-based permissions for shared evals
+- SSO integration (SAML 2.0 and OIDC)
+
+For more details on authentication and team management, see the [Enterprise documentation](/docs/enterprise/authentication.md).
+
+## CI/CD Integration
+
+### Using API Tokens (Cloud/Enterprise)
+
+```sh
+# Authenticate with API token
+export DODOGUARD_API_KEY=your_api_token
+
+# Run and share
+dodoguard eval --share
+```
+
+Get your API token from the "CLI Login Information" section in your account settings. For Enterprise users, you can also use [Service Accounts](/docs/enterprise/service-accounts.md) for CI/CD integration.
+
+## Advanced: Self-Hosted Sharing
+
+For users with self-hosted instances:
+
+```sh
+# Configure sharing to your server
+export DODOGUARD_REMOTE_API_BASE_URL=http://your-server:3000
+export DODOGUARD_REMOTE_APP_BASE_URL=http://your-server:3000
+
+# Share your eval (no login required)
+dodoguard share
+```
+
+If you need to use HTTP Basic Authentication with your self-hosted server:
+
+```sh
+# Configure sharing with basic auth credentials in URL
+export DODOGUARD_REMOTE_API_BASE_URL=http://username:password@your-server:3000
+export DODOGUARD_REMOTE_APP_BASE_URL=http://username:password@your-server:3000
+```
+
+You can also add these settings to your `dodoguardconfig.yaml`:
+
+```yaml title="dodoguardconfig.yaml"
+sharing:
+  apiBaseUrl: http://your-server:3000
+  appBaseUrl: http://your-server:3000
+```
+
+:::tip
+
+Self-hosted sharing doesn't require `dodoguard auth login` when these environment variables or config settings are present.
+
+:::
+
+### Troubleshooting Upload Issues
+
+#### Handling "413 Request Entity Too Large" Errors
+
+When sharing large eval results, you may encounter "413 Request Entity Too Large" errors from NGINX or other proxies. This happens when the request payload exceeds the server's configured limit.
+
+You can solve this in two ways:
+
+1. **Reduce chunk size** (client-side):
+
+   ```sh
+   # Reduce the number of results per upload chunk (default is calculated automatically)
+   # Start with a small value like 10-20 for very large evals
+   export DODOGUARD_SHARE_CHUNK_SIZE=10
+   ```
+
+2. **Increase NGINX max body size** (server-side):
+   ```nginx
+   # In your nginx.conf or site config
+   client_max_body_size 20M; # Adjust as needed
+   ```
+
+For multi-tenant environments, reducing the chunk size on the client is usually safer than increasing server limits.
+
+## Disabling Sharing
+
+To disable sharing completely:
+
+### Disable via Configuration
+
+```yaml title="dodoguardconfig.yaml"
+sharing: false
+```
+
+### Disable via Environment Variable
+
+```sh
+export DODOGUARD_DISABLE_SHARING=true
+```
+
+## See Also
+
+- [Self-hosting](/docs/usage/self-hosting.md)
+- [Command Line Usage](/docs/usage/command-line.md)
+- [Enterprise Authentication](/docs/enterprise/authentication.md)
+- [Managing Roles and Teams](/docs/enterprise/teams.md)

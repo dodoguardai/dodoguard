@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "target": "es2020",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "resolveJsonModule": true,
+    "composite": true,
+    "rootDir": ".",
+    "baseUrl": "./"
+  },
+  "ts-node": {
+    "swc": true
+  },
+  "include": [
+    "backend/src/",
+    "test/",
+    "./package.json",
+    "backend/src/**/*.json",
+    "test/**/*.json",
+    "backend/src/types/globals.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "backend/src/workers/**/*",
+    "test/app/**/*",
+    "test/site/",
+    "test/dify-pentest/integration/comprehensive-security-test.ts",
+    "test/dify-pentest/integration/dify-agent-integration.test.ts",
+    "test/dify-pentest/integration/dify-agent-pentest.test.ts",
+    "test/dify-pentest/integration/dify-pentest-with-reporting.test.ts",
+    "test/dify-pentest/integration/security-test-with-llm-assertion copy.ts",
+    "test/dify-pentest/integration/security-test-with-llm-assertion.ts",
+    "test/dify-pentest/plugins/base/DifyPentestPluginBase.test.ts",
+    "test/dify-pentest/run.test.ts",
+    "test/dify-pentest/unit/dify-pentest-comprehensive.test.ts"
+  ]
+}

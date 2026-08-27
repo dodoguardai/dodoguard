@@ -1,0 +1,469 @@
+{
+  "name": "dodoguard",
+  "description": "DodoGuard - LLM security testing toolkit",
+  "author": "DodoGuard",
+  "version": "0.119.0",
+  "license": "MIT",
+  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ZhiyuFutureAI/dodoguard.git"
+  },
+  "main": "dist/src/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/src/index.js",
+      "require": "./dist/src/index.js"
+    }
+  },
+  "workspaces": [
+    "frontend",
+    "site"
+  ],
+  "types": "dist/src/index.d.ts",
+  "typings": "dist/src/index.d.ts",
+  "files": [
+    "dist",
+    "scripts/run-dodoguard-cli.cjs",
+    "!dist/test",
+    "!dist/src/__mocks__"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "bin": {
+    "dodoguard": "scripts/run-dodoguard-cli.cjs"
+  },
+  "scripts": {
+    "audit:fix": "npm audit fix && npm audit fix --prefix frontend && npm audit fix --prefix site",
+    "bin": "dist/src/main.js",
+    "build:app": "cross-env NODE_OPTIONS=--max-old-space-size=12288 npm run build --prefix frontend",
+    "build:clean": "shx rm -rf dist && shx rm -f tsconfig.build.tsbuildinfo",
+    "build:capability-audit": "node scripts/build-capability-audit.cjs",
+    "build:cli": "npm run generate-constants && shx rm -rf dist && shx rm -f tsconfig.build.tsbuildinfo && cross-env NODE_OPTIONS=--max-old-space-size=12288 tsc -p tsconfig.build.json && npm run build:capability-audit && shx cp backend/src/*.html dist/src && shx cp backend/src/python/wrapper.py dist/src/python && shx cp backend/src/python/persistent_wrapper.py dist/src/python && shx mkdir -p dist/src/golang && shx cp backend/src/golang/wrapper.go dist/src/golang && shx mkdir -p dist/src/ruby && shx cp backend/src/ruby/wrapper.rb dist/src/ruby && shx cp backend/src/dynamic-import.cjs dist/src && shx rm -rf dist/drizzle && shx cp -r drizzle dist/drizzle && shx mkdir -p dist/src/agent-skills/bundled && shx cp -r backend/src/agent-skills/bundled/. dist/src/agent-skills/bundled/ && shx mkdir -p dist/src/dify-pentest/reports/templates/resources && shx cp backend/src/dify-pentest/reports/templates/resources/*.md dist/src/dify-pentest/reports/templates/resources/ && shx chmod +x dist/src/main.js",
+    "build:watch": "cross-env NODE_OPTIONS=--max-old-space-size=12288 tsc --watch -p tsconfig.build.json",
+    "build": "npm run generate-constants && shx rm -rf dist && shx rm -f tsconfig.build.tsbuildinfo && cross-env NODE_OPTIONS=--max-old-space-size=12288 tsc -p tsconfig.build.json && npm run build:capability-audit && shx cp backend/src/*.html dist/src && shx cp backend/src/python/wrapper.py dist/src/python && shx cp backend/src/python/persistent_wrapper.py dist/src/python && shx mkdir -p dist/src/golang && shx cp backend/src/golang/wrapper.go dist/src/golang && shx mkdir -p dist/src/ruby && shx cp backend/src/ruby/wrapper.rb dist/src/ruby && shx cp backend/src/dynamic-import.cjs dist/src && shx rm -rf dist/drizzle && shx cp -r drizzle dist/drizzle && shx mkdir -p dist/src/agent-skills/bundled && shx cp -r backend/src/agent-skills/bundled/. dist/src/agent-skills/bundled/ && shx mkdir -p dist/src/dify-pentest/reports/templates/resources && shx cp backend/src/dify-pentest/reports/templates/resources/*.md dist/src/dify-pentest/reports/templates/resources/ && npm run build:app && shx chmod +x dist/src/main.js",
+    "dify:vuln": "npx tsx scripts/dify-api-vuln-library.ts",
+    "dify:chat-scan": "npx tsx scripts/dify-api-vuln-library.ts scan --profile payloads",
+    "fastgpt:vuln": "npx tsx scripts/fastgpt-api-vuln-library.ts",
+    "fastgpt:chat-scan": "npx tsx scripts/fastgpt-api-vuln-library.ts scan --profile payloads",
+    "n8n:vuln": "npx tsx scripts/n8n-api-vuln-library.ts",
+    "n8n:chat-scan": "npx tsx scripts/n8n-api-vuln-library.ts scan --profile payloads",
+    "coze:vuln": "npx tsx scripts/coze-api-vuln-library.ts",
+    "coze:chat-scan": "npx tsx scripts/coze-api-vuln-library.ts scan --profile payloads",
+    "coze:scan-db": "npx tsx scripts/coze-api-vuln-library.ts scan --profile all --persist-hits-db",
+    "coze:scan-llm": "npx tsx scripts/coze-api-vuln-library.ts scan --profile all --judge-mode llm",
+    "coze:scan-db-llm": "npx tsx scripts/coze-api-vuln-library.ts scan --profile all --judge-mode llm --persist-hits-db",
+    "citation:generate": "node ./node_modules/ts-node/dist/bin.js scripts/generateCitation.ts",
+    "db:generate": "npx drizzle-kit generate",
+    "db:migrate": "node --require tsx/cjs backend/src/migrate.ts",
+    "db:studio": "npx drizzle-kit studio",
+    "export:dify-config-vulns": "npx tsx scripts/export-dify-config-vulnerabilities.ts",
+    "dev:app": "npm run dev --prefix frontend",
+    "dev:server": "node ./node_modules/nodemon/bin/nodemon.js --exec \"node ./node_modules/ts-node/dist/bin.js\" -P 1000 backend/src/server/index.ts",
+    "dev:mysql": "docker compose -f docker-compose.mysql.yml up -d --wait",
+    "dev:mysql:down": "docker compose -f docker-compose.mysql.yml down",
+    "dev:with-mysql": "npm run dev:mysql && node ./node_modules/concurrently/dist/bin/concurrently.js \"npm run dev:server\" \"npm run dev:app\"",
+    "dev": "node ./node_modules/concurrently/dist/bin/concurrently.js \"npm run dev:server\" \"npm run dev:app\"",
+    "docker:offline": "bash scripts/build-offline-image.sh",
+    "desktop:preflight": "node scripts/desktop-preflight.cjs",
+    "desktop:build": "node scripts/generate-desktop-icon.cjs && npm run desktop:preflight && npm run build:clean && npm run build",
+    "desktop:pack": "npm run desktop:build && electron-builder --dir",
+    "desktop:dist": "npm run desktop:build && electron-builder",
+    "desktop:fetch-mysql:win": "node scripts/fetch-mysql-portable-win.cjs",
+    "desktop:fetch-mysql:linux": "node scripts/fetch-mysql-portable-linux.cjs",
+    "desktop:fetch-mysql:mac": "node scripts/fetch-mysql-portable-mac.cjs",
+    "desktop:prepare-bcrypt:win": "node scripts/prepare-bcrypt-native.cjs win32 x64",
+    "desktop:prepare-bcrypt:mac": "node scripts/prepare-bcrypt-native.cjs darwin x64",
+    "desktop:prepare-bcrypt:linux": "node scripts/prepare-bcrypt-native.cjs linux x64",
+    "desktop:dist:win": "npm run desktop:build && npm run desktop:prepare-bcrypt:win && electron-builder --win nsis",
+    "desktop:dist:win:bundle": "npm run desktop:fetch-mysql:win && npm run desktop:dist:win",
+    "desktop:dist:mac": "npm run desktop:build && npm run desktop:prepare-bcrypt:mac && electron-builder --mac dir --publish never && node scripts/patch-packaged-bcrypt.cjs release/mac/DodoGuard.app darwin x64 && node scripts/create-mac-dmg.cjs",
+    "desktop:dist:mac:bundle": "npm run desktop:fetch-mysql:mac && npm run desktop:dist:mac",
+    "desktop:dist:mac:noproxy": "npm run desktop:build && node scripts/desktop-electron-builder-no-proxy.cjs --mac dmg",
+    "desktop:dist:mac:universal": "npm run desktop:build && electron-builder --mac dmg --universal",
+    "desktop:dist:mac:universal:noproxy": "npm run desktop:build && node scripts/desktop-electron-builder-no-proxy.cjs --mac dmg --universal",
+    "desktop:dist:linux": "npm run desktop:build && npm run desktop:prepare-bcrypt:linux && electron-builder --linux AppImage deb",
+    "desktop:dist:linux:appimage": "npm run desktop:build && npm run desktop:prepare-bcrypt:linux && electron-builder --linux AppImage",
+    "desktop:dist:linux:bundle": "npm run desktop:fetch-mysql:linux && npm run desktop:dist:linux:appimage",
+    "desktop:dist:linux:noproxy": "npm run desktop:build && node scripts/desktop-electron-builder-no-proxy.cjs --linux AppImage deb",
+    "desktop:dist:win:noproxy": "npm run desktop:build && node scripts/desktop-electron-builder-no-proxy.cjs --win nsis",
+    "playwright:install": "playwright install chromium",
+    "f": "git diff --name-only --diff-filter=ACMRTUXB origin/main | grep -E '\\.(js|jsx|mjs|cjs|ts|tsx|json)$' | xargs npx @biomejs/biome format --write && git diff --name-only --diff-filter=ACMRTUXB origin/main | grep -E '\\.(css|scss|html|md|mdc|mdx|yaml|yml)$' | xargs prettier --write",
+    "format:check": "npx @biomejs/biome format && prettier --check '**/*.{css,scss,html,md,mdc,mdx,yaml,yml}'",
+    "format": "npx @biomejs/biome format --write . && prettier --write '**/*.{css,scss,html,md,mdc,mdx,yaml,yml}'",
+    "generate-constants": "node scripts/generate-constants.js",
+    "jsonSchema:generate": "npx -y tsx scripts/generateJsonSchema.ts > site/static/config-schema.json && npx @biomejs/biome format --write site/static/config-schema.json",
+    "knip": "knip",
+    "l": "git diff --name-only --diff-filter=ACMRTUXB origin/main | grep -E '\\.(js|ts|tsx)$' | xargs npx @biomejs/biome lint --write",
+    "lint:site": "npx @biomejs/biome lint site",
+    "lint:src": "npx @biomejs/biome lint backend/src",
+    "lint:tests": "npx @biomejs/biome lint test",
+    "lint": "npm run lint:src",
+    "local:web": "npm run dev --prefix frontend",
+    "local": "node ./node_modules/ts-node/dist/bin.js --cwdMode --transpileOnly backend/src/main.ts",
+    "dodoguard": "node dist/src/main.js",
+    "preversion": "command -v gh >/dev/null 2>&1 || (echo \"Error: GitHub CLI required.\" && exit 1) && [ \"$(git rev-parse --abbrev-ref HEAD)\" = \"main\" ] || (echo \"Error: Must be on main branch to version\" && exit 1) && git pull origin main && git checkout -b \"chore/bump-version-$(date +%s)\"",
+    "postversion": "npm run citation:generate && git add CITATION.cff && git commit --amend --no-edit",
+    "prepublishOnly": "npm run build:clean && npm run build",
+    "test:app": "npm run test --prefix frontend",
+    "test:integration": "jest --config jest.integration.config.ts integration",
+    "test:watch": "jest --watch",
+    "test:redteam:integration": "npm run build && ./test/redteam/integration/test.sh",
+    "test": "jest",
+    "tsc": "cross-env NODE_OPTIONS=--max-old-space-size=12288 tsc",
+    "mcp": "node dist/src/main.js mcp",
+    "depcheck": "depcheck --ignores=\"@types/*,@biomejs/biome,prettier,shx,concurrently,madge,knip,vite,typescript,tshy\" --ignore-dirs=\"dist,site,examples,node_modules\""
+  },
+  "overrides": {
+    "uri-js": "npm:uri-js-replace",
+    "chokidar": "4.0.3",
+    "whatwg-url": "14.2.0",
+    "esbuild": "0.27.2",
+    "react-is": "^18.3.1",
+    "*": {
+      "whatwg-url": "14.2.0",
+      "chokidar": "4.0.3",
+      "esbuild": "0.27.2"
+    },
+    "gcp-metadata": "5.3.0",
+    "gaxios": "5.1.3",
+    "node-fetch": "2.7.0"
+  },
+  "devDependencies": {
+    "@adaline/anthropic": "1.8.0",
+    "@adaline/azure": "1.6.2",
+    "@adaline/gateway": "^0.14.0",
+    "@adaline/google": "1.8.1",
+    "@adaline/groq": "1.8.2",
+    "@adaline/open-router": "1.5.1",
+    "@adaline/openai": "1.10.0",
+    "@adaline/provider": "1.5.1",
+    "@adaline/together-ai": "1.5.1",
+    "@adaline/types": "1.9.1",
+    "@adaline/vertex": "1.7.1",
+    "@anthropic-ai/claude-agent-sdk": "^0.1.11",
+    "@aws-sdk/client-bedrock-agent-runtime": "^3.908.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.908.0",
+    "@aws-sdk/client-sagemaker-runtime": "^3.908.0",
+    "@aws-sdk/credential-provider-sso": "^3.908.0",
+    "@aws-sdk/types": "^3.901.0",
+    "@azure/identity": "^4.13.0",
+    "@azure/openai-assistants": "^1.0.0-beta.6",
+    "@biomejs/biome": "2.2.6",
+    "@fal-ai/client": "^1.6.2",
+    "@ibm-cloud/watsonx-ai": "^1.7.0",
+    "@ibm-generative-ai/node-sdk": "^3.2.4",
+    "@jest/globals": "^30.2.0",
+    "@libsql/client": "^0.15.15",
+    "@swc/core": "^1.13.20",
+    "@swc/jest": "^0.2.39",
+    "@types/async": "^3.2.25",
+    "@types/bcrypt": "^5.0.2",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/cache-manager": "^4.0.6",
+    "@types/cache-manager-fs-hash": "^0.0.5",
+    "@types/cli-progress": "^3.11.6",
+    "@types/compression": "^1.8.1",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/fluent-ffmpeg": "^2.1.27",
+    "@types/handlebars": "^4.0.40",
+    "@types/jest": "^30.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/jsdom": "^21.1.7",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^24.7.2",
+    "@types/nodemailer": "^8.0.0",
+    "@types/nunjucks": "^3.2.6",
+    "@types/opener": "^1.4.3",
+    "@types/pdf-parse": "^1.1.5",
+    "@types/pem": "^1.14.4",
+    "@types/proxy-from-env": "^1.0.4",
+    "@types/semver": "^7.7.1",
+    "@types/source-map-support": "^0.5.10",
+    "@types/supertest": "^6.0.3",
+    "@types/uuid": "^10.0.0",
+    "axios": "^1.12.2",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "depcheck": "^1.4.7",
+    "drizzle-kit": "^0.31.5",
+    "electron": "^41.2.0",
+    "electron-builder": "^26.8.1",
+    "ibm-cloud-sdk-core": "^5.4.3",
+    "jest": "^30.2.0",
+    "knip": "^5.65.0",
+    "langfuse": "^3.38.5",
+    "madge": "^8.0.0",
+    "nock": "^14.0.10",
+    "node-sql-parser": "^5.3.12",
+    "nodemon": "^3.1.10",
+    "pdf-parse": "^1.1.1",
+    "playwright": "^1.56.0",
+    "playwright-extra": "^4.3.6",
+    "prettier": "3.6.2",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "sharp": "^0.35.4",
+    "shx": "^0.4.0",
+    "source-map-support": "^0.5.21",
+    "supertest": "^7.1.4",
+    "ts-dedent": "^2.2.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "winston-transport": "^4.9.0",
+    "zod-to-json-schema": "^3.24.6"
+  },
+  "optionalDependencies": {
+    "@adaline/anthropic": "1.8.0",
+    "@adaline/azure": "1.6.2",
+    "@adaline/gateway": "^0.14.0",
+    "@adaline/google": "1.8.1",
+    "@adaline/groq": "1.8.2",
+    "@adaline/open-router": "1.5.1",
+    "@adaline/openai": "1.10.0",
+    "@adaline/provider": "1.5.1",
+    "@adaline/together-ai": "1.5.1",
+    "@adaline/types": "1.9.1",
+    "@adaline/vertex": "1.7.1",
+    "@anthropic-ai/claude-agent-sdk": "^0.1.11",
+    "@aws-sdk/client-bedrock-agent-runtime": "^3.908.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.908.0",
+    "@aws-sdk/client-sagemaker-runtime": "^3.908.0",
+    "@aws-sdk/credential-provider-sso": "^3.908.0",
+    "@azure/ai-projects": "^1.0.0",
+    "@azure/identity": "^4.13.0",
+    "@azure/openai-assistants": "^1.0.0-beta.6",
+    "@biomejs/cli-darwin-arm64": "2.2.6",
+    "@biomejs/cli-darwin-x64": "2.2.6",
+    "@biomejs/cli-linux-x64": "2.2.6",
+    "@biomejs/cli-linux-x64-musl": "2.2.6",
+    "@biomejs/cli-win32-x64": "2.2.6",
+    "@fal-ai/client": "^1.6.2",
+    "@ibm-cloud/watsonx-ai": "^1.7.0",
+    "@ibm-generative-ai/node-sdk": "^3.2.4",
+    "@playwright/browser-chromium": "^1.56.0",
+    "@rollup/rollup-linux-x64-gnu": "^4.52.4",
+    "@slack/web-api": "^7.11.0",
+    "@smithy/node-http-handler": "^4.1.1",
+    "@swc/core-darwin-arm64": "^1.13.20",
+    "@swc/core-darwin-x64": "^1.13.20",
+    "@swc/core-linux-x64-gnu": "^1.13.20",
+    "@swc/core-linux-x64-musl": "^1.13.20",
+    "@swc/core-win32-x64-msvc": "^1.13.20",
+    "fluent-ffmpeg": "^2.1.3",
+    "google-auth-library": "^10.3.0",
+    "ibm-cloud-sdk-core": "^5.4.3",
+    "langfuse": "^3.38.5",
+    "natural": "^8.1.0",
+    "node-sql-parser": "^5.3.12",
+    "pdf-parse": "^1.1.1",
+    "playwright": "^1.56.0",
+    "playwright-extra": "^4.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "sharp": "^0.35.4"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.67.0",
+    "@apidevtools/json-schema-ref-parser": "^12.0.2",
+    "@googleapis/sheets": "^14.0.0",
+    "@inquirer/checkbox": "^4.3.0",
+    "@inquirer/confirm": "^5.1.19",
+    "@inquirer/core": "^10.3.0",
+    "@inquirer/editor": "^4.2.21",
+    "@inquirer/input": "^4.2.5",
+    "@inquirer/select": "^4.4.0",
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "@openai/agents": "^0.1.11",
+    "@types/ws": "^8.18.1",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "async": "^3.2.6",
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "12.9.0",
+    "cache-manager": "^4.1.0",
+    "cache-manager-fs-hash": "^3.0.0",
+    "chalk": "^4.1.2",
+    "chokidar": "4.0.3",
+    "cli-progress": "^3.12.0",
+    "cli-table3": "^0.6.5",
+    "commander": "^14.0.1",
+    "compression": "^1.8.1",
+    "cors": "^2.8.5",
+    "csv-parse": "^6.1.0",
+    "csv-stringify": "^6.6.0",
+    "debounce": "^2.2.0",
+    "dedent": "^1.7.0",
+    "docx": "^9.6.1",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.2",
+    "express": "^5.1.0",
+    "fast-deep-equal": "^3.1.3",
+    "fast-safe-stringify": "^2.1.1",
+    "fast-xml-parser": "^5.3.0",
+    "fastest-levenshtein": "^1.0.16",
+    "fflate": "^0.8.2",
+    "glob": "^11.0.3",
+    "handlebars": "^4.7.8",
+    "html-docx-js": "^0.3.1",
+    "html-to-docx": "^1.1.2",
+    "http-z": "^7.1.3",
+    "jks-js": "^1.1.4",
+    "js-rouge": "^3.0.0",
+    "js-yaml": "^4.1.0",
+    "jsdom": "^26.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "lru-cache": "^11.2.2",
+    "markdown-it": "^14.1.0",
+    "mathjs": "^15.2.0",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.11.5",
+    "node-cache": "^5.1.2",
+    "nodemailer": "^9.0.5",
+    "nunjucks": "^3.2.4",
+    "openai": "^6.3.0",
+    "opener": "^1.5.2",
+    "pandoc": "^0.2.0",
+    "pdf-lib": "^1.17.1",
+    "pem": "^1.15.1",
+    "posthog-node": "^5.9.5",
+    "proxy-agent": "^6.5.0",
+    "proxy-from-env": "^1.1.0",
+    "python-shell": "^5.0.0",
+    "rfdc": "^1.4.1",
+    "rxjs": "^7.8.2",
+    "semver": "^7.7.3",
+    "socket.io": "^4.8.1",
+    "swiper": "14.1.0",
+    "tsx": "^4.20.6",
+    "undici": "^7.16.0",
+    "uuid": "^11.1.0",
+    "wait-on": "^9.0.5",
+    "winston": "^3.18.3",
+    "ws": "^8.18.3",
+    "zod": "^3.25.76",
+    "zod-validation-error": "^3.5.3"
+  },
+  "madge": {
+    "detectiveOptions": {
+      "ts": {
+        "skipAsyncImports": true
+      },
+      "tsx": {
+        "skipAsyncImports": true
+      }
+    }
+  },
+  "build": {
+    "publish": null,
+    "appId": "com.dodoguard.desktop",
+    "productName": "DodoGuard",
+    "afterPack": "scripts/electron-after-pack.cjs",
+    "icon": "build/icon.png",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "frontend/dist/**/*",
+      "desktop/**/*",
+      "package.json",
+      {
+        "from": "dist/capability-audit",
+        "to": "capability-audit"
+      }
+    ],
+    "extraResources": [
+      {
+        "from": "dist/drizzle",
+        "to": "drizzle"
+      },
+      {
+        "from": "release/dodoguard.sql",
+        "to": "dodoguard-offline/dodoguard.sql"
+      },
+      {
+        "from": "build/icon.png",
+        "to": "dodoguard-icon.png"
+      }
+    ],
+    "extraMetadata": {
+      "main": "desktop/main.cjs"
+    },
+    "asarUnpack": [
+      "**/*.node"
+    ],
+    "win": {
+      "requestedExecutionLevel": "requireAdministrator",
+      "target": [
+        "nsis"
+      ],
+      "extraResources": [
+        {
+          "from": "desktop/vendor/mysql/win-x64",
+          "to": "mysql",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "perMachine": false,
+      "runAfterFinish": false,
+      "include": "build/installer.nsh",
+      "deleteAppDataOnUninstall": false,
+      "uninstallDisplayName": "DodoGuard",
+      "installerLanguages": [
+        "zh_CN",
+        "en_US"
+      ],
+      "language": "2052"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.developer-tools",
+      "extraResources": [
+        {
+          "from": "desktop/vendor/mysql/darwin-x64",
+          "to": "mysql",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Development",
+      "extraResources": [
+        {
+          "from": "desktop/vendor/mysql/linux-x64",
+          "to": "mysql",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ]
+    }
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@playwright/browser-chromium",
+      "@swc/core",
+      "better-sqlite3",
+      "core-js",
+      "core-js-pure",
+      "esbuild"
+    ],
+    "ignoredBuiltDependencies": []
+  }
+}

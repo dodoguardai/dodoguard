@@ -1,0 +1,944 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DodoGuard — 首次安装向导</title>
+    <style>
+      :root {
+        font-family:
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+        color: #eaf2ff;
+        background: #07111f;
+        color-scheme: dark;
+        --cyan: #22d3ee;
+        --blue: #3b82f6;
+        --mint: #34d399;
+        --panel: rgba(9, 20, 36, 0.78);
+        --panel-strong: rgba(11, 28, 50, 0.92);
+        --line: rgba(125, 211, 252, 0.2);
+        --muted: #a9bad2;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 24px 28px 30px;
+        overflow-x: hidden;
+        background:
+          radial-gradient(circle at 12% 8%, rgba(34, 211, 238, 0.22), transparent 28%),
+          radial-gradient(circle at 88% 3%, rgba(59, 130, 246, 0.26), transparent 26%),
+          linear-gradient(135deg, #07111f 0%, #0b1628 48%, #060b15 100%);
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.35;
+        background-image:
+          linear-gradient(rgba(125, 211, 252, 0.08) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(125, 211, 252, 0.08) 1px, transparent 1px);
+        background-size: 34px 34px;
+        mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 88%);
+      }
+      body::after {
+        content: '';
+        position: fixed;
+        inset: -30% -20%;
+        pointer-events: none;
+        background:
+          linear-gradient(115deg, transparent 20%, rgba(34, 211, 238, 0.1) 42%, transparent 58%),
+          linear-gradient(65deg, transparent 34%, rgba(52, 211, 153, 0.1) 48%, transparent 62%);
+        filter: blur(1px);
+        animation: driftLight 9s linear infinite;
+      }
+      .shell {
+        position: relative;
+        z-index: 1;
+        max-width: 608px;
+        margin-inline: auto;
+      }
+      h1 {
+        font-size: 1.55rem;
+        letter-spacing: 0;
+        margin: 0 0 8px;
+        color: #f8fbff;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 0.88rem;
+        margin: 0;
+        line-height: 1.5;
+      }
+      .hero {
+        position: relative;
+        min-height: 178px;
+        margin-bottom: 20px;
+        border: 1px solid rgba(125, 211, 252, 0.22);
+        border-radius: 16px;
+        padding: 24px 24px 22px;
+        overflow: hidden;
+        background:
+          linear-gradient(135deg, rgba(17, 34, 60, 0.92), rgba(5, 12, 24, 0.7)),
+          radial-gradient(circle at 74% 50%, rgba(34, 211, 238, 0.2), transparent 34%);
+        box-shadow:
+          0 22px 70px rgba(0, 0, 0, 0.34),
+          inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      }
+      .hero::before,
+      .hero::after {
+        content: '';
+        position: absolute;
+        pointer-events: none;
+      }
+      .hero::before {
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.22), transparent);
+        width: 42%;
+        transform: skewX(-18deg) translateX(-140%);
+        animation: heroSweep 4.8s ease-in-out infinite;
+      }
+      .hero::after {
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--cyan), var(--mint), transparent);
+        box-shadow: 0 0 18px rgba(34, 211, 238, 0.65);
+      }
+      .hero-copy {
+        position: relative;
+        z-index: 2;
+        max-width: 390px;
+      }
+      .brand-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .brand-mark {
+        width: 42px;
+        height: 42px;
+        object-fit: contain;
+        border-radius: 11px;
+        overflow: hidden;
+        filter: drop-shadow(0 0 18px rgba(34, 211, 238, 0.45));
+      }
+      .kicker {
+        margin: 0 0 2px;
+        color: #89e8ff;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+      }
+      .hero-orbit {
+        position: absolute;
+        right: 18px;
+        top: 22px;
+        width: 168px;
+        height: 168px;
+        border-radius: 50%;
+        border: 1px solid rgba(125, 211, 252, 0.18);
+        background:
+          radial-gradient(circle, rgba(34, 211, 238, 0.16), transparent 50%),
+          conic-gradient(from 40deg, transparent, rgba(34, 211, 238, 0.75), transparent 34%);
+        animation: rotateOrb 6s linear infinite;
+        opacity: 0.9;
+      }
+      .hero-orbit::before,
+      .hero-orbit::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+      }
+      .hero-orbit::before {
+        inset: 32px;
+        border: 1px solid rgba(52, 211, 153, 0.22);
+        box-shadow: 0 0 26px rgba(52, 211, 153, 0.2);
+      }
+      .hero-orbit::after {
+        width: 12px;
+        height: 12px;
+        right: 18px;
+        top: 26px;
+        background: #bff7ff;
+        box-shadow: 0 0 18px #22d3ee;
+      }
+      .status-rail {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin: 14px 0 22px;
+      }
+      .status-chip {
+        min-width: 0;
+        border: 1px solid rgba(125, 211, 252, 0.18);
+        border-radius: 8px;
+        padding: 9px 10px;
+        background: rgba(4, 12, 24, 0.58);
+        color: #c8d7ee;
+        font-size: 0.76rem;
+      }
+      .status-chip strong {
+        display: block;
+        color: #ffffff;
+        font-size: 0.86rem;
+        margin-bottom: 1px;
+      }
+      .stepper {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+      .step-item {
+        position: relative;
+        flex: 1;
+        text-align: center;
+        font-size: 0.75rem;
+        color: #7f93ad;
+        padding: 10px 8px 12px;
+        border-bottom: 2px solid rgba(125, 211, 252, 0.12);
+        border-radius: 8px 8px 0 0;
+        background: rgba(10, 24, 43, 0.46);
+      }
+      .step-item.active {
+        color: #c9f7ff;
+        border-bottom-color: var(--cyan);
+        font-weight: 600;
+        box-shadow: inset 0 -1px 0 rgba(34, 211, 238, 0.45);
+      }
+      .step-item.done {
+        color: #a7f3d0;
+        border-bottom-color: var(--mint);
+      }
+      .panel {
+        position: relative;
+        display: none;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px 20px 20px;
+        overflow: hidden;
+        box-shadow:
+          0 18px 52px rgba(0, 0, 0, 0.24),
+          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      }
+      .panel.active {
+        display: block;
+      }
+      .panel::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.9), transparent);
+      }
+      .panel h2 {
+        position: relative;
+        z-index: 1;
+        color: #f7fbff;
+        font-size: 1.02rem;
+        margin: 0 0 10px;
+      }
+      .check-list {
+        position: relative;
+        z-index: 1;
+        list-style: none;
+        padding: 0;
+        margin: 0 0 16px;
+      }
+      .check-list li {
+        font-size: 0.85rem;
+        color: #d6e4f5;
+        padding: 9px 10px;
+        margin-bottom: 6px;
+        border-radius: 6px;
+        border: 1px solid rgba(125, 211, 252, 0.18);
+        background: rgba(5, 14, 27, 0.62);
+      }
+      .check-list li.ok {
+        background: rgba(5, 46, 36, 0.62);
+        border-color: rgba(52, 211, 153, 0.35);
+      }
+      .check-list li.fail {
+        background: rgba(64, 15, 25, 0.72);
+        border-color: rgba(248, 113, 113, 0.4);
+      }
+      .check-list .label {
+        font-weight: 600;
+        display: block;
+        color: #ffffff;
+      }
+      button {
+        padding: 10px 16px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition:
+          transform 160ms ease,
+          box-shadow 160ms ease,
+          opacity 160ms ease;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #22d3ee, #2563eb 72%);
+        color: #fff;
+        width: 100%;
+        margin-top: 10px;
+        box-shadow: 0 0 24px rgba(37, 99, 235, 0.34);
+      }
+      .btn-primary:hover:not(:disabled),
+      .btn-secondary:hover:not(:disabled) {
+        transform: translateY(-1px);
+      }
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .btn-secondary {
+        background: rgba(148, 163, 184, 0.16);
+        color: #dbeafe;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        margin-right: 8px;
+      }
+      .actions {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        margin-top: 8px;
+      }
+      .actions .spacer {
+        flex: 1;
+      }
+      .msg {
+        position: relative;
+        z-index: 1;
+        margin-top: 12px;
+        padding: 10px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        white-space: pre-wrap;
+      }
+      .msg.ok {
+        background: rgba(5, 46, 36, 0.82);
+        color: #b7f7d8;
+        border: 1px solid rgba(52, 211, 153, 0.35);
+      }
+      .msg.err {
+        background: rgba(69, 10, 10, 0.82);
+        color: #fecaca;
+        border: 1px solid rgba(248, 113, 113, 0.38);
+      }
+      .hint {
+        position: relative;
+        z-index: 1;
+        font-size: 0.82rem;
+        color: var(--muted);
+        line-height: 1.5;
+        margin: 0 0 12px;
+      }
+      .sql-info {
+        position: relative;
+        z-index: 1;
+        font-size: 0.8rem;
+        color: #d7e5f7;
+        background: rgba(5, 14, 27, 0.62);
+        border: 1px solid rgba(125, 211, 252, 0.18);
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 12px;
+      }
+      .mode-pane {
+        position: relative;
+        z-index: 1;
+      }
+      .mode-pane[hidden] {
+        display: none;
+      }
+      label {
+        display: block;
+        color: #dbeafe;
+        font-size: 0.78rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+      }
+      input {
+        width: 100%;
+        padding: 9px 10px;
+        margin-bottom: 12px;
+        border: 1px solid rgba(125, 211, 252, 0.2);
+        border-radius: 8px;
+        background: rgba(3, 9, 19, 0.72);
+        color: #f8fbff;
+        font-size: 0.92rem;
+        outline: none;
+      }
+      input:focus {
+        border-color: rgba(34, 211, 238, 0.7);
+        box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.12);
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 120px;
+        gap: 12px;
+      }
+      .opt-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin: 0 0 12px;
+        padding: 10px;
+        border: 1px solid rgba(125, 211, 252, 0.18);
+        border-radius: 8px;
+        background: rgba(5, 14, 27, 0.58);
+      }
+      .opt-row input[type='checkbox'] {
+        width: auto;
+        margin: 4px 0 0;
+      }
+      .opt-row label {
+        margin: 0;
+        color: #cbdcf4;
+        font-weight: 500;
+        line-height: 1.45;
+      }
+      .install-visual {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        place-items: center;
+        height: 148px;
+        margin: 6px 0 14px;
+        border: 1px solid rgba(125, 211, 252, 0.14);
+        border-radius: 12px;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at center, rgba(34, 211, 238, 0.2), transparent 36%),
+          linear-gradient(180deg, rgba(9, 23, 41, 0.7), rgba(3, 9, 19, 0.82));
+      }
+      .install-visual::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, transparent 0 46%, rgba(34, 211, 238, 0.2) 50%, transparent 54% 100%);
+        animation: scanLine 2.2s ease-in-out infinite;
+      }
+      .install-core {
+        position: relative;
+        width: 78px;
+        height: 78px;
+        border-radius: 50%;
+        border: 1px solid rgba(34, 211, 238, 0.32);
+        background:
+          radial-gradient(circle, rgba(255, 255, 255, 0.8) 0 5px, rgba(34, 211, 238, 0.6) 6px 10px, transparent 11px),
+          conic-gradient(from 0deg, rgba(34, 211, 238, 0.95), rgba(52, 211, 153, 0.1), rgba(59, 130, 246, 0.95), rgba(34, 211, 238, 0.95));
+        box-shadow:
+          0 0 34px rgba(34, 211, 238, 0.48),
+          inset 0 0 24px rgba(2, 6, 23, 0.7);
+        animation: rotateOrb 1.6s linear infinite;
+      }
+      .install-core::before,
+      .install-core::after {
+        content: '';
+        position: absolute;
+        inset: 34px;
+        border-radius: 50%;
+        border: 1px solid rgba(125, 211, 252, 0.24);
+      }
+      body.is-installing .hero-orbit,
+      body.is-starting .hero-orbit {
+        animation-duration: 2.2s;
+      }
+      body.is-installing .install-core,
+      body.is-starting .install-core {
+        animation-duration: 0.9s;
+      }
+      body.is-installing .panel::after,
+      body.is-starting .panel::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        background: linear-gradient(110deg, transparent 12%, rgba(34, 211, 238, 0.08), transparent 38%);
+        animation: panelSweep 2s ease-in-out infinite;
+        pointer-events: none;
+      }
+      @keyframes rotateOrb {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes scanLine {
+        0%,
+        100% {
+          transform: translateY(-70%);
+          opacity: 0.15;
+        }
+        50% {
+          transform: translateY(70%);
+          opacity: 1;
+        }
+      }
+      @keyframes heroSweep {
+        0%,
+        55% {
+          transform: skewX(-18deg) translateX(-140%);
+        }
+        100% {
+          transform: skewX(-18deg) translateX(260%);
+        }
+      }
+      @keyframes panelSweep {
+        from {
+          transform: translateX(-120%);
+        }
+        to {
+          transform: translateX(120%);
+        }
+      }
+      @keyframes driftLight {
+        from {
+          transform: translateX(-4%);
+        }
+        to {
+          transform: translateX(4%);
+        }
+      }
+      @media (max-width: 620px) {
+        body {
+          padding: 18px;
+        }
+        .hero {
+          padding: 20px;
+        }
+        .hero-orbit {
+          opacity: 0.35;
+          right: -26px;
+        }
+        .status-rail {
+          grid-template-columns: 1fr;
+        }
+        .form-grid {
+          grid-template-columns: 1fr;
+          gap: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero" aria-label="DodoGuard 首次安装">
+        <div class="hero-copy">
+          <div class="brand-row">
+            <img class="brand-mark" id="brandLogo" alt="" aria-hidden="true" />
+            <div>
+              <p class="kicker">SECURE DESKTOP DEPLOYMENT</p>
+              <h1>DodoGuard 首次安装向导</h1>
+            </div>
+          </div>
+          <p class="sub" id="heroSub">
+            Windows 版将自动安装内置 MySQL 8 并导入业务数据，无需单独部署数据库服务。数据保存在本机应用目录，仅监听
+            127.0.0.1。
+          </p>
+        </div>
+        <div class="hero-orbit" aria-hidden="true"></div>
+      </section>
+
+      <div class="status-rail" aria-hidden="true">
+        <div class="status-chip" id="modeChip1"><strong>Local MySQL</strong>内置数据库</div>
+        <div class="status-chip" id="modeChip2"><strong>127.0.0.1</strong>本机监听</div>
+        <div class="status-chip" id="modeChip3"><strong>Offline SQL</strong>离线初始化</div>
+      </div>
+
+      <div class="stepper" role="navigation" aria-label="安装步骤">
+        <div class="step-item active" id="stepLabel1">1 检测环境</div>
+        <div class="step-item" id="stepLabel2">2 导入数据库</div>
+        <div class="step-item" id="stepLabel3">3 部署</div>
+      </div>
+
+      <section class="panel active" id="panel1" aria-labelledby="stepLabel1">
+        <h2>步骤 1：检测环境</h2>
+        <p class="hint" id="panel1Hint">将检查磁盘、端口、安装包内 MySQL 组件及数据目录写入权限。</p>
+        <ul class="check-list" id="checkList">
+          <li>点击“开始检测”检查安装环境…</li>
+        </ul>
+        <div class="actions">
+          <button type="button" class="btn-primary" id="btnRunCheck">开始检测</button>
+        </div>
+        <div id="out1" class="msg" style="display: none"></div>
+      </section>
+
+      <section class="panel" id="panel2" aria-labelledby="stepLabel2">
+        <h2 id="panel2Title">步骤 2：导入数据库</h2>
+        <p class="hint" id="panel2Hint">
+          将初始化内置 MySQL、导入 <code>dodoguard.sql</code> 并创建应用账号。首次安装可能需要数分钟，请勿关闭窗口。
+        </p>
+        <div class="install-visual" aria-hidden="true">
+          <div class="install-core"></div>
+        </div>
+        <div id="sqlBox" class="sql-info">正在检查 dodoguard.sql…</div>
+        <div class="mode-pane" id="externalPane" hidden>
+          <div class="opt-row">
+            <input type="checkbox" id="importCb" checked />
+            <label for="importCb">
+              <strong>从安装包导入 dodoguard.sql</strong>。取消勾选表示目标库已存在且已有表结构，仅保存连接配置。
+            </label>
+          </div>
+          <form id="externalForm" autocomplete="on">
+            <label for="host">MySQL 主机</label>
+            <input id="host" name="host" type="text" value="127.0.0.1" required />
+            <div class="form-grid">
+              <div>
+                <label for="port">端口</label>
+                <input id="port" name="port" type="number" value="3306" required />
+              </div>
+              <div>
+                <label for="database">数据库名</label>
+                <input id="database" name="database" type="text" value="dodoguard" required />
+              </div>
+            </div>
+            <label for="user">用户名</label>
+            <input id="user" name="user" type="text" value="" required />
+            <label for="password">密码</label>
+            <input id="password" name="password" type="password" value="" />
+          </form>
+          <div class="actions">
+            <button type="button" class="btn-secondary" id="btnTest">测试连接</button>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn-secondary" id="btnBack2">上一步</button>
+          <div class="spacer"></div>
+          <button type="button" class="btn-primary" id="btnInstall" disabled style="width: auto">
+            开始导入数据库
+          </button>
+        </div>
+        <div id="out2" class="msg" style="display: none"></div>
+      </section>
+
+      <section class="panel" id="panel3" aria-labelledby="stepLabel3">
+        <h2>步骤 3：部署</h2>
+        <p class="hint">数据库已就绪。将启动内嵌服务并打开主界面（默认 http://127.0.0.1:15500）。</p>
+        <div class="install-visual" aria-hidden="true">
+          <div class="install-core"></div>
+        </div>
+        <div class="actions">
+          <button type="button" class="btn-secondary" id="btnBack3">上一步</button>
+          <div class="spacer"></div>
+          <button type="button" class="btn-primary" id="btnStart" style="width: auto">部署并启动</button>
+        </div>
+        <div id="out3" class="msg" style="display: none"></div>
+      </section>
+    </main>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      let currentStep = 1;
+      let envCheckPassed = false;
+      let dbInstalled = false;
+      let envCheckDone = false;
+      let bundledMode = true;
+      let externalConnectionOk = false;
+      let bundledSqlAvailable = false;
+
+      function showMsg(el, text, ok) {
+        el.style.display = 'block';
+        el.textContent = text;
+        el.className = 'msg ' + (ok ? 'ok' : 'err');
+      }
+
+      function setStep(step) {
+        currentStep = step;
+        for (let i = 1; i <= 3; i++) {
+          $('panel' + i).classList.toggle('active', i === step);
+          const label = $('stepLabel' + i);
+          label.classList.remove('active', 'done');
+          if (i < step) {
+            label.classList.add('done');
+          } else if (i === step) {
+            label.classList.add('active');
+          }
+        }
+        syncInstallButton();
+      }
+
+      function collectExternalConfig() {
+        return {
+          host: $('host').value.trim(),
+          port: Number($('port').value) || 3306,
+          database: $('database').value.trim() || 'dodoguard',
+          user: $('user').value.trim(),
+          password: $('password').value,
+          importBundledSql: $('importCb').checked,
+        };
+      }
+
+      function syncInstallButton() {
+        const btn = $('btnInstall');
+        if (currentStep !== 2 || !envCheckPassed) {
+          btn.disabled = true;
+          return;
+        }
+        if (dbInstalled) {
+          btn.disabled = false;
+          return;
+        }
+        if (bundledMode) {
+          btn.disabled = !bundledSqlAvailable;
+          return;
+        }
+        btn.disabled = !externalConnectionOk || ($('importCb').checked && !bundledSqlAvailable);
+      }
+
+      function configureMode(info) {
+        bundledMode = !!info.isBundledMode;
+        $('externalPane').hidden = bundledMode;
+
+        if (bundledMode) {
+          const platformLabel = info.platform === 'darwin' ? 'macOS' : info.platform === 'linux' ? 'Linux' : 'Windows';
+          $('heroSub').textContent =
+            `${platformLabel} 版将自动安装内置 MySQL 8 并导入业务数据，无需单独部署数据库服务。数据保存在本机应用目录，仅监听 127.0.0.1。`;
+          $('modeChip1').innerHTML = '<strong>Local MySQL</strong>内置数据库';
+          $('modeChip2').innerHTML = '<strong>127.0.0.1</strong>本机监听';
+          $('modeChip3').innerHTML = '<strong>Offline SQL</strong>离线初始化';
+          $('panel2Hint').innerHTML =
+            '将初始化内置 MySQL、导入 <code>dodoguard.sql</code> 并创建应用账号。首次安装可能需要数分钟，请勿关闭窗口。';
+          $('panel1Hint').textContent = '将检查磁盘、端口、安装包内 MySQL 组件及数据目录写入权限。';
+          $('btnInstall').textContent = '开始导入数据库';
+          return;
+        }
+
+        $('heroSub').textContent =
+          'macOS 版将检测应用运行环境，连接你本机或局域网中的 MySQL，并导入业务数据后部署内嵌服务。';
+        $('modeChip1').innerHTML = '<strong>External MySQL</strong>连接数据库';
+        $('modeChip2').innerHTML = '<strong>dodoguard.sql</strong>导入业务库';
+        $('modeChip3').innerHTML = '<strong>Local App</strong>部署服务';
+        $('panel2Hint').innerHTML =
+          '请填写 MySQL 连接信息，先测试连接，再导入 <code>dodoguard.sql</code> 或保存已有数据库配置。';
+        $('panel1Hint').textContent = '将检查 macOS 运行环境、应用端口、磁盘空间及配置目录写入权限。';
+        $('btnInstall').textContent = '导入数据库';
+      }
+
+      function markExternalDirty() {
+        if (bundledMode) {
+          return;
+        }
+        externalConnectionOk = false;
+        dbInstalled = false;
+        $('btnInstall').textContent = $('importCb').checked ? '导入数据库' : '保存配置';
+        syncInstallButton();
+      }
+
+      function renderChecks(checks) {
+        const ul = $('checkList');
+        ul.innerHTML = '';
+        for (const c of checks) {
+          const li = document.createElement('li');
+          li.className = c.ok ? 'ok' : 'fail';
+          li.innerHTML =
+            '<span class="label">' +
+            (c.ok ? '✓ ' : '✗ ') +
+            c.label +
+            '</span>' +
+            (c.message || '');
+          ul.appendChild(li);
+        }
+      }
+
+      $('btnRunCheck').addEventListener('click', async () => {
+        const btn = $('btnRunCheck');
+        if (envCheckDone && envCheckPassed) {
+          setStep(2);
+          return;
+        }
+        btn.disabled = true;
+        $('out1').style.display = 'none';
+        try {
+          const r = await window.desktopSetup.runEnvCheck();
+          renderChecks(r.checks || []);
+          envCheckPassed = !!r.ok;
+          envCheckDone = true;
+          if (r.ok) {
+            showMsg($('out1'), '环境检测通过，可进入下一步。', true);
+            btn.textContent = '下一步';
+          } else {
+            showMsg($('out1'), '环境检测未通过，请根据上述项修复后重试。', false);
+            btn.textContent = '重新检测';
+            envCheckDone = false;
+          }
+        } catch (e) {
+          showMsg($('out1'), String(e), false);
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      $('btnBack2').addEventListener('click', () => setStep(1));
+      $('btnBack3').addEventListener('click', () => setStep(2));
+
+      $('btnTest').addEventListener('click', async () => {
+        const btn = $('btnTest');
+        externalConnectionOk = false;
+        dbInstalled = false;
+        btn.disabled = true;
+        $('btnInstall').disabled = true;
+        $('out2').style.display = 'none';
+        showMsg($('out2'), '正在测试 MySQL 连接…', true);
+        try {
+          const r = await window.desktopSetup.testConnection(collectExternalConfig());
+          if (r.ok) {
+            externalConnectionOk = true;
+            showMsg($('out2'), r.message || '连接成功。', true);
+          } else {
+            showMsg($('out2'), r.message || '连接失败。', false);
+          }
+        } catch (e) {
+          showMsg($('out2'), String(e), false);
+        } finally {
+          btn.disabled = false;
+          syncInstallButton();
+        }
+      });
+
+      $('externalForm').addEventListener('input', markExternalDirty);
+      $('importCb').addEventListener('change', markExternalDirty);
+
+      async function onInstall() {
+        const btn = $('btnInstall');
+        if (dbInstalled) {
+          document.body.classList.remove('is-installing');
+          setStep(3);
+          return;
+        }
+        btn.disabled = true;
+        $('btnBack2').disabled = true;
+        if (!bundledMode) {
+          $('btnTest').disabled = true;
+        }
+        $('out2').style.display = 'none';
+        document.body.classList.add('is-installing');
+        showMsg(
+          $('out2'),
+          bundledMode
+            ? '正在初始化 MySQL、导入数据… 请勿关闭窗口，这可能需要几分钟。'
+            : $('importCb').checked
+              ? '正在连接 MySQL 并导入 dodoguard.sql… 请勿关闭窗口。'
+              : '正在保存数据库连接配置…',
+          true,
+        );
+        try {
+          const r = bundledMode
+            ? await window.desktopSetup.installBundledMysql()
+            : await window.desktopSetup.prepareExternalDb(collectExternalConfig());
+          if (r.ok) {
+            dbInstalled = true;
+            document.body.classList.remove('is-installing');
+            showMsg($('out2'), r.message || '安装完成。', true);
+            btn.textContent = '下一步';
+            btn.disabled = false;
+            $('btnBack2').disabled = false;
+            if (!bundledMode) {
+              $('btnTest').disabled = false;
+            }
+          } else {
+            document.body.classList.remove('is-installing');
+            showMsg($('out2'), r.message || '安装失败', false);
+            btn.disabled = false;
+            $('btnBack2').disabled = false;
+            if (!bundledMode) {
+              $('btnTest').disabled = false;
+            }
+            syncInstallButton();
+          }
+        } catch (e) {
+          document.body.classList.remove('is-installing');
+          showMsg($('out2'), String(e), false);
+          btn.disabled = false;
+          $('btnBack2').disabled = false;
+          if (!bundledMode) {
+            $('btnTest').disabled = false;
+          }
+          syncInstallButton();
+        }
+      }
+      $('btnInstall').addEventListener('click', onInstall);
+
+      $('btnStart').addEventListener('click', async () => {
+        const btn = $('btnStart');
+        btn.disabled = true;
+        $('out3').style.display = 'none';
+        document.body.classList.add('is-starting');
+        showMsg($('out3'), '正在启动内嵌服务…', true);
+        try {
+          const r = await window.desktopSetup.startApplication();
+          if (!r.ok) {
+            document.body.classList.remove('is-starting');
+            showMsg($('out3'), r.message || '启动失败', false);
+            btn.disabled = false;
+          }
+        } catch (e) {
+          document.body.classList.remove('is-starting');
+          showMsg($('out3'), String(e), false);
+          btn.disabled = false;
+        }
+      });
+
+      window.addEventListener('DOMContentLoaded', async () => {
+        try {
+          const info = await window.desktopSetup.getPlatformInfo();
+          configureMode(info);
+          const logo = await window.desktopSetup.getLogoDataUrl();
+          if (logo.ok && logo.dataUrl) {
+            $('brandLogo').src = logo.dataUrl;
+          }
+          if (info.hasEnvFile) {
+            envCheckPassed = true;
+            envCheckDone = true;
+            dbInstalled = true;
+            $('btnRunCheck').textContent = '下一步';
+            $('btnInstall').textContent = '下一步';
+            setStep(3);
+          }
+          const st = await window.desktopSetup.getBundledSqlStatus();
+          const sqlBox = $('sqlBox');
+          if (st.ok && st.exists) {
+            bundledSqlAvailable = true;
+            sqlBox.innerHTML =
+              '<strong>已附带 dodoguard.sql</strong> · 约 ' +
+              String(st.sizeLabel || '?') +
+              '<br /><span style="color:#6b7280">' +
+              (bundledMode ? '安装时将自动导入至库 dodoguard' : '安装时将导入至你填写的数据库') +
+              '</span>';
+          } else {
+            bundledSqlAvailable = false;
+            sqlBox.innerHTML =
+              '<strong style="color:#b91c1c">未找到 dodoguard.sql</strong>，' +
+              ($('importCb').checked
+                ? '无法完成导入。请使用完整安装包。'
+                : '若不导入 SQL，可继续保存已有数据库配置。');
+          }
+          if (bundledMode && !info.bundledMysqlAvailable) {
+            sqlBox.innerHTML +=
+              '<br /><strong style="color:#b91c1c">未找到内置 MySQL 组件</strong>，请先执行 npm run desktop:fetch-mysql:win 后重新打包。';
+            bundledSqlAvailable = false;
+          }
+          syncInstallButton();
+        } catch (e) {
+          $('sqlBox').textContent = '初始化检查失败：' + String(e);
+        }
+      });
+    </script>
+  </body>
+</html>

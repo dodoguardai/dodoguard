@@ -1,0 +1,24 @@
+# 本地开发用 MySQL（与 backend 默认 DB_* 一致：root / root12345 / dodoguard / 3306）
+# 启动：npm run dev:mysql
+# 停止并删容器：npm run dev:mysql:down（数据卷保留；需彻底删库可加 -v）
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: dodoguard-mysql-dev
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root12345
+      MYSQL_DATABASE: dodoguard
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot12345"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+    volumes:
+      - dodoguard-mysql-dev-data:/var/lib/mysql
+
+volumes:
+  dodoguard-mysql-dev-data:

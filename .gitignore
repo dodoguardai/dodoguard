@@ -1,0 +1,38 @@
+node_modules/
+
+.env
+.env.*
+!.env.example
+
+/dist/
+/frontend/dist/
+/release/
+/zhian-offline/
+
+# Local security-test inputs and outputs
+/.dodoguard/
+/results/
+/reports/
+/tmp/
+/scan-task.yaml
+/scan-task.yml
+/my-scan.yaml
+/my-scan.yml
+*.scan.local.yaml
+*.scan.local.yml
+*.scan.local.json
+/scan-results*.json
+
+# Generated database exports
+/drizzle/zhian*.sql
+/drizzle/export_*.sql
+/drizzle/*_export.sql
+/scripts/sql/zhian*.sql
+
+# Local agent configuration
+/AGENTS.md
+/CLAUDE.md
+/conductor.json
+
+.DS_Store
+*.tsbuildinfo

@@ -1,0 +1,59 @@
+---
+sidebar_label: Connecting to Targets
+description: Red team API authentication and rate limiting configurations by validating security headers and tokens to protect AI systems from unauthorized access and abuse
+---
+
+# Connecting to Targets
+
+When setting up your target, use these best practices:
+
+- Use a **single HTTP endpoint** for all requests. This endpoint should accept a user input and return a response.
+- If your target requires authentication, include a custom header or user agent in your configuration and whitelist your client.
+- DodoGuard runs locally on your machine, so your machine must have access to the target.
+
+DodoGuard is capable of using authentication, complex protocols, websockets, and more. But you will find it much easier to setup if you use a single HTTP endpoint.
+
+There are a few common issues that can arise when connecting to targets:
+
+## Authentication
+
+If your target requires authentication you will need to provide a valid authentication token.
+
+If you're using a provider like HTTP or WebSocket, you can pass the token in the `headers` property.
+
+```yaml
+headers:
+  Authorization: Bearer <token>
+```
+
+## Rate Limiting
+
+If you're making a large number of requests to the target, you may encounter rate limiting. This is a common security measure to prevent abuse.
+
+The solution here is to include a custom header or user agent in your configuration and whitelist this in your target's rate limiting settings.
+
+```yaml
+headers:
+  User-Agent: DodoGuard
+```
+
+## Streaming or Polling
+
+Many chatbots will stream responses back to the client or have the client poll for new messages. The solution here is to setup an alternate HTTP endpoint or parameter to return the response in a single message.
+
+## Using WebSockets for Realtime Targets
+
+If your target exposes a Realtime WebSocket-compatible API, you can test it directly:
+
+- With the generic [WebSocket provider](/docs/providers/websocket/)
+- With the [OpenAI Realtime provider](/docs/providers/openai/#realtime-api-models)
+
+For OpenAI-compatible Realtime targets (including proxies and local/dev deployments), set `apiBaseUrl` (or `OPENAI_API_BASE_URL`/`OPENAI_BASE_URL`). The WebSocket URL will be derived automatically (https→wss, http→ws), allowing you to route through corporate proxies or test on `localhost`:
+
+```yaml
+providers:
+  - id: openai:realtime:gpt-4o-realtime-preview
+    config:
+      apiBaseUrl: 'http://localhost:8080/v1' # → ws://localhost:8080/v1/realtime
+      modalities: ['text']
+```

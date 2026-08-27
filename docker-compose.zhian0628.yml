@@ -1,0 +1,28 @@
+# 本地 zhian0628 开发库（3307 端口，避免占用本机已有 3306）
+# 启动：docker compose -f docker-compose.zhian0628.yml up -d --wait
+# 停止：docker compose -f docker-compose.zhian0628.yml down
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: zhian0628-mysql-dev
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: zhian0628_dev
+      MYSQL_DATABASE: zhian0628
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max_allowed_packet=256M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pzhian0628_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    volumes:
+      - zhian0628-mysql-dev-data:/var/lib/mysql
+
+volumes:
+  zhian0628-mysql-dev-data:

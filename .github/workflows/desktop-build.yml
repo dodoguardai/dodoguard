@@ -1,0 +1,64 @@
+name: Desktop builds
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [safe]
+    paths:
+      - "backend/**"
+      - "desktop/**"
+      - "drizzle/**"
+      - "frontend/**"
+      - "scripts/desktop-preflight.cjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/desktop-build.yml"
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows NSIS
+            os: windows-latest
+            command: npm run desktop:dist:win
+            artifact: release/*
+          - name: macOS DMG
+            os: macos-latest
+            command: npm run desktop:dist:mac
+            artifact: release/*
+          - name: Linux AppImage and deb
+            os: ubuntu-latest
+            command: npm run desktop:fetch-mysql:linux && npm run desktop:dist:linux
+            artifact: release/*
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify desktop build inputs
+        run: npm run desktop:preflight
+
+      - name: Build installer
+        run: ${{ matrix.command }}
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+      - name: Upload installer artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: ${{ matrix.artifact }}
+          if-no-files-found: error

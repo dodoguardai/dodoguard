@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+authors:
+  - family-names: DodoGuard
+    given-names: Team
+title: DodoGuard
+version: 0.119.0
+date-released: '2026-05-30'
+url: https://dodoguard.dev
+repository-code: https://github.com/ZhiyuFutureAI/dodoguard
+license: MIT
+type: software
+description: DodoGuard - LLM security testing toolkit

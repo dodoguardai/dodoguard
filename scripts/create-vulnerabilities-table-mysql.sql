@@ -1,0 +1,33 @@
+-- Create vulnerabilities table for MySQL
+CREATE TABLE IF NOT EXISTS vulnerabilities (
+  id VARCHAR(36) PRIMARY KEY,
+  avd_id VARCHAR(50) UNIQUE NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  type VARCHAR(20) NOT NULL COMMENT 'agent, mcp, llm, tool, platform',
+  category VARCHAR(100),
+  risk_level VARCHAR(20) NOT NULL COMMENT 'critical, high, medium, low',
+  status VARCHAR(20) NOT NULL DEFAULT 'discovered' COMMENT 'discovered, confirmed, patched, archived',
+  disclosed_at TIMESTAMP NULL,
+  description TEXT,
+  affected_targets JSON,
+  impact_scope TEXT,
+  cwe_id VARCHAR(20),
+  mitre_id VARCHAR(50),
+  owasp_id VARCHAR(50),
+  owasp_llm_top10_mapping JSON,
+  exploitability JSON,
+  patch_status JSON,
+  audit_notes TEXT,
+  tags JSON,
+  metadata JSON,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  created_by VARCHAR(36),
+  updated_by VARCHAR(36),
+  INDEX idx_vulnerabilities_avd_id (avd_id),
+  INDEX idx_vulnerabilities_type (type),
+  INDEX idx_vulnerabilities_risk_level (risk_level),
+  INDEX idx_vulnerabilities_status (status),
+  INDEX idx_vulnerabilities_category (category)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

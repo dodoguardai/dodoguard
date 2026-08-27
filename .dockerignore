@@ -1,0 +1,50 @@
+# 勿把本机 node_modules 打进上下文：否则会覆盖镜像内 `npm ci` 的结果，
+# 导致 tsc/shx 报 MODULE_NOT_FOUND（与本机是否安装 devDependencies 强相关）。
+**/node_modules
+
+# 构建产物与缓存（由镜像内命令生成）
+dist
+frontend/dist
+site/build
+site/.docusaurus
+coverage
+.turbo
+*.tsbuildinfo
+
+# 版本控制与大文件（减小上下文、加速 COPY）
+.git
+.github
+
+# 本地与交付物（无需参与镜像构建）
+**/zhian-offline/images/*.tar
+release
+desktop
+docs
+reports
+exports
+results
+docker-packages
+
+# Windows-only offline bundles; Linux images install scan CLIs via apk/pip.
+capability-audit/tools/bundled/
+capability-audit/tools/bin/*.exe
+# Local virtualenvs are host-specific (macOS/Windows paths and binaries break in Linux containers).
+capability-audit/tools/scan-venv/
+capability-audit/tools/cisco-venv/
+capability-audit/tools/snyk-venv/
+
+# 桌面端 / 文档站 / 测试 / 示例（镜像内 npm ci 仅需 site/package.json，见 Dockerfile COPY）
+site/**
+!site/package.json
+test
+examples
+zhian-offline
+
+# 环境密钥勿入镜像
+.env
+.env.*
+!.env.example
+
+# 日志与生成目录
+reports
+npm-debug.log*

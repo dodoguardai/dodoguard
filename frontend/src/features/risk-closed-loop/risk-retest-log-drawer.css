@@ -1,0 +1,201 @@
+#rrcRetestLogHost {
+  pointer-events: none;
+}
+
+#rrcRetestLogHost .sec-rpt-v2-drawer-mask,
+#rrcRetestLogHost .sec-rpt-v2-drawer {
+  pointer-events: auto;
+}
+
+#rrcRetestLogHost .sec-rpt-v2-drawer-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 9100;
+  border: 0;
+  background: rgb(15 23 42 / 42%);
+  cursor: pointer;
+}
+
+#rrcRetestLogHost .sec-rpt-v2-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9110;
+  display: flex;
+  width: 680px;
+  max-width: 92vw;
+  flex-direction: column;
+  background: #fff;
+  box-shadow: -24px 0 50px rgb(15 23 42 / 18%);
+}
+
+#rrcRetestLogHost .sec-rpt-v2-drawer-head {
+  display: flex;
+  flex-shrink: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #fff;
+  padding: 18px 22px;
+}
+
+#rrcRetestLogHost .sec-rpt-v2-drawer-head-main {
+  min-width: 0;
+  flex: 1;
+}
+
+#rrcRetestLogHost .sec-rpt-v2-drawer-head h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+#rrcRetestLogHost .sec-rpt-v2-drawer-subtitle {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#rrcRetestLogHost .sec-rpt-v2-close {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: #f3f4f6;
+  color: #475569;
+  cursor: pointer;
+}
+
+#rrcRetestLogHost .sec-rpt-v2-close:hover {
+  background: #e5e7eb;
+}
+
+#rrcRetestLogHost .sec-rpt-v2-drawer-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+  overflow: auto;
+  background: #f8fafc;
+  padding: 16px 20px 22px;
+}
+
+#rrcRetestLogHost .sec-rpt-v2-drawer-block h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+}
+
+#rrcRetestLogHost .rrc-retest-log-running {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+#rrcRetestLogHost .rrc-retest-log-kpi {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+#rrcRetestLogHost .rrc-retest-log-kpi-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  padding: 14px 12px;
+  text-align: center;
+}
+
+#rrcRetestLogHost .rrc-retest-log-kpi-item strong {
+  display: block;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+#rrcRetestLogHost .rrc-retest-log-kpi-item span {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+#rrcRetestLogHost .rrc-retest-log-list {
+  display: grid;
+  gap: 10px;
+}
+
+#rrcRetestLogHost .rrc-retest-log-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  padding: 12px 14px;
+}
+
+#rrcRetestLogHost .rrc-retest-log-item-time {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+#rrcRetestLogHost .rrc-retest-log-item-meta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+#rrcRetestLogHost .rrc-retest-log-item-meta code {
+  font-size: 11px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+#rrcRetestLogHost .rrc-retest-log-item-result {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#rrcRetestLogHost .rrc-retest-log-item-summary {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+#rrcRetestLogHost .rrc-retest-log-fail {
+  color: #dc2626;
+}
+
+#rrcRetestLogHost .rrc-retest-log-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+#rrcRetestLogHost .rrc-empty-state {
+  padding: 24px;
+  text-align: center;
+  color: #64748b;
+  font-size: 13px;
+}

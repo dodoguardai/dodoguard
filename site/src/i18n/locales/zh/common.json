@@ -1,0 +1,69 @@
+{
+  "hero": {
+    "titleMain": "保护你的 AI 安全",
+    "titleFrom": "从",
+    "titlePrompt": "提示词",
+    "titleTo": "到",
+    "titleProduction": "生产环境",
+    "subtitle": "开源 LLM 安全方案，已被 {{count}}+ 名用户信任使用"
+  },
+  "heroCta": {
+    "getStarted": "开始使用",
+    "requestDemo": "申请演示"
+  },
+  "walkthrough": {
+    "redTeaming": "红队对抗",
+    "redTeamingMobile": "红队",
+    "redTeamingHeading": "面向应用的自适应红队测试，而不只是模型",
+    "redTeamingIntro": "针对你的具体场景生成定制化攻击：",
+    "redTeamingCli": "npx dodoguard@latest redteam setup",
+    "redTeamingDescription": "我们的语言模型会主动探测系统中的特定风险。",
+    "redTeamingMore": "更多内容",
+    "redTeamingLearnMore": "» 了解更多红队对抗",
+    "guardrails": "防护栏",
+    "guardrailsHeading": "能从攻击中持续学习的自进化防护栏",
+    "guardrailsIntro": "不同于静态规则，我们的系统通过红队反馈持续改进：",
+    "guardrailsDeploy": "几分钟内即可在云端或本地部署，并无缝集成到任意 AI 工作流中。",
+    "guardrailsLearnMore": "» 了解更多防护栏",
+    "modelSecurity": "模型安全",
+    "modelSecurityHeading": "覆盖整个 AI 栈的合规能力",
+    "modelSecurityIntro": "一键扫描整个 AI 生态，符合各类行业安全框架：",
+    "modelSecurityDescription": "提供带有整改建议的详细报告，并支持持续监控。",
+    "modelSecurityLearnMore": "» 了解更多模型安全",
+    "mcp": "MCP",
+    "mcpHeading": "企业级 MCP 代理，安全接入 AI 工具",
+    "mcpIntro": "集中控制和监控组织内的 MCP 服务器：",
+    "mcpDescription": "在严格可控的前提下，为 AI 提供经批准的工具与数据访问能力。",
+    "mcpLearnMore": "» 了解更多 MCP 安全",
+    "evals": "评估",
+    "evalsMobile": "评估",
+    "evalsHeading": "构建可靠的提示词、RAG 和智能体",
+    "evalsIntro": "几分钟内开始测试模型、提示词和工具的效果：",
+    "evalsCli": "npx dodoguard@latest init",
+    "evalsDescription": "DodoGuard 本地运行，可直接与你的应用集成——无需额外 SDK、云依赖或登录。",
+    "evalsGetStarted": "» 评估快速上手"
+  },
+  "asSeenOn": {
+    "featuredIn": "媒体报道",
+    "buildHours": "Build Hours",
+    "buildHoursQuote": "“DodoGuard 非常强大，你可以快速迭代提示词、用 YAML 配置测试并在本地查看所有结果……更快也更直接。”",
+    "buildHoursCta": "观看视频 →",
+    "courses": "课程",
+    "coursesQuote": "“DodoGuard 提供了一套即开即用的解决方案，可以显著减少进行全面提示词测试所需的时间和精力。”",
+    "coursesCta": "查看课程 →"
+  },
+  "logos": {
+    "trustedBy": "受到以下团队信任"
+  },
+  "cta": {
+    "title": "现在就为你的 AI 应用加上一层安全防护",
+    "getStarted": "开始使用",
+    "requestDemo": "申请演示"
+  },
+  "language": {
+    "switchToEnglish": "English",
+    "switchToChinese": "中文",
+    "currentLanguage": "当前语言：{{lng}}"
+  }
+}
+

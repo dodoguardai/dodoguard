@@ -1,0 +1,2 @@
+# 可选：大 zip 包使用 Git LFS（需 git lfs install）。未配置 LFS 时仍可作为普通文件提交。
+capability-audit/tools/bundled/*.zip filter=lfs diff=lfs merge=lfs -text

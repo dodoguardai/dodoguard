@@ -1,0 +1,29 @@
+# DodoGuard CLI 扫描任务示例
+# 字段与 POST /api/v1/attack-tasks 请求体对齐，可在开源版本地直接执行
+
+name: "Dify Agent 安全扫描（示例）"
+description: "使用 CLI 对 Dify Agent 进行动态攻击扫描"
+targetType: platform
+platformFamily: dify
+scanMode: runtime
+targetConfig:
+  apiBaseUrl: https://api.dify.ai
+  apiKey: ${DIFY_API_KEY}
+  userId: scan-cli-user
+vulnerabilities:
+  - agent-prompt-injection
+attackMode: simple
+detectionConfig:
+  useRule: true
+  useLLM: false
+  useKnowledgeBase: false
+metadata:
+  creationMode: cli
+execution:
+  maxConcurrency: 2
+output:
+  path: ./scan-results.json
+  format: json
+
+# 也可引用已有 dify-pentest 配置，而非 inline targetConfig：
+# runnerConfigPath: ../dify-pentest/config.yaml

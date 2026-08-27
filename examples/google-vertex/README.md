@@ -1,0 +1,92 @@
+# google-vertex (Google Vertex AI Examples)
+
+Example configurations for testing Google Vertex AI models with DodoGuard.
+
+You can run this example with:
+
+```bash
+npx dodoguard@latest init --example google-vertex
+```
+
+## Purpose
+
+- Test Vertex AI's Gemini, Claude, and Llama models
+- Configure model-specific features and search grounding
+- Compare performance across different tasks
+
+## Prerequisites
+
+- Google Cloud account with Vertex AI API enabled
+- API credentials
+- Node.js 20+
+
+## Environment Variables
+
+- `VERTEX_PROJECT_ID` - Your Google Cloud project ID
+- `GOOGLE_APPLICATION_CREDENTIALS` - Path to service account credentials (optional)
+
+## Setup
+
+1. Install dependencies:
+
+   ```sh
+   npm install google-auth-library
+   ```
+
+2. Configure authentication:
+
+   ```sh
+   # User account (development)
+   gcloud auth application-default login
+
+   # Or service account
+   export GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
+   ```
+
+3. Set your project ID:
+   ```sh
+   export VERTEX_PROJECT_ID=your-project-id
+   ```
+
+## Configurations
+
+This example includes:
+
+- `dodoguardconfig.gemini.yaml`: Gemini models with function calling, system instructions, and safety settings
+- `dodoguardconfig.claude.yaml`: Claude models for technical writing and code analysis
+- `dodoguardconfig.llama.yaml`: Llama models with safety features and region configuration
+- `dodoguardconfig.search.yaml`: Search grounding for real-time information
+- `dodoguardconfig.response-schema.yaml`: Response schemas with structured output
+
+## Running Examples
+
+```sh
+# Basic example
+dodoguard eval -c dodoguardconfig.yaml
+
+# Model-specific examples
+dodoguard eval -c dodoguardconfig.gemini.yaml
+dodoguard eval -c dodoguardconfig.claude.yaml
+dodoguard eval -c dodoguardconfig.llama.yaml
+
+# Search grounding tool and image understanding
+dodoguard eval -c dodoguardconfig.search.yaml
+dodoguard eval -c dodoguardconfig.image.yaml
+
+# Structured output with response schemas
+dodoguard eval -c dodoguardconfig.response-schema.yaml
+
+# View results
+dodoguard view
+```
+
+## Expected Results
+
+Each configuration demonstrates different model capabilities, from function calling and tool use to safety features and real-time information retrieval.
+
+## Learn More
+
+- [Vertex AI Provider Documentation](https://www.dodoguard.dev/docs/providers/vertex/)
+- [Google Cloud Vertex AI Documentation](https://cloud.google.com/vertex-ai/docs)
+- [Google documentation on Grounding with Google Search](https://ai.google.dev/docs/gemini_api/grounding)
+- [Google documentation on Image Understanding](https://ai.google.dev/gemini-api/docs/image-understanding#inline-image)

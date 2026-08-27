@@ -1,0 +1,35 @@
+{
+  "version": "2.2.0",
+  "scope": "skill-mcp-only",
+  "platforms": {
+    "win32-x64": {
+      "skillspector": {
+        "version": "2.3.9",
+        "path": "scan-venv/Scripts/skillspector.exe"
+      },
+      "cisco_skill_scanner": {
+        "version": "2.0.12",
+        "path": "scan-venv/Scripts/skill-scanner.exe"
+      },
+      "snyk_agent_scan": {
+        "version": "external",
+        "path": "CAPABILITY_SCAN_SNYK_AGENT_SCAN_BIN or PATH"
+      },
+      "bundleArchive": "bundled/scan-venv-win-amd64.zip"
+    },
+    "linux-x64": {
+      "skillspector": {
+        "version": "2.3.9",
+        "path": "scan-venv/bin/skillspector"
+      },
+      "cisco_skill_scanner": {
+        "version": "2.0.12",
+        "path": "scan-venv/bin/skill-scanner"
+      },
+      "snyk_agent_scan": {
+        "version": "external",
+        "path": "CAPABILITY_SCAN_SNYK_AGENT_SCAN_BIN or PATH"
+      }
+    }
+  }
+}

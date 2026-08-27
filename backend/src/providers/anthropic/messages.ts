@@ -1,0 +1,246 @@
+import { APIError } from '@anthropic-ai/sdk';
+import { getCache, isCacheEnabled } from '../../cache';
+import { getEnvFloat, getEnvInt } from '../../envars';
+import logger from '../../logger';
+import { normalizeFinishReason } from '../../util/finishReason';
+import { maybeLoadToolsFromExternalFile } from '../../util/index';
+import { createEmptyTokenUsage } from '../../util/tokenUsageUtils';
+import { MCPClient } from '../mcp/client';
+import { transformMCPToolsToAnthropic } from '../mcp/transform';
+import { AnthropicGenericProvider } from './generic';
+import {
+  ANTHROPIC_MODELS,
+  calculateAnthropicCost,
+  getTokenUsage,
+  outputFromMessage,
+  parseMessages,
+  processAnthropicTools,
+} from './util';
+import type Anthropic from '@anthropic-ai/sdk';
+
+import type { EnvOverrides } from '../../types/env';
+import type { CallApiContextParams, ProviderResponse } from '../../types/index';
+import type { AnthropicMessageOptions } from './types';
+
+export class AnthropicMessagesProvider extends AnthropicGenericProvider {
+  declare config: AnthropicMessageOptions;
+  private mcpClient: MCPClient | null = null;
+  private initializationPromise: Promise<void> | null = null;
+
+  static ANTHROPIC_MODELS = ANTHROPIC_MODELS;
+
+  static ANTHROPIC_MODELS_NAMES = ANTHROPIC_MODELS.map((model) => model.id);
+
+  constructor(
+    modelName: string,
+    options: { id?: string; config?: AnthropicMessageOptions; env?: EnvOverrides } = {},
+  ) {
+    if (!AnthropicMessagesProvider.ANTHROPIC_MODELS_NAMES.includes(modelName)) {
+      logger.warn(`Using unknown Anthropic model: ${modelName}`);
+    }
+    super(modelName, options);
+    const { id } = options;
+    this.id = id ? () => id : this.id;
+
+    // Start initialization if MCP is enabled
+    if (this.config.mcp?.enabled) {
+      this.initializationPromise = this.initializeMCP();
+    }
+  }
+
+  private async initializeMCP(): Promise<void> {
+    this.mcpClient = new MCPClient(this.config.mcp!);
+    await this.mcpClient.initialize();
+  }
+
+  async cleanup(): Promise<void> {
+    if (this.mcpClient) {
+      await this.initializationPromise;
+      await this.mcpClient.cleanup();
+      this.mcpClient = null;
+    }
+  }
+
+  toString(): string {
+    if (!this.modelName) {
+      throw new Error('Anthropic model name is not set. Please provide a valid model name.');
+    }
+    return `[Anthropic Messages Provider ${this.modelName}]`;
+  }
+
+  async callApi(prompt: string, context?: CallApiContextParams): Promise<ProviderResponse> {
+    // Wait for MCP initialization if it's in progress
+    if (this.initializationPromise) {
+      await this.initializationPromise;
+    }
+
+    if (!this.apiKey) {
+      throw new Error(
+        'Anthropic API key is not set. Set the ANTHROPIC_API_KEY environment variable or add `apiKey` to the provider config.',
+      );
+    }
+
+    if (!this.modelName) {
+      throw new Error('Anthropic model name is not set. Please provide a valid model name.');
+    }
+
+    // Merge configs from the provider and the prompt
+    const config: AnthropicMessageOptions = {
+      ...this.config,
+      ...context?.prompt?.config,
+    };
+
+    const { system, extractedMessages, thinking } = parseMessages(prompt);
+
+    // Get MCP tools if client is initialized
+    let mcpTools: Anthropic.Tool[] = [];
+    if (this.mcpClient) {
+      mcpTools = transformMCPToolsToAnthropic(this.mcpClient.getAllTools());
+    }
+
+    // Load and process tools from config (handles both external files and inline tool definitions)
+    const configTools = maybeLoadToolsFromExternalFile(config.tools) || [];
+    const { processedTools: processedConfigTools, requiredBetaFeatures } =
+      processAnthropicTools(configTools);
+
+    // Combine all tools
+    const allTools = [...mcpTools, ...processedConfigTools];
+
+    const shouldStream = config.stream ?? false;
+    const params: Anthropic.MessageCreateParams = {
+      model: this.modelName,
+      ...(system ? { system } : {}),
+      max_tokens:
+        config?.max_tokens ||
+        getEnvInt('ANTHROPIC_MAX_TOKENS', config.thinking || thinking ? 2048 : 1024),
+      messages: extractedMessages,
+      stream: shouldStream,
+      temperature:
+        config.thinking || thinking
+          ? config.temperature
+          : config.temperature || getEnvFloat('ANTHROPIC_TEMPERATURE', 0),
+      ...(allTools.length > 0 ? { tools: allTools as any } : {}),
+      ...(config.tool_choice ? { tool_choice: config.tool_choice } : {}),
+      ...(config.thinking || thinking ? { thinking: config.thinking || thinking } : {}),
+      ...(typeof config?.extra_body === 'object' && config.extra_body ? config.extra_body : {}),
+    };
+
+    logger.debug('Calling Anthropic Messages API', { params });
+
+    const headers: Record<string, string> = {
+      ...(config.headers || {}),
+    };
+
+    // Add beta features header if specified
+    const allBetaFeatures = [...(config.beta || []), ...requiredBetaFeatures];
+    if (allBetaFeatures.length > 0) {
+      headers['anthropic-beta'] = allBetaFeatures.join(',');
+    }
+
+    const cache = await getCache();
+    const cacheKey = `anthropic:${JSON.stringify(params)}`;
+
+    if (isCacheEnabled()) {
+      // Try to get the cached response
+      const cachedResponse = await cache.get<string | undefined>(cacheKey);
+      if (cachedResponse) {
+        logger.debug(`Returning cached response for ${prompt}: ${cachedResponse}`);
+        try {
+          const parsedCachedResponse = JSON.parse(cachedResponse) as Anthropic.Messages.Message;
+          const finishReason = normalizeFinishReason(parsedCachedResponse.stop_reason);
+          return {
+            output: outputFromMessage(parsedCachedResponse, config.showThinking ?? true),
+            tokenUsage: getTokenUsage(parsedCachedResponse, true),
+            ...(finishReason && { finishReason }),
+            cost: calculateAnthropicCost(
+              this.modelName,
+              config,
+              parsedCachedResponse.usage?.input_tokens,
+              parsedCachedResponse.usage?.output_tokens,
+            ),
+          };
+        } catch {
+          // Could be an old cache item, which was just the text content from TextBlock.
+          return {
+            output: cachedResponse,
+            tokenUsage: createEmptyTokenUsage(),
+          };
+        }
+      }
+    }
+
+    try {
+      if (shouldStream) {
+        // Handle streaming request
+        const stream = await this.anthropic.messages.stream(params, {
+          ...(typeof headers === 'object' && Object.keys(headers).length > 0 ? { headers } : {}),
+        });
+
+        // Wait for the stream to complete and get the final message
+        const finalMessage = await stream.finalMessage();
+        logger.debug(`Anthropic Messages API streaming complete`, { finalMessage });
+
+        if (isCacheEnabled()) {
+          try {
+            await cache.set(cacheKey, JSON.stringify(finalMessage));
+          } catch (err) {
+            logger.error(`Failed to cache response: ${String(err)}`);
+          }
+        }
+
+        const finishReason = normalizeFinishReason(finalMessage.stop_reason);
+        return {
+          output: outputFromMessage(finalMessage, config.showThinking ?? true),
+          tokenUsage: getTokenUsage(finalMessage, false),
+          ...(finishReason && { finishReason }),
+          cost: calculateAnthropicCost(
+            this.modelName,
+            config,
+            finalMessage.usage?.input_tokens,
+            finalMessage.usage?.output_tokens,
+          ),
+        };
+      } else {
+        // Handle non-streaming request
+        const response = (await this.anthropic.messages.create(params, {
+          ...(typeof headers === 'object' && Object.keys(headers).length > 0 ? { headers } : {}),
+        })) as Anthropic.Messages.Message;
+        logger.debug(`Anthropic Messages API response`, { response });
+
+        if (isCacheEnabled()) {
+          try {
+            await cache.set(cacheKey, JSON.stringify(response));
+          } catch (err) {
+            logger.error(`Failed to cache response: ${String(err)}`);
+          }
+        }
+
+        const finishReason = normalizeFinishReason(response.stop_reason);
+        return {
+          output: outputFromMessage(response, config.showThinking ?? true),
+          tokenUsage: getTokenUsage(response, false),
+          ...(finishReason && { finishReason }),
+          cost: calculateAnthropicCost(
+            this.modelName,
+            config,
+            response.usage?.input_tokens,
+            response.usage?.output_tokens,
+          ),
+        };
+      }
+    } catch (err) {
+      logger.error(
+        `Anthropic Messages API call error: ${err instanceof Error ? err.message : String(err)}`,
+      );
+      if (err instanceof APIError && err.error) {
+        const errorDetails = err.error as { error: { message: string; type: string } };
+        return {
+          error: `API call error: ${errorDetails.error.message}, status ${err.status}, type ${errorDetails.error.type}`,
+        };
+      }
+      return {
+        error: `API call error: ${err instanceof Error ? err.message : String(err)}`,
+      };
+    }
+  }
+}

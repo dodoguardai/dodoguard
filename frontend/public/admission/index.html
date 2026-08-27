@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DodoGuard · 安全准入与系统管理</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside id="sidebar">
+        <div class="sidebar-brand">DodoGuard · 平台演示</div>
+        <div id="nav">
+          <div class="nav-group" data-group="admission" data-expanded="true">
+            <button
+              type="button"
+              class="nav-item nav-parent active"
+              id="admission-toggle"
+              data-nav-parent="admission"
+              aria-expanded="true"
+              aria-controls="admission-sub"
+            >
+              <span class="nav-icon" aria-hidden="true">🛡</span>
+              <span class="nav-item-label">安全准入管理</span>
+              <span class="nav-chevron" aria-hidden="true">▾</span>
+            </button>
+            <div id="admission-sub" class="nav-sub"></div>
+          </div>
+          <button type="button" class="nav-item" id="agent-chat-nav" data-id="agent-chat">
+            <span class="nav-icon" aria-hidden="true">💬</span>
+            <span class="nav-item-label">智能助手</span>
+          </button>
+          <div class="nav-group" data-group="system" data-expanded="true">
+            <button
+              type="button"
+              class="nav-item nav-parent"
+              id="system-toggle"
+              data-nav-parent="system"
+              aria-expanded="true"
+              aria-controls="system-sub"
+            >
+              <span class="nav-icon" aria-hidden="true">⌘</span>
+              <span class="nav-item-label">系统管理</span>
+              <span class="nav-chevron" aria-hidden="true">▾</span>
+            </button>
+            <div id="system-sub" class="nav-sub" aria-label="系统管理子菜单">
+              <a class="nav-item" href="#system/models" data-page="models" data-module="system">
+                <span class="nav-item-label">模型设置</span>
+              </a>
+              <a class="nav-item" href="#system/agents-mgmt" data-page="agents-mgmt" data-module="system">
+                <span class="nav-item-label">Agent 设置</span>
+              </a>
+              <div class="nav-sub-divider" aria-hidden="true"></div>
+              <a class="nav-item" href="#system/tenant" data-page="tenant" data-module="system"><span class="nav-item-label">组织租户</span></a>
+              <a class="nav-item" href="#system/iam" data-page="iam" data-module="system"><span class="nav-item-label">身份与访问</span></a>
+              <a class="nav-item" href="#system/platform" data-page="platform" data-module="system"><span class="nav-item-label">平台配置</span></a>
+              <a class="nav-item" href="#system/security-auth" data-page="security-auth" data-module="system"><span class="nav-item-label">安全认证</span></a>
+              <a class="nav-item" href="#system/integrations" data-page="integrations" data-module="system"><span class="nav-item-label">集成中心</span></a>
+              <a class="nav-item" href="#system/notifications" data-page="notifications" data-module="system"><span class="nav-item-label">通知告警</span></a>
+              <a class="nav-item" href="#system/audit" data-page="audit" data-module="system"><span class="nav-item-label">审计日志</span></a>
+              <a class="nav-item" href="#system/open-api" data-page="open-api" data-module="system"><span class="nav-item-label">开放 API</span></a>
+              <a class="nav-item" href="#system/subscription" data-page="subscription" data-module="system"><span class="nav-item-label">订阅与配额</span></a>
+              <a class="nav-item" href="#system/ops" data-page="ops" data-module="system"><span class="nav-item-label">系统运维</span></a>
+            </div>
+          </div>
+        </div>
+      </aside>
+      <div class="main-wrap">
+        <header class="topbar">
+          <h1 id="page-title">待办工作台</h1>
+          <p id="page-desc">按优先级汇总材料、检测、评审、整改等待办 · 登记入台账不依赖准入</p>
+        </header>
+        <main id="content"></main>
+      </div>
+    </div>
+    <div id="modal-root" class="modal-root" hidden aria-hidden="true"></div>
+    <script src="data.js?v=20260620b"></script>
+    <script src="app.js?v=20260620b"></script>
+  </body>
+</html>

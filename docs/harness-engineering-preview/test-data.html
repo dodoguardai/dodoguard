@@ -1,0 +1,1362 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Data</title>
+    <link rel="stylesheet" href="./shared.css" />
+  </head>
+  <body>
+    <div class="dg-shell">
+      <aside class="dg-sidebar" data-slot="sidebar-inner">
+        <div class="dg-sidebar-header">
+          <div class="dg-team">
+            <strong>DodoGuard</strong>
+            <small>Reliability Lab</small>
+          </div>
+        </div>
+        <div class="dg-sidebar-content">
+          <div class="dg-nav-label">Reliability Lab</div>
+          <nav class="dg-nav">
+            <a class="dg-nav-item" href="./index.html">UI Map</a>
+            <a class="dg-nav-item" href="./reliability-home.html">Reliability Home</a>
+            <a class="dg-nav-item" href="./agents.html">Agents</a>
+            <a class="dg-nav-item" href="./scenario-studio.html">Scenario Studio</a>
+            <a class="dg-nav-item" href="./test-data.html" aria-current="page">Test Data</a>
+            <a class="dg-nav-item" href="./evaluation-rules.html">Evaluation rules</a>
+            <a class="dg-nav-item" href="./run-center.html">Run Center</a>
+            <a class="dg-nav-item" href="./benchmark-diff.html">Benchmark &amp; Diff</a>
+            <a class="dg-nav-item" href="./quality-gates.html">Quality Gates</a>
+            <a class="dg-nav-item" href="./issue-workflow.html">Issue Workflow</a>
+          </nav>
+        </div>
+      </aside>
+
+      <div class="dg-inset">
+        <header class="dg-header">
+          <span class="dg-header-title">Reliability Lab</span>
+        </header>
+        <main class="dg-main">
+          <div class="dg-page-head">
+            <div>
+              <div class="dg-breadcrumb">Reliability Lab / Test Data</div>
+              <h1 class="dg-title">Test Data</h1>
+              <p class="dg-desc">
+                Evaluation assets: datasets are <strong>Q&amp;A-style test cases</strong>—<code>question</code> (vars / input), <code>expected_answer</code> (pass signal for rules or LLM rubric), optional <code>failure_signals</code> (must-not phrases, forbidden tools, bad-example hints)—plus case sets, baselines, and labels. Aligned with Promptfoo-style <strong>vars + assert</strong> (
+                <a href="https://www.promptfoo.dev/docs/configuration/guide/" rel="noopener noreferrer" target="_blank">config guide</a>). Session mock only.
+              </p>
+              <p class="dg-page-hint">
+                <strong>Quick path:</strong> Use the table below as the hub — <strong>Details</strong> opens imports and manual entry; <strong>Scenario</strong> jumps to the wizard with a dataset hint;
+                <strong>Run</strong> opens Run Center with <code>?dataset=…</code>. New user? Read
+                <a href="./index.html#howto-prototype">UI Map · How to use this prototype</a> first.
+                <span class="muted" style="display: block; margin-top: 0.35rem">说明：表内数据为演示；除本会话表格外，刷新页面会丢失未持久化的改动。</span>
+                <span class="muted" style="display: block; margin-top: 0.35rem">核心逻辑：每条样本提供 <code>question</code>（输入）与 <code>expected_answer</code>（期望输出）；Scenario 绑定数据集后逐条评估并汇总通过率。</span>
+              </p>
+              <details class="dg-drawer-details dg-mt-3" id="item-type-scoring">
+                <summary>How items are scored (same pipeline for all types)</summary>
+                <div class="dg-drawer-details-body">
+                  <p class="muted dg-scoring-guide-intro" style="font-size: 0.8125rem; margin: 0 0 0.75rem">
+                    <code>item_type</code> is a <strong>taxonomy label</strong> for reporting and mix—it does <strong>not</strong> switch to a different assert engine. Pass/fail uses the same path for every row:
+                    <code>expected_answer</code> and <code>failure_signals</code> (dataset), plus scenario <strong>rule sets</strong> and optional <strong>LLM rubric</strong> (see
+                    <a href="./scenario-studio.html?tab=editor&amp;step=3">Scenario Studio · Evaluate</a>). Author gold and negatives to match the capability you are testing.
+                  </p>
+                  <div class="dg-table-wrap dg-scoring-guide-table-wrap">
+                    <table class="dg-table dg-table-compact dg-scoring-guide-table">
+                      <thead>
+                        <tr>
+                          <th>Item type</th>
+                          <th>Typical <code>expected_answer</code></th>
+                          <th><code>failure_signals</code></th>
+                          <th>Rules focus</th>
+                          <th>Rubric focus</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Factual</td>
+                          <td>Correct fact, intent label, or grounded short reply</td>
+                          <td>Forbidden phrases, hallucinated entities</td>
+                          <td>Exact / JSONPath on structured fields</td>
+                          <td>Grounding vs question; no invented facts</td>
+                        </tr>
+                        <tr>
+                          <td>Reasoning</td>
+                          <td>Expected conclusion or required reasoning steps (summary)</td>
+                          <td>Bad-example outputs that skip steps</td>
+                          <td>JSONPath where intermediate structure exists</td>
+                          <td>Logical validity; premises → conclusion</td>
+                        </tr>
+                        <tr>
+                          <td>Tool-use</td>
+                          <td>Which tool(s) to call and what to return</td>
+                          <td><code>forbidden_tools</code>, wrong-arg patterns</td>
+                          <td>Tool-call policy on <code>tool_trace</code></td>
+                          <td>Correct tool choice and safe parameters</td>
+                        </tr>
+                        <tr>
+                          <td>Safety</td>
+                          <td>Refuse, clarify, escalate, or safe completion</td>
+                          <td>Must-not commitments, policy leaks</td>
+                          <td>Regex on output / tool allowlist</td>
+                          <td>Policy adherence; appropriate refusal</td>
+                        </tr>
+                        <tr>
+                          <td>Robustness</td>
+                          <td>Clarify or correct route under noisy input</td>
+                          <td>Fake IDs, overconfident claims</td>
+                          <td>Intent allowlists; regex on toxic shortcuts</td>
+                          <td>Stability under noise; no fabricated data</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </details>
+            </div>
+            <div class="dg-actions">
+              <a class="btn btn-outline" href="./index.html#howto-prototype">How to use</a>
+              <button type="button" class="btn btn-outline" id="btn-import-one-item">Import one item</button>
+              <button type="button" class="btn btn-outline" id="btn-import-entry">Bulk import (JSONL)</button>
+              <button type="button" class="btn btn-outline" data-toast="Export job queued (mock)">Export</button>
+              <button type="button" class="btn btn-default" id="btn-new-dataset-entry">New dataset</button>
+            </div>
+          </div>
+
+          <div data-tab-root>
+            <div class="dg-tabs dg-mt-4" role="tablist">
+              <button type="button" class="dg-tab-btn is-active" data-tab-trigger="datasets" aria-selected="true">Datasets</button>
+              <button type="button" class="dg-tab-btn" data-tab-trigger="cases" aria-selected="false">Case sets</button>
+              <button type="button" class="dg-tab-btn" data-tab-trigger="baselines" aria-selected="false">Baselines</button>
+              <button type="button" class="dg-tab-btn" data-tab-trigger="labels" aria-selected="false">Labels &amp; tags</button>
+            </div>
+
+            <div class="dg-mt-4" data-tab-panel="datasets">
+              <div class="dg-grid dg-grid-2-1">
+                <div class="dg-card-sm">
+                  <div class="dg-toolbar-inline" style="flex-wrap: wrap">
+                    <button type="button" class="btn btn-outline btn-sm" id="btn-import-one-item-inline">Import one item</button>
+                    <button type="button" class="btn btn-outline btn-sm" id="btn-manual-entry">Manual entry</button>
+                    <input type="search" class="dg-input" id="dataset-search" placeholder="Filter by name…" style="max-width: 14rem" />
+                    <select class="dg-select" id="dataset-platform" style="max-width: 8rem">
+                      <option value="all">All platforms</option>
+                      <option value="Dify">Dify</option>
+                      <option value="Coze">Coze</option>
+                    </select>
+                  </div>
+                  <div class="dg-table-wrap dg-mt-4">
+                    <table class="dg-table">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Platform</th>
+                          <th>Rows</th>
+                          <th>Primary types</th>
+                          <th>Linked scenario</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody id="dataset-tbody">
+                        <tr data-name="cs-intent-gold-v3" data-platform="Dify">
+                          <td>cs-intent-gold-v3</td>
+                          <td>Dify</td>
+                          <td>1,240</td>
+                          <td>Factual, Robustness</td>
+                          <td>CS routing – noisy input</td>
+                          <td class="dg-actions-cell">
+                            <button type="button" class="btn btn-outline btn-sm" data-open-drawer="ds-1">Details</button>
+                            <a class="btn btn-outline btn-sm" href="./run-center.html?dataset=cs-intent-gold-v3&amp;from=test-data">Run</a>
+                            <a class="btn btn-outline btn-sm" href="./scenario-studio.html?dataset=cs-intent-gold-v3&amp;tab=editor">Scenario</a>
+                          </td>
+                        </tr>
+                        <tr data-name="order-query-stress" data-platform="Coze">
+                          <td>order-query-stress</td>
+                          <td>Coze</td>
+                          <td>380</td>
+                          <td>Tool-use, Robustness</td>
+                          <td>Order query – tool timeout</td>
+                          <td class="dg-actions-cell">
+                            <button type="button" class="btn btn-outline btn-sm" data-open-drawer="ds-2">Details</button>
+                            <a class="btn btn-outline btn-sm" href="./run-center.html?dataset=order-query-stress&amp;from=test-data">Run</a>
+                            <a class="btn btn-outline btn-sm" href="./scenario-studio.html?dataset=order-query-stress&amp;tab=editor">Scenario</a>
+                          </td>
+                        </tr>
+                        <tr data-name="sales-longctx-v1" data-platform="Dify">
+                          <td>sales-longctx-v1</td>
+                          <td>Dify</td>
+                          <td>620</td>
+                          <td>Reasoning, Factual</td>
+                          <td>Sales Q&amp;A – long context</td>
+                          <td class="dg-actions-cell">
+                            <button type="button" class="btn btn-outline btn-sm" data-open-drawer="ds-3">Details</button>
+                            <a class="btn btn-outline btn-sm" href="./run-center.html?dataset=sales-longctx-v1&amp;from=test-data">Run</a>
+                            <a class="btn btn-outline btn-sm" href="./scenario-studio.html?dataset=sales-longctx-v1&amp;tab=editor">Scenario</a>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div id="dataset-empty-state" class="dg-empty-state hidden" role="status" aria-live="polite">
+                    <p style="margin: 0">No datasets match your filters.</p>
+                    <button type="button" class="btn btn-outline btn-sm" id="dataset-clear-filters">Clear filters</button>
+                  </div>
+                  <p class="note">
+                    Each row is a test case: <code>question</code>, <code>expected_answer</code>, <code>item_type</code> (Factual, Reasoning, Tool-use, Safety, Robustness), optional <code>failure_signals</code> (object or JSON string: e.g.
+                    <code>forbidden_phrases</code>, <code>forbidden_tools</code>, <code>bad_example_output</code>) for negative checks alongside scenario <a href="./evaluation-rules.html">rule sets</a> / LLM judge. Optional metadata: tenant, role, channel. PII masking rules apply.
+                  </p>
+                </div>
+                <div class="dg-card-sm">
+                  <h3>Quick actions</h3>
+                  <ul class="dg-list">
+                    <li><strong>Import one item</strong> — form, JSON, <strong>CSV row</strong>, or <strong>clipboard</strong> into an existing dataset</li>
+                    <li>Bulk import: pick a JSONL file or paste lines in the bulk drawer</li>
+                    <li>Import failed samples from a Run</li>
+                    <li>Freeze a version for baseline reference</li>
+                  </ul>
+                  <button type="button" class="btn btn-outline btn-sm dg-mt-4" data-toast="Snapshot tag created: preview-20260406 (mock)">Freeze current version</button>
+                  <h4 class="dg-drawer-section-title dg-mt-4">Next steps</h4>
+                  <p class="muted" style="font-size: 0.8125rem; margin: 0 0 0.5rem">
+                    Bind datasets in Scenario Studio (matrix step). Grading uses each row’s <code>expected_answer</code> and <code>failure_signals</code> together with the scenario’s rule sets and LLM rubric. Table links are deep-link mocks.
+                  </p>
+                  <div class="dg-toolbar-inline" style="margin: 0; flex-wrap: wrap">
+                    <a class="btn btn-outline btn-sm" href="./scenario-studio.html?tab=editor">Open Scenario Studio</a>
+                    <a class="btn btn-default btn-sm" href="./run-center.html?from=test-data">Open Run Center</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dg-mt-4 hidden" data-tab-panel="cases">
+              <div class="dg-card-sm">
+                <div class="dg-toolbar-inline dg-mb-4">
+                  <h3 style="margin: 0; font-size: 1rem">Case sets</h3>
+                  <button type="button" class="btn btn-default btn-sm" id="btn-case-entry">Add case set</button>
+                </div>
+                <div class="dg-table-wrap">
+                  <table class="dg-table">
+                    <thead>
+                      <tr>
+                        <th>Set name</th>
+                        <th>Source</th>
+                        <th>Filter</th>
+                        <th>Cases</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody id="case-tbody">
+                      <tr>
+                        <td>smoke-routing</td>
+                        <td>cs-intent-gold-v3</td>
+                        <td>tag=smoke</td>
+                        <td>48</td>
+                        <td><button type="button" class="btn btn-outline btn-sm" data-toast="Reference in Scenario Studio (mock)">Use in scenario</button></td>
+                      </tr>
+                      <tr>
+                        <td>boundary-noise</td>
+                        <td>cs-intent-gold-v3</td>
+                        <td>type=boundary</td>
+                        <td>120</td>
+                        <td><button type="button" class="btn btn-outline btn-sm" data-toast="Reference in Scenario Studio (mock)">Use in scenario</button></td>
+                      </tr>
+                      <tr>
+                        <td>full-regression</td>
+                        <td>(multi-source)</td>
+                        <td>baseline=2026-04-01</td>
+                        <td>2,100</td>
+                        <td><button type="button" class="btn btn-outline btn-sm" data-toast="Reference in Scenario Studio (mock)">Use in scenario</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="dg-mt-4 hidden" data-tab-panel="baselines">
+              <div class="dg-card-sm">
+                <h3>Baselines</h3>
+                <div class="dg-table-wrap">
+                  <table class="dg-table">
+                    <thead>
+                      <tr>
+                        <th>Baseline ID</th>
+                        <th>Scope</th>
+                        <th>Frozen</th>
+                        <th>Used by</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>bl-2026-04-06-prod</td>
+                        <td>All scenarios</td>
+                        <td>2026-04-06</td>
+                        <td>Gates / Diff</td>
+                        <td><button type="button" class="btn btn-outline btn-sm" data-toast="Set as default baseline (mock)">Set default</button></td>
+                      </tr>
+                      <tr>
+                        <td>bl-release-1.9.1</td>
+                        <td>Customer domain</td>
+                        <td>2026-04-01</td>
+                        <td>Benchmark</td>
+                        <td><button type="button" class="btn btn-outline btn-sm" data-toast="Set as default baseline (mock)">Set default</button></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p class="note">A baseline pins metric snapshots from a Run.</p>
+              </div>
+            </div>
+
+            <div class="dg-mt-4 hidden" data-tab-panel="labels">
+              <div class="dg-card-sm">
+                <h3>Labels &amp; tags</h3>
+                <div class="pill-list" id="pill-list-tags">
+                  <span class="pill">smoke</span>
+                  <span class="pill">boundary</span>
+                  <span class="pill">regression</span>
+                  <span class="pill">pii-safe</span>
+                </div>
+                <div class="dg-field dg-mt-4" style="max-width: 24rem">
+                  <label class="dg-label" for="new-tag">New tag</label>
+                  <div class="dg-toolbar-inline" style="margin: 0">
+                    <input type="text" class="dg-input" id="new-tag" placeholder="e.g. long-context" style="max-width: 12rem" />
+                    <button type="button" class="btn btn-default btn-sm" id="btn-add-tag">Add</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <template id="tpl-dataset-entry">
+      <p class="muted" style="margin-top: 0">Static mock: appended rows exist only in this page session.</p>
+      <h4 class="dg-drawer-section-title">Manual entry</h4>
+      <div class="dg-field">
+        <label class="dg-label" for="entry-ds-name">Dataset name</label>
+        <input class="dg-input" type="text" id="entry-ds-name" placeholder="my-dataset-v1" style="max-width: 100%" />
+      </div>
+      <div class="dg-field dg-mt-4">
+        <label class="dg-label" for="entry-ds-platform">Platform</label>
+        <select class="dg-select" id="entry-ds-platform" style="max-width: 100%">
+          <option>Dify</option>
+          <option>Coze</option>
+        </select>
+      </div>
+      <div class="dg-field dg-mt-4">
+        <label class="dg-label" for="entry-ds-question">Question</label>
+        <input class="dg-input" type="text" id="entry-ds-question" placeholder="User or system prompt…" style="max-width: 100%" />
+      </div>
+      <div class="dg-field dg-mt-4">
+        <label class="dg-label" for="entry-ds-answer">Expected answer</label>
+        <input class="dg-input" type="text" id="entry-ds-answer" placeholder="Gold label or reference reply…" style="max-width: 100%" />
+      </div>
+      <div class="dg-field dg-mt-4">
+        <label class="dg-label" for="entry-ds-failure-signals">Failure signals (optional)</label>
+        <textarea class="dg-textarea" id="entry-ds-failure-signals" rows="3" style="max-width: 100%; font-family: ui-monospace, monospace" placeholder='{"forbidden_phrases":["refund approved"],"forbidden_tools":["refund_full"]}'></textarea>
+        <p class="note" style="margin: 0.35rem 0 0; font-size: 0.75rem">JSON object or plain note; used with rules / LLM rubric at run time (mock).</p>
+      </div>
+      <div class="dg-field dg-mt-4">
+        <label class="dg-label" for="entry-ds-item-type">Item type</label>
+        <p class="muted" style="font-size: 0.75rem; margin: 0 0 0.35rem">
+          Stratification label; same scoring pipeline for all types. <a href="#item-type-scoring">Open scoring guide</a>
+        </p>
+        <select class="dg-select" id="entry-ds-item-type" style="max-width: 100%">
+          <option>Factual</option>
+          <option>Reasoning</option>
+          <option>Tool-use</option>
+          <option>Safety</option>
+          <option>Robustness</option>
+        </select>
+      </div>
+      <div class="dg-field dg-mt-4">
+        <label class="dg-label" for="entry-ds-linked">Linked scenario (optional)</label>
+        <input class="dg-input" type="text" id="entry-ds-linked" placeholder="—" style="max-width: 100%" />
+      </div>
+      <div class="dg-toolbar-inline dg-mt-4" style="flex-wrap: wrap">
+        <button type="button" class="btn btn-default" data-dataset-append>Add to list</button>
+      </div>
+
+      <h4 class="dg-drawer-section-title dg-mt-4">Load from file (mock)</h4>
+      <p class="muted" style="font-size: 0.8125rem; margin: 0 0 0.5rem">
+        Reads JSONL / JSON / plain text into the field below. For many <strong>CSV</strong> rows, use <strong>Import one item</strong> and paste one row at a time (or clipboard).
+      </p>
+      <div class="dg-field dg-mb-4">
+        <label class="dg-label" for="entry-jsonl-file">Choose file</label>
+        <input type="file" id="entry-jsonl-file" accept=".jsonl,.json,.txt,text/plain,application/json" class="dg-input" style="padding: 0.35rem; max-width: 100%" />
+      </div>
+
+      <h4 class="dg-drawer-section-title dg-mt-4">Paste JSONL</h4>
+      <p class="muted" style="font-size: 0.8125rem">
+        One JSON object per line. Preferred keys: <code>question</code>, <code>expected_answer</code>, <code>item_type</code>, optional <code>failure_signals</code> (object). Legacy keys still accepted:
+        <code>input</code> / <code>user_input</code> / <code>prompt</code> and <code>expected</code> / <code>expect</code> / <code>expected_output</code>.
+        <code>item_type</code> is included in run vars for reporting, stratification, and optional grader context—it does not select a separate assert type by itself.
+      </p>
+      <p class="note" style="margin: 0 0 0.5rem; font-size: 0.8125rem">
+        Example line:
+        <code style="word-break: break-all">{"question":"Track order ORD-9f2a","expected_answer":"Invoke order tool and return status","item_type":"Tool-use","failure_signals":{"forbidden_tools":["refund_full"],"forbidden_phrases":["I refunded"]}}</code>
+        <button type="button" class="btn btn-outline btn-sm" style="margin-left: 0.35rem; vertical-align: middle" data-jsonl-insert-example>Insert example</button>
+      </p>
+      <div class="dg-field">
+        <label class="dg-label" for="entry-jsonl">JSONL</label>
+        <textarea class="dg-textarea" id="entry-jsonl" rows="5" style="max-width: 100%; font-family: ui-monospace, monospace"></textarea>
+      </div>
+      <pre class="dg-jsonl-preview" id="entry-jsonl-preview" style="display: none"></pre>
+      <div class="dg-toolbar-inline dg-mt-4" style="flex-wrap: wrap">
+        <button type="button" class="btn btn-outline" data-jsonl-preview>Preview first 3 lines</button>
+        <button type="button" class="btn btn-default" data-dataset-jsonl-append>Parse &amp; append</button>
+      </div>
+      <div class="dg-toolbar-inline dg-mt-4" style="flex-wrap: wrap">
+        <button type="button" class="btn btn-outline" data-close-drawer>Close</button>
+      </div>
+    </template>
+
+    <template id="tpl-import-one-item">
+      <p class="muted" style="margin-top: 0">
+        Append one Q&amp;A item to a dataset in the table. Row count and <strong>Primary types</strong> update; <strong>Details</strong> shows merged items for this session (mock).
+      </p>
+
+      <details class="dg-drawer-details" open>
+        <summary>Target dataset, fields &amp; clipboard</summary>
+        <div class="dg-drawer-details-body">
+          <div class="dg-toolbar-inline dg-mb-4" style="flex-wrap: wrap">
+            <button type="button" class="btn btn-outline btn-sm" data-import-one-paste-clipboard>Paste from clipboard</button>
+          </div>
+          <p class="muted" style="font-size: 0.75rem; margin: 0 0 0.75rem">
+            Clipboard (HTTPS / localhost): auto-detects JSON or one CSV row into the form fields.
+          </p>
+          <div class="dg-field">
+            <label class="dg-label" for="import-one-dataset">Target dataset</label>
+            <select class="dg-select" id="import-one-dataset" style="max-width: 100%"></select>
+          </div>
+          <div class="dg-field dg-mt-4">
+            <label class="dg-label" for="import-one-question">Question</label>
+            <input class="dg-input" type="text" id="import-one-question" placeholder="User or system prompt…" style="max-width: 100%" />
+          </div>
+          <div class="dg-field dg-mt-4">
+            <label class="dg-label" for="import-one-answer">Expected answer</label>
+            <input class="dg-input" type="text" id="import-one-answer" placeholder="Gold label or reference reply…" style="max-width: 100%" />
+          </div>
+          <div class="dg-field dg-mt-4">
+            <label class="dg-label" for="import-one-failure-signals">Failure signals (optional)</label>
+            <textarea class="dg-textarea" id="import-one-failure-signals" rows="2" style="max-width: 100%; font-family: ui-monospace, monospace" placeholder='{"forbidden_phrases":["…"]}'></textarea>
+          </div>
+          <div class="dg-field dg-mt-4">
+            <label class="dg-label" for="import-one-item-type">Item type</label>
+            <p class="muted" style="font-size: 0.75rem; margin: 0 0 0.35rem">
+              Stratification label; same scoring pipeline for all types. <a href="#item-type-scoring">Open scoring guide</a>
+            </p>
+            <select class="dg-select" id="import-one-item-type" style="max-width: 100%">
+              <option>Factual</option>
+              <option>Reasoning</option>
+              <option>Tool-use</option>
+              <option>Safety</option>
+              <option>Robustness</option>
+            </select>
+          </div>
+          <div class="dg-toolbar-inline dg-mt-4" style="flex-wrap: wrap">
+            <button type="button" class="btn btn-default" data-import-one-submit>Add item to dataset</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="dg-drawer-details">
+        <summary>JSON object</summary>
+        <div class="dg-drawer-details-body">
+          <p class="muted" style="font-size: 0.8125rem; margin: 0 0 0.5rem">
+            Keys: <code>question</code> / <code>expected_answer</code> / <code>item_type</code> / optional <code>failure_signals</code>, or legacy <code>input</code> / <code>expected</code>.
+          </p>
+          <div class="dg-field">
+            <label class="dg-label" for="import-one-json">Single object (JSON)</label>
+            <textarea class="dg-textarea" id="import-one-json" rows="5" style="max-width: 100%; font-family: ui-monospace, monospace" placeholder='{"question":"…","expected_answer":"…","item_type":"Factual","failure_signals":{}}'></textarea>
+          </div>
+          <div class="dg-toolbar-inline dg-mt-4" style="flex-wrap: wrap">
+            <button type="button" class="btn btn-outline" data-import-one-parse-json>Apply JSON to fields</button>
+            <button type="button" class="btn btn-default" data-import-one-submit-json>Import from JSON</button>
+          </div>
+        </div>
+      </details>
+
+      <details class="dg-drawer-details">
+        <summary>CSV row</summary>
+        <div class="dg-drawer-details-body">
+          <p class="muted" style="font-size: 0.8125rem; margin: 0 0 0.5rem">
+            Columns: <code>question</code>, <code>expected_answer</code>, optional <code>item_type</code>, optional <code>failure_signals</code> (JSON in quotes, e.g. forbidden phrases). Quote fields that contain commas.
+          </p>
+          <p class="note" style="margin: 0 0 0.5rem; font-size: 0.8125rem">
+            Example:
+            <code style="word-break: break-all">What is SLA?,"24h for P1, 72h otherwise",Factual,"{""forbidden_phrases"":[""no SLA""]}"</code>
+            <button type="button" class="btn btn-outline btn-sm" style="margin-left: 0.35rem; vertical-align: middle" data-import-one-insert-csv-example>Insert example</button>
+          </p>
+          <div class="dg-field">
+            <label class="dg-label" for="import-one-csv">CSV (single line)</label>
+            <textarea class="dg-textarea" id="import-one-csv" rows="2" style="max-width: 100%; font-family: ui-monospace, monospace" placeholder="question,expected_answer,Tool-use"></textarea>
+          </div>
+          <div class="dg-toolbar-inline dg-mt-4" style="flex-wrap: wrap">
+            <button type="button" class="btn btn-outline" data-import-one-parse-csv>Apply CSV to fields</button>
+            <button type="button" class="btn btn-default" data-import-one-submit-csv>Import from CSV</button>
+          </div>
+        </div>
+      </details>
+
+      <div class="dg-toolbar-inline dg-mt-4" style="flex-wrap: wrap">
+        <button type="button" class="btn btn-outline" data-close-drawer>Close</button>
+      </div>
+    </template>
+
+    <template id="tpl-case-entry">
+      <p class="muted" style="margin-top: 0">Add one case set row (mock).</p>
+      <div class="dg-field">
+        <label class="dg-label" for="entry-case-name">Set name</label>
+        <input class="dg-input" type="text" id="entry-case-name" placeholder="my-smoke-set" style="max-width: 100%" />
+      </div>
+      <div class="dg-field dg-mt-4">
+        <label class="dg-label" for="entry-case-source">Source dataset</label>
+        <input class="dg-input" type="text" id="entry-case-source" placeholder="cs-intent-gold-v3" style="max-width: 100%" />
+      </div>
+      <div class="dg-field dg-mt-4">
+        <label class="dg-label" for="entry-case-filter">Filter</label>
+        <input class="dg-input" type="text" id="entry-case-filter" placeholder="tag=custom" style="max-width: 100%" />
+      </div>
+      <div class="dg-field dg-mt-4">
+        <label class="dg-label" for="entry-case-count">Estimated cases</label>
+        <input class="dg-input" type="number" id="entry-case-count" value="12" min="1" style="max-width: 8rem" />
+      </div>
+      <div class="dg-toolbar-inline dg-mt-4" style="flex-wrap: wrap">
+        <button type="button" class="btn btn-default" data-case-append>Add to case sets</button>
+        <button type="button" class="btn btn-outline" data-close-drawer>Cancel</button>
+      </div>
+    </template>
+
+    <div id="dg-backdrop" class="dg-backdrop hidden" data-close-drawer></div>
+    <aside id="dg-panel" class="dg-panel hidden" role="dialog" aria-modal="true" aria-labelledby="dg-panel-title">
+      <div class="dg-panel-head">
+        <h4 id="dg-panel-title">Detail</h4>
+        <button type="button" class="btn btn-outline btn-sm" data-close-drawer>Close</button>
+      </div>
+      <div class="dg-panel-body" id="dg-panel-body"></div>
+    </aside>
+
+    <script src="./preview.js"></script>
+    <script>
+      window.PREVIEW_DRAWERS = {
+        "ds-1": {
+          title: "cs-intent-gold-v3",
+          body:
+            "<p class='muted'>1,240 rows · Dify</p><ul class='dg-list'><li>Columns: question, expected_answer, item_type, failure_signals (opt.), locale</li><li>Last import: 2026-04-05</li><li>PII: phone column masked</li></ul><h4 class='dg-drawer-section-title dg-mt-4'>Sample items (mock)</h4><div class='dg-table-wrap'><table class='dg-table dg-table-compact'><thead><tr><th>#</th><th>Question</th><th>Expected answer</th><th>Failure signals</th><th>Type</th></tr></thead><tbody><tr><td>1</td><td>I want a human agent</td><td>intent=human_handoff</td><td>forbidden: refund_full tool</td><td>Factual</td></tr><tr><td>2</td><td>Umm… invoice please</td><td>intent=invoice</td><td>must_not: unrelated SKU list</td><td>Robustness</td></tr><tr><td>3</td><td>(noise only)</td><td>Clarify or refuse</td><td>must_not: fake order ID</td><td>Robustness</td></tr></tbody></table></div>",
+        },
+        "ds-2": {
+          title: "order-query-stress",
+          body:
+            "<p class='muted'>380 rows · Coze</p><ul class='dg-list'><li>Timeout and dirty-payload columns</li><li>Linked scenario: Order query – tool timeout</li></ul><h4 class='dg-drawer-section-title dg-mt-4'>Sample items (mock)</h4><div class='dg-table-wrap'><table class='dg-table dg-table-compact'><thead><tr><th>#</th><th>Question</th><th>Expected answer</th><th>Failure signals</th><th>Type</th></tr></thead><tbody><tr><td>1</td><td>Status for order ORD-9f2a</td><td>tool.query_order_status OK</td><td>forbidden_tools: refund_full</td><td>Tool-use</td></tr><tr><td>2</td><td>Same + 3s timeout</td><td>Fallback message</td><td>must_not: empty 500 page</td><td>Robustness</td></tr></tbody></table></div>",
+        },
+        "ds-3": {
+          title: "sales-longctx-v1",
+          body:
+            "<p class='muted'>620 rows · Dify</p><ul class='dg-list'><li>Context buckets: 4k / 16k / 32k</li></ul><h4 class='dg-drawer-section-title dg-mt-4'>Sample items (mock)</h4><div class='dg-table-wrap'><table class='dg-table dg-table-compact'><thead><tr><th>#</th><th>Question (summary)</th><th>Expected answer</th><th>Failure signals</th><th>Type</th></tr></thead><tbody><tr><td>1</td><td>16k product comparison</td><td>Cite SKU table, no hallucination</td><td>bad_example: invented price</td><td>Reasoning</td></tr><tr><td>2</td><td>32k attachment summary</td><td>Keep all constraints</td><td>must_not: drop stated discount</td><td>Factual</td></tr></tbody></table></div>",
+        },
+      };
+
+      function escHtml(s) {
+        const d = document.createElement("div");
+        d.textContent = s;
+        return d.innerHTML;
+      }
+
+      function slugName(name) {
+        const t = name.trim().toLowerCase().replace(/\s+/g, "-");
+        const safe = t.replace(/[^a-z0-9-_]/g, "");
+        return safe || "dataset-" + Date.now().toString(36);
+      }
+
+      function openDatasetEntryDrawer(title) {
+        const tpl = document.getElementById("tpl-dataset-entry");
+        if (!tpl) return;
+        window.previewOpenDrawer(title || "Dataset entry", tpl.innerHTML, { wide: true });
+      }
+
+      function extractFailureSignalsField(o) {
+        if (!o || typeof o !== "object") return "";
+        const fs = o.failure_signals ?? o.failureSignals;
+        if (fs == null || fs === "") return "";
+        if (typeof fs === "string") return fs;
+        try {
+          return JSON.stringify(fs);
+        } catch {
+          return "";
+        }
+      }
+
+      function extractCaseFromObject(o) {
+        if (!o || typeof o !== "object") return { input: "", expected: "", itemType: "", failureSignals: "" };
+        const input = String(
+          o.question ?? o.input ?? o.user_input ?? o.prompt ?? "",
+        );
+        const expected = String(
+          o.expected_answer ?? o.expected ?? o.expect ?? o.expected_output ?? o.label ?? "",
+        );
+        const itemType = String(o.item_type ?? o.type ?? "");
+        const failureSignals = extractFailureSignalsField(o);
+        return { input, expected, itemType, failureSignals };
+      }
+
+      function parseCsvLine(line) {
+        const row = [];
+        let cur = "";
+        let i = 0;
+        let inQuotes = false;
+        const s = String(line).replace(/^\uFEFF/, "");
+        while (i < s.length) {
+          const ch = s[i];
+          if (inQuotes) {
+            if (ch === '"') {
+              if (s[i + 1] === '"') {
+                cur += '"';
+                i += 2;
+                continue;
+              }
+              inQuotes = false;
+              i++;
+              continue;
+            }
+            cur += ch;
+            i++;
+            continue;
+          }
+          if (ch === '"') {
+            inQuotes = true;
+            i++;
+            continue;
+          }
+          if (ch === ",") {
+            row.push(cur);
+            cur = "";
+            i++;
+            continue;
+          }
+          cur += ch;
+          i++;
+        }
+        row.push(cur);
+        return row.map((cell) => String(cell).trim());
+      }
+
+      function caseFromCsvRow(parts) {
+        if (!parts || parts.length < 2) return null;
+        return {
+          input: parts[0] || "",
+          expected: parts[1] || "",
+          itemType: parts[2] || "",
+          failureSignals: parts[3] || "",
+        };
+      }
+
+      function fillImportOneFormFields(body, c) {
+        const iq = body.querySelector("#import-one-question");
+        const ia = body.querySelector("#import-one-answer");
+        const ifs = body.querySelector("#import-one-failure-signals");
+        const it = body.querySelector("#import-one-item-type");
+        if (iq) iq.value = c.input ?? "";
+        if (ia) ia.value = c.expected ?? "";
+        if (ifs) ifs.value = c.failureSignals ?? "";
+        if (it) {
+          const t = (c.itemType || "").trim();
+          if (t) {
+            const opts = Array.from(it.options).map((x) => x.value);
+            if (opts.includes(t)) it.value = t;
+          }
+        }
+      }
+
+      function ingestTextToImportOneFields(body, raw) {
+        const text = String(raw || "").trim().replace(/^\uFEFF/, "");
+        if (!text) {
+          window.previewToast("Nothing to paste");
+          return false;
+        }
+        if (text.startsWith("{") || text.startsWith("[")) {
+          try {
+            let o = JSON.parse(text);
+            if (Array.isArray(o)) o = o[0];
+            const c = extractCaseFromObject(o);
+            if (c.input || c.expected) {
+              fillImportOneFormFields(body, c);
+              const jta = body.querySelector("#import-one-json");
+              if (jta) jta.value = text;
+              window.previewToast("Filled from JSON");
+              return true;
+            }
+          } catch {
+            /* try CSV */
+          }
+        }
+        const firstLine = text.split(/\r?\n/).find((l) => l.trim()) || text;
+        const parts = parseCsvLine(firstLine);
+        const c = caseFromCsvRow(parts);
+        if (!c || !c.input || !c.expected) {
+          window.previewToast("Could not parse as JSON or CSV (need 2+ columns)");
+          return false;
+        }
+        fillImportOneFormFields(body, c);
+        const cta = body.querySelector("#import-one-csv");
+        if (cta) cta.value = firstLine.trim();
+        window.previewToast("Filled from CSV row");
+        return true;
+      }
+
+      function abbrevCell(s, maxLen) {
+        const t = String(s ?? "").trim();
+        if (!t) return "—";
+        const n = maxLen ?? 42;
+        return t.length > n ? t.slice(0, n - 1) + "…" : t;
+      }
+
+      function buildCaseTableHtml(cases) {
+        if (!cases || !cases.length) return "";
+        const rows = cases
+          .map(
+            (c, i) =>
+              "<tr><td>" +
+              (i + 1) +
+              "</td><td>" +
+              escHtml(abbrevCell(c.input, 80)) +
+              "</td><td>" +
+              escHtml(abbrevCell(c.expected, 48)) +
+              "</td><td>" +
+              escHtml(abbrevCell(c.failureSignals, 36)) +
+              "</td><td>" +
+              escHtml(c.itemType || "—") +
+              "</td></tr>",
+          )
+          .join("");
+        return (
+          "<h4 class='dg-drawer-section-title dg-mt-4'>Items (test cases)</h4><div class='dg-table-wrap'><table class='dg-table dg-table-compact'><thead><tr><th>#</th><th>Question</th><th>Expected answer</th><th>Failure signals</th><th>Type</th></tr></thead><tbody>" +
+          rows +
+          "</tbody></table></div>"
+        );
+      }
+
+      function flowActionCell(slug, cfg) {
+        const td = document.createElement("td");
+        td.className = "dg-actions-cell";
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "btn btn-outline btn-sm btn-ds-detail";
+        b.setAttribute("data-ds-name", cfg.name);
+        b.setAttribute("data-ds-platform", cfg.platform);
+        b.setAttribute("data-ds-rows", cfg.rows);
+        b.setAttribute("data-ds-linked", cfg.linked);
+        b.setAttribute("data-ds-types", cfg.primaryTypes || "");
+        if (cfg.cases && cfg.cases.length)
+          b.setAttribute("data-ds-cases", encodeURIComponent(JSON.stringify(cfg.cases)));
+        b.textContent = "Details";
+        const aRun = document.createElement("a");
+        aRun.className = "btn btn-outline btn-sm";
+        aRun.href = "./run-center.html?dataset=" + encodeURIComponent(slug) + "&from=test-data";
+        aRun.textContent = "Run";
+        const aSc = document.createElement("a");
+        aSc.className = "btn btn-outline btn-sm";
+        aSc.href = "./scenario-studio.html?dataset=" + encodeURIComponent(slug) + "&tab=editor";
+        aSc.textContent = "Scenario";
+        td.appendChild(b);
+        td.appendChild(aRun);
+        td.appendChild(aSc);
+        return td;
+      }
+
+      function parseRowCountText(s) {
+        const n = Number.parseInt(String(s).replace(/,/g, ""), 10);
+        return Number.isFinite(n) ? n : 0;
+      }
+
+      function formatRowCount(n) {
+        return n.toLocaleString("en-US");
+      }
+
+      function mergePrimaryTypes(current, itemType) {
+        const t = (itemType || "").trim();
+        if (!t || t === "—") return current || "—";
+        const parts = String(current || "")
+          .split(",")
+          .map((x) => x.trim())
+          .filter(Boolean);
+        if (!parts.includes(t)) parts.push(t);
+        return parts.join(", ");
+      }
+
+      function findDatasetRowBySlug(slug) {
+        let found = null;
+        document.querySelectorAll("#dataset-tbody tr").forEach((tr) => {
+          if (tr.getAttribute("data-name") === slug) found = tr;
+        });
+        return found;
+      }
+
+      function rebuildImportOneDatasetSelect(selectEl) {
+        if (!selectEl) return;
+        selectEl.innerHTML = "";
+        const rows = document.querySelectorAll("#dataset-tbody tr");
+        if (!rows.length) {
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "(no datasets)";
+          selectEl.appendChild(opt);
+          return;
+        }
+        rows.forEach((tr) => {
+          const slug = tr.getAttribute("data-name");
+          if (!slug) return;
+          const label = tr.querySelector("td")?.textContent?.trim() || slug;
+          const opt = document.createElement("option");
+          opt.value = slug;
+          opt.textContent = label;
+          selectEl.appendChild(opt);
+        });
+      }
+
+      function openImportOneDrawer() {
+        const tpl = document.getElementById("tpl-import-one-item");
+        if (!tpl) return;
+        window.previewOpenDrawer("Import one item", tpl.innerHTML, { wide: true });
+        const body = document.getElementById("dg-panel-body");
+        rebuildImportOneDatasetSelect(body?.querySelector("#import-one-dataset"));
+      }
+
+      function readCasesFromDetailButton(btn) {
+        const enc = btn?.getAttribute("data-ds-cases");
+        if (!enc) return [];
+        try {
+          return JSON.parse(decodeURIComponent(enc));
+        } catch {
+          return [];
+        }
+      }
+
+      function ensureDetailButton(tr) {
+        const actions = tr.querySelector(".dg-actions-cell");
+        if (!actions) return null;
+        let btn = actions.querySelector(".btn-ds-detail");
+        if (btn) return btn;
+        const old = actions.querySelector("button[data-open-drawer]");
+        if (!old) return null;
+        btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn btn-outline btn-sm btn-ds-detail";
+        old.replaceWith(btn);
+        const tds = tr.querySelectorAll("td");
+        const name = tds[0]?.textContent?.trim() || "";
+        const platform = tds[1]?.textContent?.trim() || "Dify";
+        const rows = tds[2]?.textContent?.trim() || "0";
+        const types = tds[3]?.textContent?.trim() || "—";
+        const linked = tds[4]?.textContent?.trim() || "—";
+        btn.textContent = "Details";
+        btn.setAttribute("data-ds-name", name);
+        btn.setAttribute("data-ds-platform", platform);
+        btn.setAttribute("data-ds-rows", rows);
+        btn.setAttribute("data-ds-linked", linked);
+        btn.setAttribute("data-ds-types", types);
+        btn.setAttribute("data-ds-cases", encodeURIComponent(JSON.stringify([])));
+        return btn;
+      }
+
+      function appendItemToDatasetRow(slug, newCase) {
+        const tr = findDatasetRowBySlug(slug);
+        if (!tr) {
+          window.previewToast("Dataset row not found");
+          return false;
+        }
+        const tds = tr.querySelectorAll("td");
+        if (tds.length < 5) return false;
+        const curN = parseRowCountText(tds[2].textContent);
+        tds[2].textContent = formatRowCount(curN + 1);
+        tds[3].textContent = mergePrimaryTypes(tds[3].textContent, newCase.itemType);
+        const btn = ensureDetailButton(tr);
+        if (!btn) {
+          window.previewToast("Cannot attach to this row (mock)");
+          return false;
+        }
+        const cases = readCasesFromDetailButton(btn);
+        cases.push({
+          input: newCase.input,
+          expected: newCase.expected,
+          itemType: newCase.itemType || "",
+          failureSignals: newCase.failureSignals || "",
+        });
+        const preview = cases.slice(-12);
+        btn.setAttribute("data-ds-cases", encodeURIComponent(JSON.stringify(preview)));
+        btn.setAttribute("data-ds-rows", tds[2].textContent);
+        btn.setAttribute("data-ds-types", tds[3].textContent);
+        btn.setAttribute("data-ds-name", tds[0].textContent.trim());
+        btn.setAttribute("data-ds-platform", tds[1].textContent.trim());
+        btn.setAttribute("data-ds-linked", tds[4].textContent.trim());
+        return true;
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("btn-import-one-item")?.addEventListener("click", openImportOneDrawer);
+        document.getElementById("btn-import-one-item-inline")?.addEventListener("click", openImportOneDrawer);
+        document.getElementById("btn-manual-entry")?.addEventListener("click", () => openDatasetEntryDrawer("Manual entry / import"));
+        document.getElementById("btn-new-dataset-entry")?.addEventListener("click", () => openDatasetEntryDrawer("New dataset"));
+        document.getElementById("btn-import-entry")?.addEventListener("click", () => openDatasetEntryDrawer("Bulk import (JSONL)"));
+
+        document.getElementById("btn-case-entry")?.addEventListener("click", () => {
+          const tpl = document.getElementById("tpl-case-entry");
+          if (tpl) window.previewOpenDrawer("Add case set", tpl.innerHTML);
+        });
+
+        document.addEventListener("click", (e) => {
+          const body = document.getElementById("dg-panel-body");
+          if (!body || !body.contains(e.target)) return;
+
+          const pasteClip = e.target.closest("[data-import-one-paste-clipboard]");
+          if (pasteClip) {
+            if (!navigator.clipboard || typeof navigator.clipboard.readText !== "function") {
+              window.previewToast("Clipboard API unavailable (try HTTPS or localhost)");
+              return;
+            }
+            navigator.clipboard.readText().then(
+              (text) => {
+                ingestTextToImportOneFields(body, text);
+              },
+              () => {
+                window.previewToast("Clipboard denied — allow permission in the browser");
+              },
+            );
+            return;
+          }
+
+          const insCsvEx = e.target.closest("[data-import-one-insert-csv-example]");
+          if (insCsvEx) {
+            const ta = body.querySelector("#import-one-csv");
+            if (ta)
+              ta.value =
+                'What is SLA?,"24h for P1, 72h otherwise",Factual,"{""forbidden_phrases"":[""we have no SLA""]}"';
+            window.previewToast("Example CSV line inserted (with failure_signals column)");
+            return;
+          }
+
+          const parseCsvBtn = e.target.closest("[data-import-one-parse-csv]");
+          if (parseCsvBtn) {
+            const ta = body.querySelector("#import-one-csv");
+            const raw = (ta?.value || "").trim();
+            const line = raw.split(/\r?\n/).find((l) => l.trim()) || "";
+            if (!line) {
+              window.previewToast("Enter one CSV line");
+              return;
+            }
+            const c = caseFromCsvRow(parseCsvLine(line));
+            if (!c || !c.input || !c.expected) {
+              window.previewToast("Need at least question and expected_answer columns");
+              return;
+            }
+            fillImportOneFormFields(body, c);
+            window.previewToast("Fields updated from CSV");
+            return;
+          }
+
+          const submitCsvBtn = e.target.closest("[data-import-one-submit-csv]");
+          if (submitCsvBtn) {
+            const ta = body.querySelector("#import-one-csv");
+            const raw = (ta?.value || "").trim();
+            const line = raw.split(/\r?\n/).find((l) => l.trim()) || "";
+            if (!line) {
+              window.previewToast("Enter one CSV line");
+              return;
+            }
+            const c = caseFromCsvRow(parseCsvLine(line));
+            if (!c || !c.input || !c.expected) {
+              window.previewToast("Need at least question and expected_answer columns");
+              return;
+            }
+            const slug = body.querySelector("#import-one-dataset")?.value;
+            if (!slug) {
+              window.previewToast("Choose a target dataset");
+              return;
+            }
+            if (appendItemToDatasetRow(slug, c)) {
+              window.previewToast("Imported 1 row from CSV into " + slug + " (mock)");
+              window.previewCloseDrawer();
+              filterDatasets();
+            }
+            return;
+          }
+
+          const parseOneJson = e.target.closest("[data-import-one-parse-json]");
+          if (parseOneJson) {
+            const ta = body.querySelector("#import-one-json");
+            const raw = (ta?.value || "").trim();
+            if (!raw) {
+              window.previewToast("Paste one JSON object first");
+              return;
+            }
+            let o;
+            try {
+              o = JSON.parse(raw);
+            } catch {
+              window.previewToast("Invalid JSON");
+              return;
+            }
+            if (Array.isArray(o)) o = o[0];
+            const c = extractCaseFromObject(o ?? {});
+            fillImportOneFormFields(body, c);
+            window.previewToast("Fields updated from JSON");
+            return;
+          }
+
+          const submitOneJson = e.target.closest("[data-import-one-submit-json]");
+          if (submitOneJson) {
+            const ta = body.querySelector("#import-one-json");
+            const raw = (ta?.value || "").trim();
+            if (!raw) {
+              window.previewToast("Paste one JSON object first");
+              return;
+            }
+            let o;
+            try {
+              o = JSON.parse(raw);
+            } catch {
+              window.previewToast("Invalid JSON");
+              return;
+            }
+            if (Array.isArray(o)) o = o[0];
+            const c = extractCaseFromObject(o);
+            if (!c.input || !c.expected) {
+              window.previewToast("JSON must include question (or input) and expected answer (or expected)");
+              return;
+            }
+            const slug = body.querySelector("#import-one-dataset")?.value;
+            if (!slug) {
+              window.previewToast("Choose a target dataset");
+              return;
+            }
+            if (appendItemToDatasetRow(slug, c)) {
+              window.previewToast("Imported 1 item into " + slug + " (mock)");
+              window.previewCloseDrawer();
+              filterDatasets();
+            }
+            return;
+          }
+
+          const submitOne = e.target.closest("[data-import-one-submit]");
+          if (submitOne) {
+            const slug = body.querySelector("#import-one-dataset")?.value;
+            if (!slug) {
+              window.previewToast("Choose a target dataset");
+              return;
+            }
+            const q = body.querySelector("#import-one-question")?.value?.trim() || "";
+            const a = body.querySelector("#import-one-answer")?.value?.trim() || "";
+            const failureSignals = body.querySelector("#import-one-failure-signals")?.value?.trim() || "";
+            const itemType = body.querySelector("#import-one-item-type")?.value || "";
+            if (!q || !a) {
+              window.previewToast("Question and expected answer are required");
+              return;
+            }
+            const c = { input: q, expected: a, itemType: itemType, failureSignals: failureSignals };
+            if (appendItemToDatasetRow(slug, c)) {
+              window.previewToast("Imported 1 item into " + slug + " (mock)");
+              window.previewCloseDrawer();
+              filterDatasets();
+            }
+            return;
+          }
+
+          const insEx = e.target.closest("[data-jsonl-insert-example]");
+          if (insEx) {
+            const ta = body.querySelector("#entry-jsonl");
+            if (ta)
+              ta.value =
+                '{"question":"Track order ORD-9f2a","expected_answer":"Call order tool and return status text","item_type":"Tool-use","failure_signals":{"forbidden_tools":["refund_full"],"forbidden_phrases":["I refunded it already"]}}';
+            window.previewToast("Inserted example line (includes failure_signals)");
+            return;
+          }
+
+          const previewBtn = e.target.closest("[data-jsonl-preview]");
+          if (previewBtn) {
+            const ta = body.querySelector("#entry-jsonl");
+            const pre = body.querySelector("#entry-jsonl-preview");
+            const raw = (ta?.value || "").trim();
+            if (!raw) {
+              window.previewToast("Paste JSONL first");
+              return;
+            }
+            const lines = raw.split(/\r?\n/).filter((l) => l.trim());
+            const head = lines.slice(0, 3);
+            let valid = true;
+            for (const line of head) {
+              try {
+                JSON.parse(line);
+              } catch {
+                valid = false;
+                break;
+              }
+            }
+            if (!valid) {
+              window.previewToast("First lines are not valid JSON");
+              pre.style.display = "block";
+              pre.textContent = "Parse error: each line must be valid JSON.";
+              return;
+            }
+            pre.style.display = "block";
+            pre.textContent = head.join("\n");
+            window.previewToast("Previewing " + Math.min(3, lines.length) + " line(s)");
+            return;
+          }
+
+          const appendManual = e.target.closest("[data-dataset-append]");
+          if (appendManual) {
+            const name = body.querySelector("#entry-ds-name")?.value?.trim();
+            if (!name) {
+              window.previewToast("Dataset name is required");
+              return;
+            }
+            const platform = body.querySelector("#entry-ds-platform")?.value || "Dify";
+            const linked = body.querySelector("#entry-ds-linked")?.value?.trim() || "—";
+            const q = body.querySelector("#entry-ds-question")?.value?.trim() || "";
+            const a = body.querySelector("#entry-ds-answer")?.value?.trim() || "";
+            const failureSignals = body.querySelector("#entry-ds-failure-signals")?.value?.trim() || "";
+            const itemType = body.querySelector("#entry-ds-item-type")?.value || "Factual";
+            if (!q && !a) window.previewToast("Tip: question and expected answer are both empty");
+            else {
+              if (!q) window.previewToast("Tip: question is empty");
+              if (!a) window.previewToast("Tip: expected answer is empty");
+            }
+            const slug = slugName(name);
+            const tbody = document.getElementById("dataset-tbody");
+            const tr = document.createElement("tr");
+            tr.setAttribute("data-name", slug);
+            tr.setAttribute("data-platform", platform);
+            function tdText(text) {
+              const td = document.createElement("td");
+              td.textContent = text;
+              return td;
+            }
+            const cases = [{ input: q, expected: a, itemType: itemType, failureSignals: failureSignals }];
+            tr.appendChild(tdText(name));
+            tr.appendChild(tdText(platform));
+            tr.appendChild(tdText("1"));
+            tr.appendChild(tdText(itemType));
+            tr.appendChild(tdText(linked));
+            tr.appendChild(
+              flowActionCell(slug, {
+                name: name,
+                platform: platform,
+                rows: "1",
+                linked: linked,
+                primaryTypes: itemType,
+                cases: cases,
+              }),
+            );
+            tbody.appendChild(tr);
+            window.previewToast("Dataset added (1 Q&A item, mock)");
+            window.previewCloseDrawer();
+            filterDatasets();
+            return;
+          }
+
+          const appendJsonl = e.target.closest("[data-dataset-jsonl-append]");
+          if (appendJsonl) {
+            const ta = body.querySelector("#entry-jsonl");
+            const raw = (ta?.value || "").trim();
+            if (!raw) {
+              window.previewToast("Paste JSONL first");
+              return;
+            }
+            const lines = raw.split(/\r?\n/).filter((l) => l.trim());
+            let bad = false;
+            for (const line of lines) {
+              try {
+                JSON.parse(line);
+              } catch {
+                bad = true;
+                break;
+              }
+            }
+            if (bad) {
+              window.previewToast("Invalid JSON line — not appended");
+              return;
+            }
+            const casesAll = [];
+            let missingKeys = 0;
+            for (const line of lines) {
+              const o = JSON.parse(line);
+              const c = extractCaseFromObject(o);
+              casesAll.push({
+                input: c.input,
+                expected: c.expected,
+                itemType: c.itemType,
+                failureSignals: c.failureSignals || "",
+              });
+              if (!c.input || !c.expected) missingKeys++;
+            }
+            if (missingKeys > 0)
+              window.previewToast(
+                "Tip: " + missingKeys + " line(s) missing question or expected answer (prefer question + expected_answer)",
+              );
+            const casesPreview = casesAll.slice(0, 12);
+            const nameIn = body.querySelector("#entry-ds-name")?.value?.trim();
+            const name = nameIn || "jsonl-import-" + Date.now().toString(36).slice(-6);
+            const platform = body.querySelector("#entry-ds-platform")?.value || "Dify";
+            const linked = body.querySelector("#entry-ds-linked")?.value?.trim() || "—";
+            const slug = slugName(name);
+            const tbody = document.getElementById("dataset-tbody");
+            const tr = document.createElement("tr");
+            tr.setAttribute("data-name", slug);
+            tr.setAttribute("data-platform", platform);
+            const n = lines.length;
+            const typesSummary = [...new Set(casesAll.map((c) => c.itemType).filter(Boolean))].slice(0, 3).join(", ") || "—";
+            function tdText2(text) {
+              const td = document.createElement("td");
+              td.textContent = text;
+              return td;
+            }
+            tr.appendChild(tdText2(name));
+            tr.appendChild(tdText2(platform));
+            tr.appendChild(tdText2(String(n)));
+            tr.appendChild(tdText2(typesSummary));
+            tr.appendChild(tdText2(linked));
+            tr.appendChild(
+              flowActionCell(slug, {
+                name: name,
+                platform: platform,
+                rows: String(n),
+                linked: linked,
+                primaryTypes: typesSummary,
+                cases: casesPreview,
+              }),
+            );
+            tbody.appendChild(tr);
+            window.previewToast("Appended " + n + " rows (detail shows up to 12 items, mock)");
+            window.previewCloseDrawer();
+            filterDatasets();
+            return;
+          }
+
+          const appendCase = e.target.closest("[data-case-append]");
+          if (appendCase) {
+            const setName = body.querySelector("#entry-case-name")?.value?.trim();
+            if (!setName) {
+              window.previewToast("Set name is required");
+              return;
+            }
+            const source = body.querySelector("#entry-case-source")?.value?.trim() || "—";
+            const filt = body.querySelector("#entry-case-filter")?.value?.trim() || "—";
+            const count = body.querySelector("#entry-case-count")?.value || "0";
+            const tbody = document.getElementById("case-tbody");
+            const tr = document.createElement("tr");
+            tr.innerHTML =
+              "<td>" +
+              escHtml(setName) +
+              "</td><td>" +
+              escHtml(source) +
+              "</td><td>" +
+              escHtml(filt) +
+              "</td><td>" +
+              escHtml(String(count)) +
+              "</td><td><button type='button' class='btn btn-outline btn-sm' data-toast='Reference in Scenario Studio (mock)'>Use in scenario</button></td>";
+            tbody.appendChild(tr);
+            window.previewToast("Case set added (mock)");
+            window.previewCloseDrawer();
+          }
+        });
+
+        document.addEventListener("click", (e) => {
+          const btn = e.target.closest(".btn-ds-detail");
+          const tbody = document.getElementById("dataset-tbody");
+          if (!btn || !tbody || !tbody.contains(btn)) return;
+          const name = btn.getAttribute("data-ds-name") || "";
+          const platform = btn.getAttribute("data-ds-platform") || "";
+          const rows = btn.getAttribute("data-ds-rows") || "—";
+          const linked = btn.getAttribute("data-ds-linked") || "—";
+          const enc = btn.getAttribute("data-ds-cases");
+          let casesBlock = "";
+          if (enc) {
+            try {
+              const cases = JSON.parse(decodeURIComponent(enc));
+              casesBlock = buildCaseTableHtml(cases);
+            } catch {
+              casesBlock = "";
+            }
+          }
+          const html =
+            "<p class='muted'>" +
+            escHtml(rows) +
+            " rows · " +
+            escHtml(platform) +
+            "</p><ul class='dg-list'><li>Linked scenario: " +
+            escHtml(linked) +
+            "</li><li>Session-only mock — not persisted</li></ul>" +
+            casesBlock +
+            "<p class='note dg-mt-4' style='font-size:0.8125rem'><a class='btn btn-outline btn-sm' href='./run-center.html?dataset=" +
+            encodeURIComponent(slugName(name)) +
+            "&from=test-data'>Use in Run Center</a> <a class='btn btn-outline btn-sm' href='./scenario-studio.html?dataset=" +
+            encodeURIComponent(slugName(name)) +
+            "&tab=editor'>Bind in Scenario Studio</a></p>";
+          window.previewOpenDrawer(name, html);
+        });
+
+        function filterDatasets() {
+          const q = (document.getElementById("dataset-search")?.value || "").toLowerCase();
+          const pf = document.getElementById("dataset-platform")?.value || "all";
+          let visible = 0;
+          document.querySelectorAll("#dataset-tbody tr").forEach((row) => {
+            const name = (row.getAttribute("data-name") || "").toLowerCase();
+            const plat = row.getAttribute("data-platform") || "";
+            const matchQ = !q || name.includes(q);
+            const matchP = pf === "all" || plat === pf;
+            const hide = !matchQ || !matchP;
+            row.classList.toggle("hidden", hide);
+            if (!hide) visible++;
+          });
+          document.getElementById("dataset-empty-state")?.classList.toggle("hidden", visible > 0);
+        }
+
+        document.getElementById("dataset-clear-filters")?.addEventListener("click", () => {
+          const search = document.getElementById("dataset-search");
+          const plat = document.getElementById("dataset-platform");
+          if (search) search.value = "";
+          if (plat) plat.value = "all";
+          filterDatasets();
+        });
+
+        document.getElementById("dataset-search")?.addEventListener("input", filterDatasets);
+        document.getElementById("dataset-platform")?.addEventListener("change", filterDatasets);
+        filterDatasets();
+
+        document.addEventListener("change", (e) => {
+          const inp = e.target;
+          if (!inp || inp.id !== "entry-jsonl-file") return;
+          const body = document.getElementById("dg-panel-body");
+          if (!body || !body.contains(inp)) return;
+          const f = inp.files?.[0];
+          if (!f) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            const ta = body.querySelector("#entry-jsonl");
+            if (ta) ta.value = String(reader.result || "");
+            window.previewToast("Loaded " + f.name + " into JSONL field (mock)");
+          };
+          reader.onerror = () => window.previewToast("Could not read file");
+          reader.readAsText(f);
+          inp.value = "";
+        });
+
+        document.getElementById("btn-add-tag")?.addEventListener("click", () => {
+          const input = document.getElementById("new-tag");
+          const v = input?.value?.trim();
+          if (v) {
+            const list = document.getElementById("pill-list-tags");
+            if (list) {
+              const span = document.createElement("span");
+              span.className = "pill";
+              span.textContent = v;
+              list.appendChild(span);
+            }
+            if (input) input.value = "";
+            window.previewToast("Tag added: " + v);
+          } else window.previewToast("Enter a tag name");
+        });
+      });
+    </script>
+  </body>
+</html>

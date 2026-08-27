@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DodoGuard — 数据库初始化（模式 A）</title>
+    <style>
+      :root {
+        font-family:
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+        color: #1a1a1a;
+        background: #f4f6f9;
+      }
+      body {
+        margin: 0;
+        padding: 24px;
+        max-width: 520px;
+        margin-inline: auto;
+      }
+      h1 {
+        font-size: 1.25rem;
+        margin: 0 0 8px;
+      }
+      .sub {
+        color: #555;
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+        line-height: 1.5;
+      }
+      label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 8px 10px;
+        margin-bottom: 14px;
+        border: 1px solid #ccd;
+        border-radius: 6px;
+        font-size: 0.95rem;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 120px;
+        gap: 12px;
+      }
+      button {
+        padding: 10px 16px;
+        border-radius: 6px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.95rem;
+      }
+      .btn-primary {
+        background: #2563eb;
+        color: #fff;
+        width: 100%;
+        margin-top: 8px;
+      }
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .btn-secondary {
+        background: #e5e7eb;
+        color: #111;
+      }
+      .msg {
+        margin-top: 12px;
+        padding: 10px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        white-space: pre-wrap;
+      }
+      .msg.ok {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .msg.err {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .sql-info {
+        font-size: 0.8rem;
+        color: #444;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 10px;
+        margin-bottom: 16px;
+      }
+      .steps {
+        font-size: 0.85rem;
+        color: #374151;
+        margin-bottom: 16px;
+        line-height: 1.6;
+      }
+      .opt-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin: 12px 0 16px;
+        padding: 10px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+      }
+      .opt-row input[type='checkbox'] {
+        width: auto;
+        margin: 4px 0 0;
+      }
+      .opt-row label.opt {
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin: 0;
+        line-height: 1.45;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>首次运行：连接自有 MySQL</h1>
+    <p class="sub">
+      模式 A：使用您环境中的 MySQL。可选从安装包内自带的 <code>dodoguard.sql</code> 一键导入；若库已由 DBA 初始化，可取消勾选仅保存连接并启动。完成后将写入应用数据目录下的
+      <code>.env</code>。
+    </p>
+    <div class="steps">
+      <strong>步骤：</strong> 1）填写连接信息并「测试连接」→ 2）按需勾选是否导入 SQL → 3）点下方主按钮（将保存配置并启动内嵌服务）。
+    </div>
+    <div class="opt-row">
+      <input type="checkbox" id="importCb" checked />
+      <label class="opt" for="importCb">
+        <strong>从安装包导入 dodoguard.sql</strong>（会 <code>CREATE DATABASE IF NOT EXISTS</code> 并执行全量 SQL；取消勾选表示目标库<strong>已存在且已有表结构</strong>，仅写入连接配置）
+      </label>
+    </div>
+    <div id="sqlBox" class="sql-info">正在检查打包的 dodoguard.sql…</div>
+    <form id="f" autocomplete="on">
+      <label for="host">主机</label>
+      <input id="host" name="host" type="text" value="127.0.0.1" required />
+      <div class="row">
+        <div>
+          <label for="port">端口</label>
+          <input id="port" name="port" type="number" value="3306" required />
+        </div>
+        <div>
+          <label for="database">数据库名</label>
+          <input id="database" name="database" type="text" value="dodoguard" required />
+        </div>
+      </div>
+      <label for="user">用户名</label>
+      <input id="user" name="user" type="text" value="" required />
+      <label for="password">密码</label>
+      <input id="password" name="password" type="password" value="" />
+      <button type="button" class="btn-secondary" id="btnTest">测试连接</button>
+      <button type="button" class="btn-primary" id="btnApply" disabled>保存并启动</button>
+    </form>
+    <div id="out" class="msg" style="display: none"></div>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const out = $('out');
+      function showMsg(text, ok) {
+        out.style.display = 'block';
+        out.textContent = text;
+        out.className = 'msg ' + (ok ? 'ok' : 'err');
+      }
+      function collect() {
+        return {
+          host: $('host').value.trim(),
+          port: Number($('port').value) || 3306,
+          database: $('database').value.trim(),
+          user: $('user').value.trim(),
+          password: $('password').value,
+          importBundledSql: $('importCb').checked,
+        };
+      }
+      function syncApplyButtonLabel() {
+        $('btnApply').textContent = $('importCb').checked ? '导入数据库并启动' : '仅保存配置并启动';
+      }
+      $('importCb').addEventListener('change', syncApplyButtonLabel);
+      window.addEventListener('DOMContentLoaded', async () => {
+        syncApplyButtonLabel();
+        try {
+          const st = await window.desktopSetup.getBundledSqlStatus();
+          const sqlBox = $('sqlBox');
+          if (st.ok && st.exists) {
+            sqlBox.innerHTML =
+              '<strong>安装包内已附带 dodoguard.sql</strong>（无需您手动拷贝）<br />路径：<span style="word-break:break-all">' +
+              String(st.path || '') +
+              '</span><br />大小：约 ' +
+              String(st.sizeLabel || '?') +
+              '<br /><span style="color:#555">取消勾选「导入」时不会读取该文件。</span>';
+          } else {
+            sqlBox.innerHTML =
+              '<strong style="color:#b91c1c">未找到 dodoguard.sql</strong> 仅影响「勾选导入」；若您不导入、库已自建，可继续。否则请使用完整安装包构建。';
+          }
+        } catch (e) {
+          $('sqlBox').textContent = '检查 dodoguard.sql 失败：' + String(e);
+        }
+      });
+      $('btnTest').addEventListener('click', async () => {
+        $('btnTest').disabled = true;
+        $('btnApply').disabled = true;
+        out.style.display = 'none';
+        try {
+          const r = await window.desktopSetup.testConnection(collect());
+          if (r.ok) {
+            showMsg(r.message || '连接成功。', true);
+            $('btnApply').disabled = false;
+          } else {
+            showMsg(r.message || '连接失败', false);
+          }
+        } catch (e) {
+          showMsg(String(e), false);
+        } finally {
+          $('btnTest').disabled = false;
+        }
+      });
+      $('btnApply').addEventListener('click', async () => {
+        $('btnTest').disabled = true;
+        $('btnApply').disabled = true;
+        out.style.display = 'none';
+        const imp = $('importCb').checked;
+        showMsg(
+          imp
+            ? '正在创建数据库（若不存在）、导入 SQL… 可能需要几分钟，请勿关闭窗口。'
+            : '正在保存配置并启动…',
+          true,
+        );
+        try {
+          const r = await window.desktopSetup.applyAndStart(collect());
+          if (!r.ok) {
+            showMsg(r.message || '失败', false);
+            $('btnTest').disabled = false;
+            $('btnApply').disabled = false;
+          }
+        } catch (e) {
+          showMsg(String(e), false);
+          $('btnTest').disabled = false;
+          $('btnApply').disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

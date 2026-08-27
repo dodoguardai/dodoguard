@@ -1,0 +1,1433 @@
+/**
+ * Aligns with frontend/src/styles/theme.css + shadcn/ui patterns
+ * (Card, Button, Sidebar, Table, Badge)
+ */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.129 0.042 264.695);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.129 0.042 264.695);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.129 0.042 264.695);
+  --primary: oklch(0.208 0.042 265.755);
+  --primary-foreground: oklch(0.984 0.003 247.858);
+  --secondary: oklch(0.968 0.007 247.896);
+  --secondary-foreground: oklch(0.208 0.042 265.755);
+  --muted: oklch(0.968 0.007 247.896);
+  --muted-foreground: oklch(0.554 0.046 257.417);
+  --accent: oklch(0.968 0.007 247.896);
+  --accent-foreground: oklch(0.208 0.042 265.755);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.929 0.013 255.508);
+  --input: oklch(0.929 0.013 255.508);
+  --ring: oklch(0.704 0.04 256.788);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+  --success: oklch(0.55 0.17 145);
+  --warning: oklch(0.72 0.16 65);
+}
+
+* {
+  box-sizing: border-box;
+  border-color: var(--border);
+}
+
+html {
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  width: 100%;
+  font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+/* ---- App shell: SidebarProvider + SidebarInset ---- */
+.dg-shell {
+  display: flex;
+  min-height: 100svh;
+  width: 100%;
+}
+
+.dg-sidebar {
+  width: 16rem;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--sidebar-border);
+  background: var(--sidebar);
+  color: var(--sidebar-foreground);
+}
+
+.dg-sidebar-header {
+  padding: 0.5rem;
+}
+
+.dg-team {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  padding: 0.75rem;
+  background: var(--card);
+}
+
+.dg-team strong {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.dg-team small {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.dg-sidebar-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dg-nav-label {
+  display: flex;
+  align-items: center;
+  height: 2rem;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: color-mix(in oklch, var(--sidebar-foreground) 70%, transparent);
+}
+
+.dg-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dg-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  border-radius: calc(var(--radius) - 2px);
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  outline: none;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.dg-nav-item:hover {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+.dg-nav-item[aria-current="page"] {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+  font-weight: 500;
+}
+
+.dg-inset {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--background);
+}
+
+.dg-header {
+  display: flex;
+  align-items: center;
+  min-height: 4rem;
+  border-bottom: 1px solid var(--border);
+  padding: 0 1rem;
+  gap: 0.75rem;
+}
+
+.dg-header-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.dg-main {
+  flex: 1;
+  padding: 1rem;
+}
+
+@media (min-width: 768px) {
+  .dg-main {
+    padding: 1.5rem;
+  }
+}
+
+/* ---- Page header (tasks-style) ---- */
+.dg-page-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.dg-breadcrumb {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.dg-title {
+  margin: 0.25rem 0 0;
+  font-size: 1.875rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.dg-desc {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  max-width: 48rem;
+  line-height: 1.5;
+}
+
+.dg-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* ---- Button (shadcn Button) ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 2.25rem;
+  padding: 0 1rem;
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s,
+    opacity 0.15s;
+  outline: none;
+}
+
+.btn:focus-visible {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.btn-default {
+  border: none;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: 0 1px 2px oklch(0 0 0 / 0.05);
+}
+
+.btn-default:hover {
+  background: color-mix(in oklch, var(--primary) 90%, transparent);
+}
+
+.btn-outline {
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: 0 1px 2px oklch(0 0 0 / 0.05);
+}
+
+.btn-outline:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* ---- Card ---- */
+.dg-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  border-radius: calc(var(--radius) + 4px);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: 0 1px 2px oklch(0 0 0 / 0.05);
+  padding: 1.5rem 0;
+}
+
+.dg-card-header {
+  padding: 0 1.5rem;
+}
+
+.dg-card-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.dg-card-desc {
+  margin: 0.375rem 0 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.dg-card-body {
+  padding: 0 1.5rem;
+}
+
+/* Compact stat / table cards */
+.dg-card-sm {
+  border-radius: calc(var(--radius) + 4px);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: 0 1px 2px oklch(0 0 0 / 0.05);
+  padding: 1rem 1.25rem;
+}
+
+/* LLM-only: emphasize rubric panel on Evaluate step */
+.llm-judge-panel.is-primary {
+  border-width: 2px;
+  border-color: var(--ring);
+}
+
+.dg-card-sm h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.dg-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.dg-grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.dg-grid-2-1 {
+  grid-template-columns: 2fr 1fr;
+}
+
+.dg-grid-1-1 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.dg-mt-4 {
+  margin-top: 1rem;
+}
+
+.dg-mb-4 {
+  margin-bottom: 1rem;
+}
+
+/* ---- Tabs (segmented) ---- */
+.dg-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0.125rem;
+  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid var(--border);
+  background: var(--muted);
+}
+
+.dg-tab {
+  padding: 0.375rem 0.625rem;
+  border-radius: calc(var(--radius) - 4px);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: default;
+}
+
+.dg-tab.is-active {
+  background: var(--background);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+/* ---- Table ---- */
+.dg-table-wrap {
+  position: relative;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.dg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  caption-side: bottom;
+}
+
+.dg-table thead tr {
+  border-bottom: 1px solid var(--border);
+}
+
+.dg-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.dg-table tbody tr:hover {
+  background: color-mix(in oklch, var(--muted) 50%, transparent);
+}
+
+.dg-table tbody tr:last-child {
+  border-bottom: 0;
+}
+
+.dg-table th {
+  text-align: left;
+  padding: 0.625rem 0.5rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.dg-table td {
+  padding: 0.625rem 0.5rem;
+}
+
+/* ---- Badge ---- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: calc(var(--radius) - 4px);
+  border: 1px solid transparent;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.badge-default {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.badge-secondary {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.badge-destructive {
+  background: var(--destructive);
+  color: white;
+}
+
+.badge-outline {
+  border-color: var(--border);
+  color: var(--foreground);
+  background: transparent;
+}
+
+/* KPI colors */
+.text-success {
+  color: var(--success);
+}
+
+.text-warning {
+  color: var(--warning);
+}
+
+.text-destructive {
+  color: var(--destructive);
+}
+
+.score-lg {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  margin: 0.25rem 0;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: calc(var(--radius) - 4px);
+  border: 1px solid var(--border);
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+ul.dg-list {
+  margin: 0;
+  padding-left: 1.125rem;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  line-height: 1.5;
+}
+
+ul.dg-list li {
+  margin: 0.375rem 0;
+}
+
+.note {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  margin-top: 0.75rem;
+  line-height: 1.45;
+}
+
+/* Onboarding / “how to use” callouts (harness preview) */
+#howto-prototype,
+#item-type-scoring {
+  scroll-margin-top: 1.25rem;
+}
+
+.dg-howto-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in oklch, var(--muted) 28%, var(--card));
+  padding: 1rem 1.1rem 1.1rem;
+  margin-bottom: 1.25rem;
+}
+
+.dg-howto-card > h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.dg-howto-card .dg-howto-sub {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  margin: 0 0 0.75rem;
+  line-height: 1.5;
+}
+
+.dg-howto-steps {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  line-height: 1.6;
+}
+
+.dg-howto-steps li {
+  margin: 0.4rem 0;
+}
+
+.dg-howto-steps strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.dg-howto-table {
+  width: 100%;
+  font-size: 0.8125rem;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+}
+
+.dg-howto-table th,
+.dg-howto-table td {
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.dg-howto-table th {
+  color: var(--muted-foreground);
+  font-weight: 600;
+  width: 42%;
+}
+
+.dg-wiz-hint {
+  border-left: 3px solid color-mix(in oklch, var(--primary) 55%, var(--border));
+  padding: 0.5rem 0 0.5rem 0.75rem;
+  margin: 0.5rem 0 0;
+  background: color-mix(in oklch, var(--muted) 22%, transparent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.dg-page-hint {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  line-height: 1.55;
+  margin: 0.5rem 0 0;
+  max-width: 52rem;
+}
+
+/* Guided workflow strip (cross-page) */
+.dg-flow-guide {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in oklch, var(--muted) 24%, var(--card));
+  padding: 0.75rem 0.85rem 0.8rem;
+  margin: 0 0 1rem;
+}
+
+.dg-flow-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.dg-flow-steps {
+  margin: 0.65rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.4rem;
+}
+
+.dg-flow-step {
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--card);
+}
+
+.dg-flow-step a {
+  display: block;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  text-decoration: none;
+}
+
+.dg-flow-step.is-current {
+  border-color: color-mix(in oklch, var(--primary) 45%, var(--border));
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--primary) 35%, transparent);
+}
+
+.dg-flow-step.is-current a {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.dg-flow-step.is-done {
+  background: color-mix(in oklch, var(--secondary) 45%, var(--card));
+}
+
+.dg-flow-step.is-done a {
+  color: var(--foreground);
+}
+
+/* Global quick help (all preview pages) */
+.dg-help-fab {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 55;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.dg-help-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 65;
+}
+
+.dg-help-panel {
+  position: fixed;
+  right: 1rem;
+  bottom: 4.2rem;
+  width: min(30rem, calc(100vw - 2rem));
+  max-height: min(70vh, 42rem);
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  z-index: 70;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.24);
+}
+
+.dg-help-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.7rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: color-mix(in oklch, var(--muted) 20%, var(--card));
+}
+
+.dg-help-head h4 {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.dg-help-body {
+  padding: 0.75rem 0.8rem 0.9rem;
+}
+
+.muted {
+  color: var(--muted-foreground);
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8125rem;
+  background: var(--muted);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+}
+
+@media (max-width: 1024px) {
+  .dg-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dg-grid-2-1,
+  .dg-grid-1-1 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dg-sidebar {
+    display: none;
+  }
+
+  .dg-shell {
+    flex-direction: column;
+  }
+}
+
+/* ---- Interactive preview (tabs / drawer / forms / toast) ---- */
+.hidden {
+  display: none !important;
+}
+
+.dg-tab-btn {
+  border: 0;
+  background: transparent;
+  padding: 0.375rem 0.625rem;
+  border-radius: calc(var(--radius) - 4px);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.dg-tab-btn:hover {
+  color: var(--foreground);
+}
+
+.dg-tab-btn.is-active {
+  background: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+}
+
+.dg-toolbar-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.dg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.dg-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.dg-input,
+.dg-select,
+.dg-textarea {
+  border: 1px solid var(--input);
+  border-radius: calc(var(--radius) - 2px);
+  padding: 0.5rem 0.625rem;
+  font-size: 0.875rem;
+  background: var(--background);
+  color: var(--foreground);
+  width: 100%;
+  max-width: 20rem;
+}
+
+.dg-textarea {
+  min-height: 4.5rem;
+  resize: vertical;
+  max-width: 100%;
+}
+
+.dg-input:focus,
+.dg-select:focus,
+.dg-textarea:focus {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 35%, transparent);
+}
+
+.btn-sm {
+  height: 2rem;
+  padding: 0 0.75rem;
+  font-size: 0.8125rem;
+}
+
+tr[data-clickable-row],
+.dg-click-row {
+  cursor: pointer;
+}
+
+.dg-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: oklch(0.129 0.042 264.695 / 0.45);
+}
+
+.dg-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 50;
+  width: min(28rem, 100%);
+  height: 100%;
+  background: var(--card);
+  border-left: 1px solid var(--border);
+  box-shadow: -4px 0 24px oklch(0 0 0 / 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.dg-panel.dg-panel-wide {
+  width: min(36rem, 100%);
+}
+
+.dg-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.dg-panel-head h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.dg-panel-body {
+  padding: 1rem 1.25rem;
+  overflow: auto;
+  flex: 1;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.dg-panel-body .dg-table-wrap {
+  margin-top: 0.5rem;
+}
+
+.dg-drawer-section-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.dg-check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.dg-check-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.dg-jsonl-preview {
+  font-size: 0.75rem;
+  background: var(--muted);
+  padding: 0.5rem;
+  border-radius: calc(var(--radius) - 4px);
+  max-height: 6rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.dg-actions-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.dg-toast-host {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  pointer-events: none;
+}
+
+.dg-toast {
+  pointer-events: auto;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--card-foreground);
+  border-radius: calc(var(--radius) - 2px);
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  box-shadow: 0 10px 24px oklch(0 0 0 / 0.1);
+  opacity: 0;
+  transform: translateY(0.5rem);
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+}
+
+.dg-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dg-steps {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.dg-step-chip {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: calc(var(--radius) - 4px);
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
+  background: var(--muted);
+}
+
+.dg-step-chip.is-done {
+  background: color-mix(in oklch, var(--success) 15%, var(--background));
+  border-color: color-mix(in oklch, var(--success) 40%, var(--border));
+  color: var(--foreground);
+}
+
+.dg-step-chip.is-current {
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 600;
+  background: var(--background);
+}
+
+.dg-switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.875rem;
+}
+
+.dg-switch-row:last-child {
+  border-bottom: 0;
+}
+
+.dg-switch {
+  width: 2.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--muted);
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.dg-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 50%;
+  background: var(--background);
+  box-shadow: 0 1px 2px oklch(0 0 0 / 0.15);
+  transition: transform 0.15s;
+}
+
+.dg-switch.is-on {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.dg-switch.is-on::after {
+  transform: translateX(1rem);
+}
+
+.dg-progress {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--muted);
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.dg-progress-bar {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--primary);
+  transition: width 0.3s;
+}
+
+/* ---- Reliability dashboard (home) ---- */
+.dg-main.dg-dashboard {
+  background: linear-gradient(180deg, color-mix(in oklch, var(--muted) 35%, var(--background)) 0%, var(--background) 14rem);
+}
+
+.dg-dash-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  font-size: 0.8125rem;
+}
+
+.dg-dash-meta-sep {
+  color: var(--border);
+  user-select: none;
+}
+
+.dg-dash-jump {
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.dg-dash-jump a {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.dg-dash-jump a:hover {
+  color: var(--foreground);
+}
+
+.dg-kpi-global {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .dg-kpi-global {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .dg-kpi-global {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dg-kpi-tile {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  background: var(--card);
+  box-shadow: 0 1px 0 oklch(0 0 0 / 0.04);
+}
+
+.dg-kpi-tile-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  margin: 0 0 0.35rem;
+}
+
+.dg-kpi-tile-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.dg-kpi-tile-hint {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  margin: 0.35rem 0 0;
+}
+
+.dg-dash-platform {
+  margin-top: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 2px);
+  background: var(--card);
+  overflow: hidden;
+  box-shadow: 0 1px 3px oklch(0 0 0 / 0.06);
+}
+
+.dg-dash-platform-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.9rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in oklch, var(--muted) 40%, var(--card));
+}
+
+.dg-dash-platform-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.dg-platform-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--muted-foreground);
+}
+
+.dg-platform-pill.is-dify {
+  border-color: color-mix(in oklch, var(--chart-3) 45%, var(--border));
+  color: color-mix(in oklch, var(--chart-3) 85%, var(--foreground));
+}
+
+.dg-platform-pill.is-coze {
+  border-color: color-mix(in oklch, var(--chart-2) 45%, var(--border));
+  color: color-mix(in oklch, var(--chart-2) 85%, var(--foreground));
+}
+
+.dg-dash-platform-meta {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+.dg-dash-platform-body {
+  padding: 1.15rem 1.25rem 1.25rem;
+}
+
+.dg-dash-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 1.1rem;
+}
+
+@media (max-width: 900px) {
+  .dg-dash-kpi-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.dg-metric-tile {
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  padding: 0.65rem 0.85rem;
+  background: color-mix(in oklch, var(--muted) 25%, var(--card));
+}
+
+.dg-metric-tile-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.dg-metric-tile-label {
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
+  margin: 0.2rem 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.dg-dash-subtitle {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  color: var(--foreground);
+}
+
+.dg-dash-subtitle.dg-mt {
+  margin-top: 1.25rem;
+}
+
+.dg-table-compact.dg-table th,
+.dg-table-compact.dg-table td {
+  padding: 0.45rem 0.6rem;
+  font-size: 0.8125rem;
+}
+
+.dg-trend-up {
+  color: var(--success);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.dg-trend-down {
+  color: var(--destructive);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.dg-trend-flat {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+/* shadcn TabsList-style triggers (dashboard scope) */
+.dg-tabs-shadcn-wrap {
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  margin-top: 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dg-tabs-shadcn-list {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius);
+  background: var(--muted);
+}
+
+.dg-tab-shadcn {
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: calc(var(--radius) - 2px);
+  padding: 0.4rem 0.95rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    box-shadow 0.15s;
+}
+
+.dg-tab-shadcn:hover {
+  color: var(--foreground);
+}
+
+.dg-tab-shadcn.is-active {
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: 0 1px 2px oklch(0 0 0 / 0.06);
+  border-color: color-mix(in oklch, var(--border) 80%, transparent);
+}
+
+.dg-dash-snap-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 640px) {
+  .dg-dash-snap-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dg-dash-snap-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  background: color-mix(in oklch, var(--muted) 20%, var(--card));
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+.dg-dash-snap-card:hover {
+  border-color: color-mix(in oklch, var(--primary) 25%, var(--border));
+  box-shadow: 0 2px 8px oklch(0 0 0 / 0.06);
+}
+
+.dg-dash-snap-card:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.dg-dash-snap-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0.65rem 0;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.dg-dash-snap-metrics span {
+  color: var(--muted-foreground);
+}
+
+.dg-dash-snap-metrics strong {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+/* Drawer body: collapsible sections + empty states */
+.dg-drawer-details {
+  margin: 0 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  background: color-mix(in oklch, var(--muted) 35%, var(--card));
+  overflow: hidden;
+}
+
+.dg-drawer-details > summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--foreground);
+  user-select: none;
+}
+
+.dg-drawer-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.dg-drawer-details[open] > summary {
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in oklch, var(--muted) 55%, var(--card));
+}
+
+.dg-drawer-details .dg-drawer-details-body {
+  padding: 0.75rem 0.65rem 0.85rem;
+  background: var(--card);
+}
+
+.dg-empty-state {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  margin-top: 0.75rem;
+}
+
+.dg-empty-state .btn {
+  margin-top: 0.75rem;
+}
+
+/* Test Data: wide scoring guide table */
+.dg-scoring-guide-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+.dg-scoring-guide-table {
+  min-width: 42rem;
+  font-size: 0.8125rem;
+}
+
+.dg-scoring-guide-table th,
+.dg-scoring-guide-table td {
+  vertical-align: top;
+}

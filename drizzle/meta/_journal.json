@@ -1,0 +1,62 @@
+{
+  "version": "5",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1763700000000,
+      "tag": "0030_mysql_schema_migration",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1767110000000,
+      "tag": "0031_add_vulnerability_related_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1767120000000,
+      "tag": "0032_add_cvss_score",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1767130000000,
+      "tag": "0035_dodoguard_v4_unified_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1767140000000,
+      "tag": "0036_dodoguard_core_and_v4_column_comments",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1767150000000,
+      "tag": "0037_task_type_dify_config_static",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1767160000000,
+      "tag": "0038_workflow_config_assets",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1767170000000,
+      "tag": "0039_external_api",
+      "breakpoints": true
+    }
+  ]
+}
