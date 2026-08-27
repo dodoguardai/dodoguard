@@ -62,7 +62,7 @@
   "dependencies": {
     "@adaline/gateway": "0.14.0",
     "@googleapis/sheets": "14.0.0",
-    "@mui/material": "^7.3.4",
+    "@mui/material": "^9.3.1",
     "@mui/system": "^7.3.3",
     "bcrypt": "6.0.0",
     "drizzle-orm": "0.45.2",
