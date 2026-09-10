@@ -120,7 +120,7 @@ docker compose up -d --build
 
 ### 其他方式
 
-[本地开发](./CONTRIBUTING.md) · [桌面端打包](./docs/desktop-packaging.md) · [docker-compose.yml](./docker-compose.yml)
+[本地开发](./CONTRIBUTING.md) · [docker-compose.yml](./docker-compose.yml)
 
 > 不要把 API Key、生产 URL 或真实业务数据提交到仓库。
 

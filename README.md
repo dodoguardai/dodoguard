@@ -120,7 +120,7 @@ docker compose up -d --build
 
 ### Also available
 
-[Local development](./CONTRIBUTING.md) · [Desktop packaging](./docs/desktop-packaging.md) · [docker-compose.yml](./docker-compose.yml)
+[Local development](./CONTRIBUTING.md) · [docker-compose.yml](./docker-compose.yml)
 
 > Never commit API keys, production URLs, or real business data.
 
