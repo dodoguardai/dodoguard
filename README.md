@@ -2,224 +2,134 @@
 
 [English](./README.md) | [简体中文](./README.zh-CN.md)
 
-> A security testing, evaluation, and local deployment platform for LLMs, agents, and AI applications.
+<p align="center">
+  <img src="./docs/image/logo.png" alt="DodoGuard" width="280" />
+</p>
 
-DodoGuard helps teams assess output quality, prompt security, and agent behavior before release and throughout iteration. It brings LLM evaluation, red-team testing, Dify application pentesting, analysis, and reporting into one CLI, web interface, and desktop application.
+<p align="center">
+  <b>Your agent passed the demo. It hasn’t passed security.</b>
+</p>
 
-## What it solves
+<p align="center">
+  Evaluate quality · Red-team behavior · Assess Dify / Coze / FastGPT / n8n · Ship with evidence<br/>
+  CLI · Web console · Desktop — run it on your side
+</p>
 
-Teams integrating LLMs into production need to know whether responses meet expectations, whether prompts and tools resist attacks, and whether a model or prompt change introduces regressions. DodoGuard provides versionable configurations and test cases to help you:
+<p align="center">
+  <a href="#quick-start">Quick start</a> ·
+  <a href="./site">Docs</a> ·
+  <a href="./examples">Examples</a> ·
+  <a href="./SECURITY.md">Security</a>
+</p>
 
-- Compare models, prompts, and parameters with rule-based, semantic-similarity, or model-graded assertions.
-- Run red-team tests for prompt injection, sensitive-information disclosure, authorization bypass, and harmful or non-compliant behavior.
-- Manage test tasks, target agents, vulnerability libraries, findings, and reports.
-- Run locally, in Docker, CI/CD, or a desktop app without handing API keys and test data to a third party.
+<p align="center">
+  <img src="./docs/image/image.png" alt="DodoGuard product" width="900" />
+</p>
 
-## Highlights
+---
 
-- LLM evaluation with prompts, providers, variable test cases, and multiple assertion types.
-- Security testing with red-team plugins, attack-task orchestration, Dify testing, and risk analysis.
-- Providers including OpenAI, Anthropic, Azure, Bedrock, Ollama, and OpenAI-compatible APIs.
-- A web console for models, agents, test tasks, rules, vulnerabilities, and reports.
-- Docker and Electron/electron-builder delivery workflows.
+## What you can catch
 
-## Quick start: CLI evaluation
+| Risk | What it looks like |
+| --- | --- |
+| **Injection & jailbreaks** | System prompts and guardrails get bypassed |
+| **Data & tool abuse** | Sensitive leaks, unauthorized tool / MCP calls |
+| **Regressions** | Quality drops after a model or prompt change |
+| **Platform gaps** | Misconfig and attack surface on agent apps |
+| **Weak release proof** | No durable findings or reports you can keep private |
 
-Install Node.js **22.12 or later**, then run an example evaluation:
+## From check → release → observe
+
+Most teams still spot-check chat. Production agents need a loop:
+
+**Evaluate** → **Attack** → **Decide** → **Keep private**
+
+Lifecycle: **intake → detect & release → observe**. Principle: **acknowledge ≠ release**.
+
+<p align="center">
+  <img src="./docs/image/life.png" alt="DodoGuard lifecycle" width="900" />
+</p>
+
+## See it in the product
+
+#### 1. Overview
+Risk posture across agents and tasks at a glance.
+
+![Dashboard](./docs/image/dashboard.png)
+
+#### 2. Asset ledger
+Register agents as assets. Acknowledge ≠ release.
+
+![Assets](./docs/image/aset_en.png)
+
+#### 3. Detection tasks
+Run eval, red-team, and platform checks as versioned work.
+
+![Tasks](./docs/image/task.png)
+
+#### 4. Findings
+Drill into failures, evidence, and severity.
+
+![Task detail](./docs/image/task_detail.png)
+
+#### 5. Reports
+Export release evidence without leaving your infra.
+
+![Report](./docs/image/report.png)
+
+#### 6. Remediation loop
+Fix, retest, then decide go-live.
+
+![Risk loop](./docs/image/risk_loop.png)
+
+## Capabilities at a glance
+
+- **LLM evaluation** — prompts, providers, variable cases, multiple assertion types  
+- **Red-team testing** — plugins and adaptive probes on live apps, not only models  
+- **Platform hardening** — Dify-class scans, config audits, risk analysis  
+- **Ops console** — agents, tasks, vulns, remediation, reporting  
+- **Self-hosted** — CLI, Docker, CI/CD, Electron desktop  
+
+**Providers:** OpenAI · Anthropic · Azure · Bedrock · Ollama · OpenAI-compatible APIs
+
+---
+
+## Quick start
+
+### CLI — about 60 seconds
+
+Requires Node.js **22.12+**.
 
 ```sh
 git clone https://github.com/dodoguardai/dodoguard.git
-cd dodoguard
-npm ci
-npm run build
+cd dodoguard && npm ci && npm run build
 
-# Copy an example into your own working directory and configure its provider.
-cp -R examples/openai-eval-factuality ./my-eval
-cd my-eval
+cp -R examples/openai-eval-factuality ./my-eval && cd my-eval
 export OPENAI_API_KEY="<your-api-key>"
 ../node_modules/.bin/dodoguard eval
 ```
 
-See [`examples/`](./examples) for more configurations, including [`examples/redteam-ollama/`](./examples/redteam-ollama) for local models. Never commit API keys, production URLs, or real business data.
+More configs: [examples/](./examples) · local models: [examples/redteam-ollama/](./examples/redteam-ollama)
 
-## Local development and web UI
-
-### 1. Install and configure
-
-```sh
-git clone https://github.com/dodoguardai/dodoguard.git
-cd dodoguard
-npm ci
-cp .env.example .env
-```
-
-The default `.env.example` uses SQLite and is suitable for local evaluation. Generate different random values for `JWT_SECRET` and `JWT_REFRESH_SECRET`:
-
-```sh
-openssl rand -base64 48
-```
-
-For MySQL development, start the development database:
-
-```sh
-npm run dev:mysql
-```
-
-Then configure `DB_TYPE=mysql` and either `DATABASE_URL` or `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, and `DB_NAME` in `.env`. In production, use a dedicated database account, strong secrets, and restricted network access.
-
-### 2. Run the application
-
-```sh
-# Run after a first install or database schema update.
-npm run db:migrate
-
-# Start the API and frontend development server.
-npm run dev
-```
-
-The frontend is served at `http://localhost:3000`; the API listens at `http://localhost:15500` by default. Create an administrator through the first-run UI. Do not use or distribute fixed accounts, passwords, or JWT secrets.
-
-Useful checks:
-
-```sh
-npm run lint
-npm run build
-```
-
-## Docker deployment
-
-### Build an image
-
-The Docker build context **must be the repository root**. The Dockerfile builds the backend, frontend, and capability audit service and initializes SQLite in the image:
-
-```sh
-docker build -t dodoguard:local .
-```
-
-You can change the base image or npm registry with build arguments:
-
-```sh
-docker build \
-  --build-arg NODE_IMAGE=node:22.14.0-alpine \
-  --build-arg NPM_REGISTRY=https://registry.npmjs.org \
-  -t dodoguard:local .
-```
-
-The default service port is `3000` and the default database is SQLite. Persist these directories when deploying:
-
-| Container path | Purpose |
-| --- | --- |
-| `/home/dodoguard/.dodoguard` | SQLite database and application data |
-| `/app/reports` | Generated reports |
-| `/app/user-configs` | User configurations and imports |
-
-### Docker Compose
-
-The root [`docker-compose.yml`](./docker-compose.yml) is the recommended public, single-container SQLite deployment:
+### Web UI — Docker Compose
 
 ```sh
 docker compose up -d --build
-docker compose ps
+# open http://localhost:3000
 ```
 
-Open `http://localhost:3000`. To stop the service while retaining data:
+### Also available
 
-```sh
-docker compose down
-```
+[Local development](./CONTRIBUTING.md) · [Desktop packaging](./docs/desktop-packaging.md) · [docker-compose.yml](./docker-compose.yml)
 
-`docker compose down -v` also deletes local database and report volumes; back them up first.
+> Never commit API keys, production URLs, or real business data.
 
-### Run a built or published image
+---
 
-Replace the image tag with the version you publish and mount persistent volumes:
+## Security & contributing
 
-```sh
-docker run -d --name dodoguard \
-  --restart unless-stopped \
-  -p 3000:3000 \
-  -e DODOGUARD_SELF_HOSTED=1 \
-  -v dodoguard-data:/home/dodoguard/.dodoguard \
-  -v dodoguard-reports:/app/reports \
-  -v dodoguard-user-configs:/app/user-configs \
-  dodoguard:local
-```
-
-Check health and logs:
-
-```sh
-docker inspect --format='{{.State.Health.Status}}' dodoguard
-docker logs -f dodoguard
-```
-
-### About `zhian-offline/`
-
-`zhian-offline/` is a historical offline-delivery directory. It can contain large image archives, MySQL initialization SQL, and delivery manifests. It is excluded from the public Docker build context and from Git. The public image uses the SQLite baseline under [`drizzle/sqlite-bootstrap/`](./drizzle/sqlite-bootstrap).
-
-Do not add `zhian-offline/`, `release/`, image archives, or SQL files containing business data to public commits. Generate and distribute offline MySQL deliveries only through a controlled private process.
-
-## Electron desktop application
-
-The desktop application uses Electron and electron-builder. Outputs are written to `release/`. Build on the target operating system for the most reliable artifacts.
-
-### Build and package
-
-The desktop build embeds `release/dodoguard.sql` for first-time local MySQL initialization. Do not commit that file to the public repository. Export a database with no production-sensitive data before running desktop commands:
-
-```sh
-mkdir -p release
-mysqldump -h <host> -u <user> -p --databases <database> > release/dodoguard.sql
-```
-
-```sh
-npm ci
-
-# Validate desktop resources and configuration.
-npm run desktop:preflight
-
-# Create an unpacked build for the current platform.
-npm run desktop:pack
-
-# Create an installer/distribution package for the current platform.
-npm run desktop:dist
-```
-
-To bundle a local MySQL runtime, use a platform-specific command:
-
-```sh
-npm run desktop:dist:win:bundle
-npm run desktop:dist:mac:bundle
-npm run desktop:dist:linux:bundle
-```
-
-These bundle commands download the corresponding MySQL runtime. Output normally includes an NSIS installer on Windows, a `.dmg` on macOS, and an `.AppImage` (and sometimes `.deb`) on Linux.
-
-Run a Linux AppImage directly:
-
-```sh
-chmod +x release/DodoGuard-*.AppImage
-./release/DodoGuard-*.AppImage
-```
-
-On first launch, the desktop application guides local database initialization and starts the service. Bind the database to the local loopback interface only. See [`docs/desktop-packaging.md`](./docs/desktop-packaging.md) for platform details.
-
-## Repository layout
-
-| Directory | Description |
-| --- | --- |
-| [`backend/src/`](./backend/src) | Core library, CLI, API server, and database migrations |
-| [`frontend/`](./frontend) | React web interface |
-| [`examples/`](./examples) | Evaluation, red-team, and provider examples |
-| [`test/`](./test) | Automated tests |
-| [`drizzle/`](./drizzle) | Database schema and migration resources |
-| [`desktop/`](./desktop) | Electron main process and desktop resources |
-| [`site/`](./site) | Documentation site |
-
-## Security and contributing
-
-- Report vulnerabilities privately as described in [`SECURITY.md`](./SECURITY.md); do not disclose them in public issues.
-- See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for contribution guidance. Run at least `npm run lint` and `npm run build` before submitting changes.
-- See [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md) and [`SUPPORT.md`](./SUPPORT.md) for community and support information.
+Report vulnerabilities privately via [SECURITY.md](./SECURITY.md).  
+Contribute with [CONTRIBUTING.md](./CONTRIBUTING.md) · [Code of Conduct](./CODE_OF_CONDUCT.md) · [Support](./SUPPORT.md)
 
 ## License
 
