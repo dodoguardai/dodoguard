@@ -1,0 +1,59 @@
+name: Feature request
+description: Suggest an enhancement for evaluation, red-teaming, platforms, or UX.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share an idea that would make DodoGuard more useful for securing LLMs and agents.
+
+        For open-ended product discussion, prefer [Discussions → Ideas](https://github.com/dodoguardai/dodoguard/discussions/categories/ideas).
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - LLM evaluation
+        - Red-team / security testing
+        - Agent platforms (Dify, Coze, FastGPT, n8n, …)
+        - Web console / reporting
+        - CLI / CI integration
+        - Docs / examples
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What pain does this solve?
+      placeholder: I'm always frustrated when …
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What would you like DodoGuard to do?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you tried or considered.
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Mockups, links, or related issues (no secrets).
+    validations:
+      required: false

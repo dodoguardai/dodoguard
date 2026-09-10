@@ -1,0 +1,32 @@
+title: "[Show]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Show how you use DodoGuard—eval configs, red-team setups, CI wiring, or platform assessments.
+
+        Please sanitize API keys, URLs, and customer data before posting.
+
+  - type: input
+    id: title_hint
+    attributes:
+      label: One-line headline
+      placeholder: e.g. Red-teaming a Dify agent in CI with Ollama
+    validations:
+      required: true
+
+  - type: textarea
+    id: story
+    attributes:
+      label: What you built
+      description: Setup, interesting findings (high level), and tips for others.
+    validations:
+      required: true
+
+  - type: textarea
+    id: links
+    attributes:
+      label: Links
+      description: Public repos, gists, or screenshots (optional).
+    validations:
+      required: false

@@ -1,0 +1,23 @@
+title: "[Idea]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share a product or community idea. For a concrete, actionable request with clear scope, prefer a [Feature request Issue](https://github.com/dodoguardai/dodoguard/issues/new?template=feature_request.yml).
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: Idea
+      description: What should change, and who benefits?
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it matters
+      description: Use cases, platforms (Dify/Coze/…), or workflows this unlocks.
+    validations:
+      required: false

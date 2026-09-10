@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question (Discussions)
+    url: https://github.com/dodoguardai/dodoguard/discussions
+    about: Usage questions, setup help, and open-ended conversation belong in Discussions—not Issues.
+  - name: Report a security vulnerability
+    url: https://github.com/dodoguardai/dodoguard/blob/main/SECURITY.md
+    about: Privately report security issues. Do not open a public Issue for vulnerabilities.
+  - name: Documentation & examples
+    url: https://github.com/dodoguardai/dodoguard/tree/main/examples
+    about: Browse examples and the project README before filing a bug.

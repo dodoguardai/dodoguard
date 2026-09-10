@@ -1,0 +1,92 @@
+name: Bug report
+description: Report a reproducible bug in DodoGuard CLI, web console, or desktop.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve DodoGuard.
+
+        **Do not** include API keys, JWT secrets, production URLs, scan results, customer data, or vulnerability exploit details.
+        Security issues → [SECURITY.md](https://github.com/dodoguardai/dodoguard/blob/main/SECURITY.md)
+        Usage questions → [Discussions](https://github.com/dodoguardai/dodoguard/discussions)
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Where did you hit the problem?
+      options:
+        - CLI
+        - Web console
+        - Desktop app
+        - Docker / Compose
+        - Documentation / examples
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What went wrong?
+      placeholder: Short description of the unexpected behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps another person can follow.
+      placeholder: |
+        1. Run `…`
+        2. Open …
+        3. See error …
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: What you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include sanitized error messages or logs if useful.
+      placeholder: What actually happened.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      description: DodoGuard version, image tag, or git commit SHA.
+      placeholder: e.g. 0.119.0 or abc1234
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Node.js version, Docker version (if relevant).
+      placeholder: e.g. macOS 14 · Node 22.14 · Docker 27
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Screenshots, related issues, or anything else that helps (sanitized).
+    validations:
+      required: false

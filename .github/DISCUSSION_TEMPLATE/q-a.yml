@@ -1,0 +1,39 @@
+title: "[Q&A]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ask how to install, configure, or run DodoGuard.
+
+        Reproducible bugs → [Bug report](https://github.com/dodoguardai/dodoguard/issues/new?template=bug_report.yml)
+        Security issues → [SECURITY.md](https://github.com/dodoguardai/dodoguard/blob/main/SECURITY.md)
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Topic
+      options:
+        - Installation / Quick start
+        - CLI evaluation or red-team
+        - Web console / Docker
+        - Providers or examples
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What are you trying to do, and where are you stuck?
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What you already tried
+      description: Commands, docs you followed, sanitized errors (no secrets).
+    validations:
+      required: false
