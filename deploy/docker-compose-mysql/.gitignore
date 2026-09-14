@@ -1,0 +1,4 @@
+# Deployment secrets and local runtime artifacts
+.env
+.DS_Store
+*.log

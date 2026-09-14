@@ -1,0 +1,72 @@
+# DodoGuard — 远程镜像仓库部署
+#
+# 一键启动：
+#   docker compose up -d
+
+services:
+  mysql:
+    image: mysql:8.0.43
+    environment:
+      MYSQL_DATABASE: dodoguard
+      MYSQL_USER: dodoguard
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u\"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    volumes:
+      - dodoguard-mysql-data:/var/lib/mysql
+      - ./dodoguard.sql:/docker-entrypoint-initdb.d/01-dodoguard.sql:ro
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+
+  dodoguard:
+    image: liguobin01/dodoguard@sha256:cd404cf3ac05c02e878fa7504b7bc95bad515caf92f44a1bb3db795766f86de3
+    ports:
+      - "3000:3000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      API_PORT: "3000"
+      HOST: "0.0.0.0"
+      NODE_ENV: production
+      DODOGUARD_SELF_HOSTED: "1"
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?Set JWT_REFRESH_SECRET in .env}
+      PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: "/usr/bin/chromium"
+      DB_TYPE: mysql
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_USER: dodoguard
+      DB_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+      DB_NAME: dodoguard
+    volumes:
+      - dodoguard-data:/home/dodoguard/.dodoguard
+      - dodoguard-reports:/app/reports
+      - dodoguard-user-configs:/app/user-configs
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+
+volumes:
+  dodoguard-mysql-data:
+  dodoguard-data:
+  dodoguard-reports:
+  dodoguard-user-configs:
