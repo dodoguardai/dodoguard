@@ -231,7 +231,7 @@
     "@aws-sdk/client-bedrock-runtime": "^3.908.0",
     "@aws-sdk/client-sagemaker-runtime": "^3.908.0",
     "@aws-sdk/credential-provider-sso": "^3.908.0",
-    "@azure/ai-projects": "^1.0.0",
+    "@azure/ai-projects": "^2.5.0",
     "@azure/identity": "^4.13.0",
     "@azure/openai-assistants": "^1.0.0-beta.6",
     "@biomejs/cli-darwin-arm64": "2.2.6",
